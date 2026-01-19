@@ -1,4 +1,4 @@
-import { useLayoutEffect, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useState, type RefObject } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motionPresets } from '../motion/motionPresets';
@@ -32,12 +32,38 @@ const groupCardsByRow = (cards: HTMLElement[]) => {
     .map(([, rowCards]) => rowCards);
 };
 
+const getIsNarrow = () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false);
+
 export function useMotion(containerRef: RefObject<HTMLElement | null>) {
-  const { prefersReducedMotion, allowParallax } = useMotionSettings();
+  const { prefersReducedMotion, allowParallax, isTouch } = useMotionSettings();
+  const [isNarrow, setIsNarrow] = useState(getIsNarrow);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 768px)');
+    const handleChange = (event: MediaQueryListEvent) => setIsNarrow(event.matches);
+    setIsNarrow(media.matches);
+    media.addEventListener('change', handleChange);
+    return () => media.removeEventListener('change', handleChange);
+  }, []);
 
   useLayoutEffect(() => {
     const root = containerRef.current;
     if (!root) return;
+
+    const motionScale = isTouch ? 0.6 : isNarrow ? 0.75 : 1;
+    const staggerScale = isTouch || isNarrow ? 0.7 : 1;
+    const parallaxScale = isTouch || isNarrow ? 0.55 : 1;
+    const sectionY = motionPresets.section.distanceY * motionScale;
+    const sectionX = motionPresets.section.distanceX * motionScale;
+    const sectionRotate = motionPresets.section.rotate * motionScale;
+    const cardY = motionPresets.card.distanceY * motionScale;
+    const cardX = motionPresets.card.distanceX * motionScale;
+    const cardRotate = motionPresets.card.rotate * motionScale;
+    const cardStagger = motionPresets.card.stagger * staggerScale;
+    const timelineX = motionPresets.timeline.distanceX * motionScale;
+    const timelineRotate = motionPresets.timeline.rotate * motionScale;
+    const parallaxDistance = motionPresets.parallax.distance * parallaxScale;
 
     const ctx = gsap.context(() => {
       if (prefersReducedMotion) {
@@ -68,8 +94,8 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
           ? [introContent]
           : Array.from(section.children).filter((child) => child !== heading);
 
-        const xOffset = (index % 2 === 0 ? 1 : -1) * motionPresets.section.distanceX;
-        const rotate = (index % 2 === 0 ? 1 : -1) * motionPresets.section.rotate;
+        const xOffset = (index % 2 === 0 ? 1 : -1) * sectionX;
+        const rotate = (index % 2 === 0 ? 1 : -1) * sectionRotate;
 
         const tl = gsap.timeline({
           scrollTrigger: { trigger: section, start: 'top 80%', once: true },
@@ -78,7 +104,7 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
         if (heading) {
           tl.fromTo(
             heading,
-            { opacity: 0, y: motionPresets.section.distanceY, x: xOffset, rotateZ: rotate },
+            { opacity: 0, y: sectionY, x: xOffset, rotateZ: rotate },
             {
               opacity: 1,
               y: 0,
@@ -97,7 +123,7 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
             contentNodes,
             {
               opacity: 0,
-              y: motionPresets.section.distanceY * 0.6,
+              y: sectionY * 0.6,
               rotateZ: rotate * 0.6,
             },
             {
@@ -134,9 +160,9 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
             row,
             {
               opacity: 0,
-              y: motionPresets.card.distanceY,
-              x: motionPresets.card.distanceX * direction,
-              rotateZ: motionPresets.card.rotate * direction,
+              y: cardY,
+              x: cardX * direction,
+              rotateZ: cardRotate * direction,
             },
             {
               opacity: 1,
@@ -149,7 +175,7 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
               onStart: () => setWillChange(row, 'opacity, transform'),
               onComplete: () => setWillChange(row, ''),
             },
-            rowIndex * motionPresets.card.stagger,
+            rowIndex * cardStagger,
           );
         });
       });
@@ -165,9 +191,9 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
           card,
           {
             opacity: 0,
-            y: motionPresets.card.distanceY,
-            x: motionPresets.card.distanceX * direction,
-            rotateZ: motionPresets.card.rotate * direction,
+            y: cardY,
+            x: cardX * direction,
+            rotateZ: cardRotate * direction,
           },
           {
             opacity: 1,
@@ -186,12 +212,12 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
       const timelineItems = Array.from(root.querySelectorAll<HTMLElement>('[data-timeline-item]'));
       timelineItems.forEach((item, index) => {
         const direction = item.dataset.direction === 'left' ? -1 : 1;
-        const rotate = (index % 2 === 0 ? 1 : -1) * motionPresets.timeline.rotate;
+        const rotate = (index % 2 === 0 ? 1 : -1) * timelineRotate;
         gsap.fromTo(
           item,
           {
             opacity: 0,
-            x: motionPresets.timeline.distanceX * direction,
+            x: timelineX * direction,
             rotateZ: rotate,
           },
           {
@@ -233,7 +259,7 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
         parallaxItems.forEach((item) => {
           const speed = parseFloat(item.dataset.parallaxSpeed ?? '0.2');
           const axis = item.dataset.parallaxAxis === 'x' ? 'x' : 'y';
-          const distance = motionPresets.parallax.distance * speed;
+          const distance = parallaxDistance * speed;
           const trigger = item.closest<HTMLElement>('[data-parallax-root]') ?? item;
 
           gsap.fromTo(
@@ -256,5 +282,5 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [allowParallax, containerRef, prefersReducedMotion]);
+  }, [allowParallax, containerRef, isNarrow, isTouch, prefersReducedMotion]);
 }
