@@ -1,13 +1,55 @@
-import type { PropsWithChildren } from 'react';
-import { useLayoutEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useLocation, type Location } from 'react-router-dom';
 import gsap from 'gsap';
-import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { motionPresets } from '../motion/motionPresets';
+import { useMotionSettings } from '../motion/MotionProvider';
 
-export function RouteTransition({ children }: PropsWithChildren) {
+type RouteTransitionProps = {
+  children: (location: Location) => ReactNode;
+};
+
+export function RouteTransition({ children }: RouteTransitionProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
-  const prefersReducedMotion = usePrefersReducedMotion();
+  const { prefersReducedMotion } = useMotionSettings();
+  const [displayLocation, setDisplayLocation] = useState(location);
+  const nextLocationRef = useRef(location);
+  const isTransitioningRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion) {
+      setDisplayLocation(location);
+      return;
+    }
+
+    if (location === displayLocation) return;
+    nextLocationRef.current = location;
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+
+    const ctx = gsap.context(() => {
+      gsap.to(containerRef.current, {
+        opacity: 0,
+        y: motionPresets.route.exitY,
+        duration: motionPresets.route.exitDuration,
+        ease: motionPresets.route.ease,
+        onStart: () => {
+          if (containerRef.current) {
+            containerRef.current.style.willChange = 'opacity, transform';
+          }
+        },
+        onComplete: () => {
+          isTransitioningRef.current = false;
+          if (containerRef.current) {
+            containerRef.current.style.willChange = '';
+          }
+          setDisplayLocation(nextLocationRef.current);
+        },
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [displayLocation, location, prefersReducedMotion]);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion) return;
@@ -15,17 +57,32 @@ export function RouteTransition({ children }: PropsWithChildren) {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         containerRef.current,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+        { opacity: 0, y: motionPresets.route.enterY },
+        {
+          opacity: 1,
+          y: 0,
+          duration: motionPresets.route.enterDuration,
+          ease: motionPresets.route.ease,
+          onStart: () => {
+            if (containerRef.current) {
+              containerRef.current.style.willChange = 'opacity, transform';
+            }
+          },
+          onComplete: () => {
+            if (containerRef.current) {
+              containerRef.current.style.willChange = '';
+            }
+          },
+        },
       );
     }, containerRef);
 
     return () => ctx.revert();
-  }, [location, prefersReducedMotion]);
+  }, [displayLocation, prefersReducedMotion]);
 
   return (
-    <div key={location.pathname} ref={containerRef} className="route-transition">
-      {children}
+    <div ref={containerRef} className="route-transition">
+      {children(displayLocation)}
     </div>
   );
 }

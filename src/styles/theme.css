@@ -1,0 +1,72 @@
+:root {
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --content-width: 1120px;
+  --transition-speed: 200ms;
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --bg-elevated: #0f172a;
+  --text: #e6ecf5;
+  --text-muted: #a8b4c9;
+  --primary: #38bdf8;
+  --primary-strong: #0ea5e9;
+  --primary-contrast: #f8fbff;
+  --border: #1f2a44;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  --chip-bg: rgba(56, 189, 248, 0.12);
+  --chip-text: #cfe9ff;
+  --card-bg: #101a30;
+  --card-border: #1f2a44;
+  --button-bg: #1b2b45;
+  --button-text: #e6ecf5;
+  --button-hover: rgba(56, 189, 248, 0.16);
+  --link: #9ad6ff;
+  --link-hover: #cce9ff;
+  --nav-bg: rgba(11, 18, 32, 0.55);
+  --nav-bg-scrolled: rgba(11, 18, 32, 0.92);
+  --nav-border: rgba(31, 42, 68, 0.55);
+  --card-glow: rgba(56, 189, 248, 0.25);
+  --chip-border: rgba(56, 189, 248, 0.3);
+  --glow-1: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.22), transparent 60%);
+  --glow-2: radial-gradient(circle at 70% 40%, rgba(249, 115, 22, 0.18), transparent 65%);
+  --glow-3: radial-gradient(circle at 40% 50%, rgba(56, 189, 248, 0.18), transparent 70%);
+  --input-bg: #0f172a;
+  --secondary-accent: #fb923c;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f7fb;
+  --bg-elevated: #ffffff;
+  --text: #0f172a;
+  --text-muted: #4b5563;
+  --primary: #0ea5e9;
+  --primary-strong: #0f8bc1;
+  --primary-contrast: #f8fbff;
+  --border: #e5e7eb;
+  --shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+  --chip-bg: #e5f3fb;
+  --chip-text: #0b6b94;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --button-bg: #0ea5e9;
+  --button-text: #ffffff;
+  --button-hover: #0f8bc1;
+  --link: #0ea5e9;
+  --link-hover: #0f8bc1;
+  --nav-bg: rgba(246, 247, 251, 0.6);
+  --nav-bg-scrolled: rgba(246, 247, 251, 0.94);
+  --nav-border: rgba(15, 23, 42, 0.08);
+  --card-glow: rgba(14, 165, 233, 0.2);
+  --chip-border: rgba(14, 165, 233, 0.2);
+  --glow-1: radial-gradient(circle at 30% 30%, rgba(14, 165, 233, 0.2), transparent 60%);
+  --glow-2: radial-gradient(circle at 70% 40%, rgba(249, 115, 22, 0.16), transparent 65%);
+  --glow-3: radial-gradient(circle at 40% 50%, rgba(14, 165, 233, 0.15), transparent 70%);
+  --input-bg: #f9fafb;
+  --secondary-accent: #f97316;
+}

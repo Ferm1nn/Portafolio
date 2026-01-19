@@ -1,12 +1,21 @@
 import type { Education, Experience } from '../data/portfolioData';
+import { AnimatedCard } from './AnimatedCard';
 
-type TimelineItemProps = { type?: 'experience' | 'education' } & (Experience | Education);
+type TimelineItemProps = {
+  type?: 'experience' | 'education';
+  index?: number;
+} & (Experience | Education);
 
-export function TimelineItem(props: TimelineItemProps) {
+export function TimelineItem({ index, ...props }: TimelineItemProps) {
   const isExperience = (props as Experience).organisation !== undefined;
+  const direction = typeof index === 'number' ? (index % 2 === 0 ? 'left' : 'right') : 'left';
 
   return (
-    <div className="timeline-item card">
+    <AnimatedCard
+      className="timeline-item"
+      data-direction={direction}
+      data-timeline-item="true"
+    >
       <div className="timeline-meta">
         <p className="eyebrow">{props.period}</p>
         <h3>{isExperience ? (props as Experience).role : (props as Education).title}</h3>
@@ -23,6 +32,6 @@ export function TimelineItem(props: TimelineItemProps) {
           ))}
         </ul>
       )}
-    </div>
+    </AnimatedCard>
   );
 }

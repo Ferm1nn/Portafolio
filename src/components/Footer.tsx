@@ -20,7 +20,7 @@ export function Footer() {
         </div>
       </div>
       <div className="footer-note">
-        © {new Date().getFullYear()} {profile.name}. Crafted with React, TypeScript, and GSAP.
+        © {new Date().getFullYear()} {profile.name}.
       </div>
     </footer>
   );

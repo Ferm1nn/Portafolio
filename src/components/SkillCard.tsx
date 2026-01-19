@@ -1,4 +1,5 @@
 import type { ExpandedSkill, SkillCategory } from '../data/portfolioData';
+import { AnimatedCard } from './AnimatedCard';
 
 type SkillCardProps = {
   title: string;
@@ -9,7 +10,7 @@ type SkillCardProps = {
 
 export function SkillCard({ title, items, highlight, bullets }: SkillCardProps) {
   return (
-    <div className="card skill-card">
+    <AnimatedCard className="skill-card">
       <div className="card-header">
         <h3>{title}</h3>
         {highlight && <p className="muted">{highlight}</p>}
@@ -30,7 +31,7 @@ export function SkillCard({ title, items, highlight, bullets }: SkillCardProps) 
           ))}
         </ul>
       )}
-    </div>
+    </AnimatedCard>
   );
 }
 

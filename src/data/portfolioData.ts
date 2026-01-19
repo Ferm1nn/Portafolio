@@ -31,11 +31,11 @@ export type ExpandedSkill = {
 
 export const profile = {
   name: 'Fermin Espinoza',
-  role: 'AI Automation Developer & Networking Student',
-  location: 'Costa Rica (remote-friendly)',
+  role: 'Network Technician / IT support',
+  location: 'Costa Rica',
   email: 'fezgar12@gmail.com',
   phone: '+506 8708 8364',
-  linkedin: 'https://linkedin.com/in/fermin-espinoza',
+  linkedin: 'https://www.linkedin.com/in/fermin-espinoza',
   summary:
     'Systems engineering and cybersecurity student focused on networking, automation, and structured troubleshooting. Delivers clear documentation, reliable workflows, and customer-focused support.',
 };

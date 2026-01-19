@@ -1,38 +1,15 @@
-import { useLayoutEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { expandedSkills, profile, technicalSkills } from '../data/portfolioData';
 import { Section } from '../components/Section';
 import { ExpandedSkillCard, SkillCategoryCard } from '../components/SkillCard';
 import { PageIntro } from '../components/PageIntro';
 import { CTAButton } from '../components/CTAButton';
-import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
-
-gsap.registerPlugin(ScrollTrigger);
+import { AnimatedCard } from '../components/AnimatedCard';
+import { useMotion } from '../hooks/useMotion';
 
 export default function Skills() {
   const pageRef = useRef<HTMLDivElement | null>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
-
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      if (prefersReducedMotion) return;
-      gsap.utils.toArray<HTMLElement>('.reveal').forEach((section) => {
-        gsap.fromTo(
-          section,
-          { opacity: 0, y: 24 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: section, start: 'top 85%' },
-          },
-        );
-      });
-    }, pageRef);
-    return () => ctx.revert();
-  }, [prefersReducedMotion]);
+  useMotion(pageRef);
 
   return (
     <div ref={pageRef}>
@@ -68,9 +45,6 @@ export default function Skills() {
         </div>
         <div className="section-cta">
           <CTAButton to="/contact">Discuss a build</CTAButton>
-          <CTAButton href="/Fermin_Espinoza_CV.pdf" download variant="ghost">
-            Download CV
-          </CTAButton>
         </div>
       </Section>
 
@@ -80,13 +54,13 @@ export default function Skills() {
         title="Available for automation, integration, and support work"
         description={`Reach out via ${profile.email} or LinkedIn for engagements.`}
       >
-        <div className="cta-panel card">
+        <AnimatedCard className="cta-panel">
           <div>
             <h3>Let’s build reliable workflows</h3>
             <p className="muted">Clear logic, documented handoffs, and maintainable automations.</p>
           </div>
           <CTAButton to="/contact">Contact</CTAButton>
-        </div>
+        </AnimatedCard>
       </Section>
     </div>
   );
