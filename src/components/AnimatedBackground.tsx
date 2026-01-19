@@ -50,9 +50,6 @@ const GLOWS = [
 export function AnimatedBackground() {
   const { isTouch, prefersReducedMotion } = useMotionSettings();
   const allowPointerParallax = !isTouch && !prefersReducedMotion;
-  const driftScale = isTouch ? 0.6 : 1;
-  const durationScale = isTouch ? 0.85 : 1;
-  const lineScale = isTouch ? 0.65 : 1;
   const bgRootRef = useRef<HTMLDivElement | null>(null);
   const baseParallaxRef = useRef<HTMLDivElement | null>(null);
   const baseDriftRef = useRef<HTMLDivElement | null>(null);
@@ -90,20 +87,20 @@ export function AnimatedBackground() {
 
     const ctx = gsap.context(() => {
       gsap.to(baseDrift, {
-        x: DRIFT.base.x * driftScale,
-        y: DRIFT.base.y * driftScale,
+        x: DRIFT.base.x,
+        y: DRIFT.base.y,
         rotation: DRIFT.base.rotation,
-        duration: DRIFT.base.duration * durationScale,
+        duration: DRIFT.base.duration,
         ease: 'sine.inOut',
         repeat: -1,
         yoyo: true,
       });
 
       gsap.to(glowDrift, {
-        x: DRIFT.glow.x * driftScale,
-        y: DRIFT.glow.y * driftScale,
+        x: DRIFT.glow.x,
+        y: DRIFT.glow.y,
         rotation: DRIFT.glow.rotation,
-        duration: DRIFT.glow.duration * durationScale,
+        duration: DRIFT.glow.duration,
         ease: 'sine.inOut',
         repeat: -1,
         yoyo: true,
@@ -113,10 +110,10 @@ export function AnimatedBackground() {
         if (!orb) return;
         const config = DRIFT.orbs[index % DRIFT.orbs.length];
         gsap.to(orb, {
-          x: config.x * driftScale,
-          y: config.y * driftScale,
+          x: config.x,
+          y: config.y,
           rotation: config.rotation,
-          duration: config.duration * durationScale,
+          duration: config.duration,
           ease: 'sine.inOut',
           repeat: -1,
           yoyo: true,
@@ -129,7 +126,7 @@ export function AnimatedBackground() {
           { backgroundPosition: '50% 50%' },
           {
             backgroundPosition: IMAGE_DRIFT.night.to,
-            duration: IMAGE_DRIFT.night.duration * durationScale,
+            duration: IMAGE_DRIFT.night.duration,
             ease: 'sine.inOut',
             repeat: -1,
             yoyo: true,
@@ -143,7 +140,7 @@ export function AnimatedBackground() {
           { backgroundPosition: '50% 50%' },
           {
             backgroundPosition: IMAGE_DRIFT.light.to,
-            duration: IMAGE_DRIFT.light.duration * durationScale,
+            duration: IMAGE_DRIFT.light.duration,
             ease: 'sine.inOut',
             repeat: -1,
             yoyo: true,
@@ -157,7 +154,7 @@ export function AnimatedBackground() {
           { backgroundPosition: '0px 0px' },
           {
             backgroundPosition: '180px -180px',
-            duration: 34 * durationScale,
+            duration: 34,
             ease: 'none',
             repeat: -1,
           },
@@ -176,7 +173,7 @@ export function AnimatedBackground() {
         if (orb) orb.style.willChange = '';
       });
     };
-  }, [driftScale, durationScale, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   useLayoutEffect(() => {
     if (!allowPointerParallax) return;
@@ -255,10 +252,10 @@ export function AnimatedBackground() {
     const ctx = gsap.context(() => {
       lines.forEach((line, index) => {
         line.style.willChange = 'transform';
-        const dashDistance = -(400 + index * 40) * lineScale;
-        const dashDuration = gsap.utils.random(12, 24) * durationScale;
-        const driftY = gsap.utils.random(-2, 2) * lineScale;
-        const driftDuration = gsap.utils.random(12, 20) * durationScale;
+        const dashDistance = -(400 + index * 40);
+        const dashDuration = gsap.utils.random(12, 24);
+        const driftY = gsap.utils.random(-2, 2);
+        const driftDuration = gsap.utils.random(12, 20);
 
         gsap.fromTo(
           line,
@@ -287,7 +284,7 @@ export function AnimatedBackground() {
         line.style.willChange = '';
       });
     };
-  }, [durationScale, lineScale, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   useLayoutEffect(() => {
     const glows = glowRefs.current.filter(Boolean) as HTMLDivElement[];
@@ -299,9 +296,9 @@ export function AnimatedBackground() {
         glow.style.willChange = 'opacity';
 
         const pulse = () => {
-          const peak = gsap.utils.random(0.08, 0.14) * (isTouch ? 0.7 : 1);
-          const up = gsap.utils.random(0.25, 0.6) * durationScale;
-          const down = gsap.utils.random(0.35, 0.8) * durationScale;
+          const peak = gsap.utils.random(0.08, 0.14);
+          const up = gsap.utils.random(0.25, 0.6);
+          const down = gsap.utils.random(0.35, 0.8);
           const gap = gsap.utils.random(1.5, 4);
 
           gsap
@@ -321,7 +318,7 @@ export function AnimatedBackground() {
         glow.style.willChange = '';
       });
     };
-  }, [durationScale, isTouch, prefersReducedMotion]);
+  }, [isTouch, prefersReducedMotion]);
 
   return (
     <div ref={bgRootRef} className="bgRoot" aria-hidden="true">
