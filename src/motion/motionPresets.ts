@@ -1,44 +1,25 @@
 export const motionPresets = {
-  reveal: {
-    duration: 0.6,
-    distanceY: 12,
-    ease: 'power2.out',
+  durations: {
+    micro: 0.16,
+    small: 0.28,
+    medium: 0.45,
+    hero: 0.8,
   },
-  section: {
-    duration: 0.8,
-    distanceY: 26,
-    distanceX: 12,
-    rotate: 1.2,
-    ease: 'power2.out',
-  },
-  card: {
-    duration: 0.6,
-    distanceY: 14,
-    distanceX: 8,
-    rotate: 1.1,
-    ease: 'power2.out',
-    stagger: 0.08,
-  },
-  timeline: {
-    duration: 0.6,
-    distanceX: 20,
-    rotate: 1.4,
-    ease: 'power2.out',
-  },
-  nav: {
-    duration: 0.35,
-    ease: 'power3.out',
+  ease: {
+    default: 'power3.out',
+    settle: 'power2.out',
+    emphasis: 'back.out(1.2)',
   },
   route: {
-    exitDuration: 0.28,
-    enterDuration: 0.5,
-    exitY: -14,
-    enterY: 18,
-    ease: 'power2.out',
+    exitDuration: 0.24,
+    enterDuration: 0.45,
+    exitY: -12,
+    enterY: 16,
+    ease: 'power3.out',
   },
   tilt: {
     maxRotate: 8,
-    hoverScale: 1.02,
+    hoverScale: 1.01,
     pressScale: 0.98,
   },
   magnetic: {
@@ -46,14 +27,8 @@ export const motionPresets = {
     duration: 0.25,
     ease: 'power3.out',
   },
-  background: {
-    driftDuration: 46,
-    driftDistance: 32,
-    parallaxStrength: 16,
-    driftRotation: 6,
-  },
   parallax: {
-    distance: 140,
+    distance: 120,
     scrub: 0.6,
   },
 } as const;

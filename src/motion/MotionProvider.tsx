@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { usePrefersReducedMotion } from '../lib/animations/hooks/usePrefersReducedMotion';
 
 type MotionSettings = {
   prefersReducedMotion: boolean;
@@ -32,8 +33,7 @@ const getDeviceState = () => {
 };
 
 export function MotionProvider({ children }: { children: ReactNode }) {
-  // Force animations on; disregard OS-level reduced motion for now to ensure GSAP runs.
-  const prefersReducedMotion = false;
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [deviceState, setDeviceState] = useState(getDeviceState);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => {
     const allowMotion = !prefersReducedMotion;
     const allowTilt = allowMotion && !deviceState.isTouch;
-    const allowParallax = allowMotion;
+    const allowParallax = allowMotion && !deviceState.isTouch;
     const allowParticles = allowMotion && !deviceState.isLowPower;
 
     return {

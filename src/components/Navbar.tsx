@@ -2,16 +2,14 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Flip } from 'gsap/all';
 import { profile } from '../data/portfolioData';
 import avatar from '../assets/profile-header.jpeg';
 import { useTheme } from '../hooks/useTheme';
-import { motionPresets } from '../motion/motionPresets';
 import { useMotionSettings } from '../motion/MotionProvider';
+import { createActiveNavIndicator } from '../lib/animations/helpers/createActiveNavIndicator';
 import { CTAButton } from './CTAButton';
 
-// FLIP indicator motion inspired by GSAP Flip docs and community examples.
-gsap.registerPlugin(ScrollTrigger, Flip);
+gsap.registerPlugin(ScrollTrigger);
 
 const links = [
   { to: '/', label: 'Home' },
@@ -28,31 +26,10 @@ export function Navbar() {
   const location = useLocation();
   const navRef = useRef<HTMLElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const navLinksRef = useRef<HTMLDivElement | null>(null);
+  const indicatorRef = useRef<HTMLSpanElement | null>(null);
   const toggleIconRef = useRef<HTMLSpanElement | null>(null);
-  const [indicatorPath, setIndicatorPath] = useState(location.pathname);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const flipStateRef = useRef<ReturnType<typeof Flip.getState> | null>(null);
-
-  useLayoutEffect(() => {
-    if (prefersReducedMotion) {
-      setIndicatorPath(location.pathname);
-      return;
-    }
-
-    if (location.pathname === indicatorPath) return;
-    flipStateRef.current = Flip.getState('.nav-indicator');
-    setIndicatorPath(location.pathname);
-  }, [indicatorPath, location.pathname, prefersReducedMotion]);
-
-  useLayoutEffect(() => {
-    if (prefersReducedMotion || !flipStateRef.current) return;
-    Flip.from(flipStateRef.current, {
-      duration: motionPresets.nav.duration,
-      ease: motionPresets.nav.ease,
-      absolute: true,
-    });
-    flipStateRef.current = null;
-  }, [indicatorPath, prefersReducedMotion]);
 
   useLayoutEffect(() => {
     const nav = navRef.current;
@@ -66,6 +43,62 @@ export function Navbar() {
 
     return () => trigger.kill();
   }, []);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion) return;
+    const navLinks = navLinksRef.current;
+    if (!navLinks) return;
+
+    const linkItems = Array.from(navLinks.querySelectorAll<HTMLElement>('.nav-link'));
+    const cleanups = linkItems.map((link) => {
+      const underline = link.querySelector<HTMLElement>('.nav-link-underline');
+      if (!underline) return () => undefined;
+
+      const handleEnter = () => {
+        gsap.to(underline, { scaleX: 1, opacity: 1, duration: 0.25, ease: 'power2.out' });
+      };
+      const handleLeave = () => {
+        gsap.to(underline, { scaleX: 0.2, opacity: 0, duration: 0.2, ease: 'power2.out' });
+      };
+
+      link.addEventListener('pointerenter', handleEnter);
+      link.addEventListener('pointerleave', handleLeave);
+      link.addEventListener('focusin', handleEnter);
+      link.addEventListener('focusout', handleLeave);
+
+      return () => {
+        link.removeEventListener('pointerenter', handleEnter);
+        link.removeEventListener('pointerleave', handleLeave);
+        link.removeEventListener('focusin', handleEnter);
+        link.removeEventListener('focusout', handleLeave);
+      };
+    });
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [prefersReducedMotion]);
+
+  useLayoutEffect(() => {
+    const indicator = indicatorRef.current;
+    const navLinks = navLinksRef.current;
+    if (!indicator || !navLinks) return;
+
+    const items = Array.from(navLinks.querySelectorAll<HTMLElement>('.nav-link'));
+    if (!items.length) return;
+
+    const api = createActiveNavIndicator({
+      navItems: items,
+      indicator,
+      container: navLinks,
+      prefersReducedMotion,
+    });
+    api.update();
+
+    return () => {
+      api.cleanup();
+    };
+  }, [location.pathname, prefersReducedMotion]);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -141,7 +174,8 @@ export function Navbar() {
           </Link>
         </div>
         <div className="nav-drawer" data-open={isMenuOpen} id="primary-navigation">
-          <nav className="nav-links" aria-label="Primary">
+          <nav className="nav-links" aria-label="Primary" ref={navLinksRef}>
+            <span className="nav-indicator" ref={indicatorRef} aria-hidden="true" />
             {links.map((link) => (
               <NavLink
                 key={link.to}
@@ -150,9 +184,7 @@ export function Navbar() {
                 end={link.to === '/'}
               >
                 <span className="nav-link-label">{link.label}</span>
-                {indicatorPath === link.to && (
-                  <span className="nav-indicator" data-flip-id="nav-indicator" aria-hidden="true" />
-                )}
+                <span className="nav-link-underline" aria-hidden="true" />
               </NavLink>
             ))}
           </nav>

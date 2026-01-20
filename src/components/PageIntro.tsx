@@ -14,7 +14,7 @@ export function PageIntro({ title, eyebrow, description }: PageIntroProps) {
       </div>
       <div className="page-intro-content">
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1>{title}</h1>
+        <h1 data-split="words">{title}</h1>
         {description && <p className="lead">{description}</p>}
       </div>
     </div>

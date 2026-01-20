@@ -1,260 +1,167 @@
 import { useLayoutEffect, type RefObject } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { motionPresets } from '../motion/motionPresets';
+import { createParallax } from '../lib/animations/helpers/createParallax';
+import { createScrollReveal } from '../lib/animations/helpers/createScrollReveal';
+import { createStaggerGrid } from '../lib/animations/helpers/createStaggerGrid';
+import { splitTextToSpans } from '../lib/animations/helpers/splitText';
 import { useMotionSettings } from '../motion/MotionProvider';
-
-// Section staging borrows rhythm ideas from GSAP ScrollTrigger demos shared on the GSAP forums.
 
 gsap.registerPlugin(ScrollTrigger);
 
-const setWillChange = (elements: HTMLElement[] | HTMLElement, value: string) => {
-  const list = Array.isArray(elements) ? elements : [elements];
-  list.forEach((element) => {
-    element.style.willChange = value;
-  });
-};
-
-const groupCardsByRow = (cards: HTMLElement[]) => {
-  const rows = new Map<number, HTMLElement[]>();
-  cards.forEach((card) => {
-    const top = Math.round(card.offsetTop);
-    const row = rows.get(top);
-    if (row) {
-      row.push(card);
-    } else {
-      rows.set(top, [card]);
-    }
-  });
-
-  return Array.from(rows.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([, rowCards]) => rowCards);
-};
-
 export function useMotion(containerRef: RefObject<HTMLElement | null>) {
-  const { prefersReducedMotion, allowParallax } = useMotionSettings();
+  const { prefersReducedMotion, allowParallax, isTouch } = useMotionSettings();
 
   useLayoutEffect(() => {
     const root = containerRef.current;
     if (!root) return;
 
-    const ctx = gsap.context(() => {
-      if (prefersReducedMotion) {
-        const reducedTargets = Array.from(
-          root.querySelectorAll<HTMLElement>('.reveal, [data-animate-card], [data-timeline-item]'),
-        );
-        reducedTargets.forEach((element) => {
-          gsap.fromTo(
-            element,
-            { opacity: 0 },
-            {
-              opacity: 1,
-              duration: 0.2,
-              ease: 'none',
-              scrollTrigger: { trigger: element, start: 'top 90%', once: true },
-            },
-          );
-        });
-        return;
-      }
+    const cleanups: Array<() => void> = [];
 
-      const sections = Array.from(root.querySelectorAll<HTMLElement>('.reveal'));
+    const sections = Array.from(root.querySelectorAll<HTMLElement>('.section'));
+    const headingVariant = prefersReducedMotion ? 'fade' : 'heading';
+    const subheadingVariant = prefersReducedMotion ? 'fade' : 'subheading';
+    const headingStagger = prefersReducedMotion ? 0 : 0.06;
+    sections.forEach((section) => {
+      const heading = section.querySelector<HTMLElement>('.section-heading h2');
+      const eyebrow = section.querySelector<HTMLElement>('.section-heading .eyebrow');
+      const description = section.querySelector<HTMLElement>('.section-heading .section-description');
 
-      sections.forEach((section, index) => {
-        const heading = section.querySelector<HTMLElement>('.section-heading');
-        const introContent = section.querySelector<HTMLElement>('.page-intro-content');
-        const contentNodes = introContent
-          ? [introContent]
-          : Array.from(section.children).filter((child) => child !== heading);
-
-        const xOffset = (index % 2 === 0 ? 1 : -1) * motionPresets.section.distanceX;
-        const rotate = (index % 2 === 0 ? 1 : -1) * motionPresets.section.rotate;
-
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: section, start: 'top 80%', once: true },
-        });
-
-        if (heading) {
-          tl.fromTo(
-            heading,
-            { opacity: 0, y: motionPresets.section.distanceY, x: xOffset, rotateZ: rotate },
-            {
-              opacity: 1,
-              y: 0,
-              x: 0,
-              rotateZ: 0,
-              duration: motionPresets.section.duration,
-              ease: motionPresets.section.ease,
-              onStart: () => setWillChange(heading, 'opacity, transform'),
-              onComplete: () => setWillChange(heading, ''),
-            },
-          );
-        }
-
-        if (contentNodes.length) {
-          tl.fromTo(
-            contentNodes,
-            {
-              opacity: 0,
-              y: motionPresets.section.distanceY * 0.6,
-              rotateZ: rotate * 0.6,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              rotateZ: 0,
-              duration: motionPresets.section.duration * 0.85,
-              ease: motionPresets.section.ease,
-              stagger: 0.08,
-              onStart: () => setWillChange(contentNodes as HTMLElement[], 'opacity, transform'),
-              onComplete: () => setWillChange(contentNodes as HTMLElement[], ''),
-            },
-            heading ? '-=0.45' : 0,
-          );
-        }
-      });
-
-      const cardGroups = Array.from(root.querySelectorAll<HTMLElement>('.grid, .timeline-grid, .cert-grid'));
-
-      cardGroups.forEach((group) => {
-        const cards = Array.from(group.querySelectorAll<HTMLElement>('[data-animate-card]')).filter(
-          (card) => !card.dataset.timelineItem,
-        );
-        if (!cards.length) return;
-
-        const rows = groupCardsByRow(cards);
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: group, start: 'top 85%', once: true },
-        });
-
-        rows.forEach((row, rowIndex) => {
-          const direction = rowIndex % 2 === 0 ? 1 : -1;
-          tl.fromTo(
-            row,
-            {
-              opacity: 0,
-              y: motionPresets.card.distanceY,
-              x: motionPresets.card.distanceX * direction,
-              rotateZ: motionPresets.card.rotate * direction,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              x: 0,
-              rotateZ: 0,
-              duration: motionPresets.card.duration,
-              ease: motionPresets.card.ease,
-              stagger: 0.06,
-              onStart: () => setWillChange(row, 'opacity, transform'),
-              onComplete: () => setWillChange(row, ''),
-            },
-            rowIndex * motionPresets.card.stagger,
-          );
-        });
-      });
-
-      const standaloneCards = Array.from(root.querySelectorAll<HTMLElement>('[data-animate-card]')).filter((card) => {
-        if (card.dataset.timelineItem) return false;
-        return !card.closest('.grid, .timeline-grid, .cert-grid');
-      });
-
-      standaloneCards.forEach((card, index) => {
-        const direction = index % 2 === 0 ? 1 : -1;
-        gsap.fromTo(
-          card,
-          {
-            opacity: 0,
-            y: motionPresets.card.distanceY,
-            x: motionPresets.card.distanceX * direction,
-            rotateZ: motionPresets.card.rotate * direction,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            x: 0,
-            rotateZ: 0,
-            duration: motionPresets.card.duration,
-            ease: motionPresets.card.ease,
-            scrollTrigger: { trigger: card, start: 'top 85%', once: true },
-            onStart: () => setWillChange(card, 'opacity, transform'),
-            onComplete: () => setWillChange(card, ''),
-          },
-        );
-      });
-
-      const timelineItems = Array.from(root.querySelectorAll<HTMLElement>('[data-timeline-item]'));
-      timelineItems.forEach((item, index) => {
-        const direction = item.dataset.direction === 'left' ? -1 : 1;
-        const rotate = (index % 2 === 0 ? 1 : -1) * motionPresets.timeline.rotate;
-        gsap.fromTo(
-          item,
-          {
-            opacity: 0,
-            x: motionPresets.timeline.distanceX * direction,
-            rotateZ: rotate,
-          },
-          {
-            opacity: 1,
-            x: 0,
-            rotateZ: 0,
-            duration: motionPresets.timeline.duration,
-            ease: motionPresets.timeline.ease,
-            scrollTrigger: { trigger: item, start: 'top 85%', once: true },
-            onStart: () => setWillChange(item, 'opacity, transform'),
-            onComplete: () => setWillChange(item, ''),
-          },
-        );
-      });
-
-      const progressLine = root.querySelector<HTMLElement>('[data-timeline-progress]');
-      const progressSection = root.querySelector<HTMLElement>('[data-timeline-section]');
-
-      if (progressLine && progressSection) {
-        gsap.fromTo(
-          progressLine,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            transformOrigin: 'top',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: progressSection,
-              start: 'top 80%',
-              end: 'bottom 30%',
-              scrub: true,
-            },
-          },
+      if (heading) {
+        const words = splitTextToSpans(heading);
+        cleanups.push(
+          createScrollReveal({
+            targets: words.length ? words : heading,
+            variant: headingVariant,
+            trigger: section,
+            stagger: headingStagger,
+          }),
         );
       }
 
-      if (allowParallax) {
-        const parallaxItems = Array.from(root.querySelectorAll<HTMLElement>('[data-parallax]'));
-        parallaxItems.forEach((item) => {
-          const speed = parseFloat(item.dataset.parallaxSpeed ?? '0.2');
-          const axis = item.dataset.parallaxAxis === 'x' ? 'x' : 'y';
-          const distance = motionPresets.parallax.distance * speed;
-          const trigger = item.closest<HTMLElement>('[data-parallax-root]') ?? item;
-
-          gsap.fromTo(
-            item,
-            { [axis]: -distance },
-            {
-              [axis]: distance,
-              ease: 'none',
-              scrollTrigger: {
-                trigger,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: motionPresets.parallax.scrub,
-                invalidateOnRefresh: true,
-              },
-            },
-          );
-        });
+      if (eyebrow) {
+        cleanups.push(
+          createScrollReveal({
+            targets: eyebrow,
+            variant: subheadingVariant,
+            trigger: section,
+            stagger: prefersReducedMotion ? 0 : 0.04,
+          }),
+        );
       }
-    }, containerRef);
 
-    return () => ctx.revert();
-  }, [allowParallax, containerRef, prefersReducedMotion]);
+      if (description) {
+        cleanups.push(
+          createScrollReveal({
+            targets: description,
+            variant: subheadingVariant,
+            trigger: section,
+            stagger: prefersReducedMotion ? 0 : 0.04,
+          }),
+        );
+      }
+    });
+
+    const intro = root.querySelector<HTMLElement>('.page-intro');
+    if (intro) {
+      const title = intro.querySelector<HTMLElement>('h1');
+      const words = splitTextToSpans(title);
+      const lead = intro.querySelector<HTMLElement>('.lead');
+
+      if (title) {
+        cleanups.push(
+          createScrollReveal({
+            targets: words.length ? words : title,
+            variant: headingVariant,
+            trigger: intro,
+            stagger: headingStagger,
+          }),
+        );
+      }
+      if (lead) {
+        cleanups.push(
+          createScrollReveal({
+            targets: lead,
+            variant: subheadingVariant,
+            trigger: intro,
+            stagger: prefersReducedMotion ? 0 : 0.04,
+          }),
+        );
+      }
+    }
+
+    const grids = Array.from(root.querySelectorAll<HTMLElement>('.grid, .timeline-grid, .cert-grid, .project-grid'));
+    grids.forEach((grid) => {
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]'));
+      if (!cards.length) return;
+      cleanups.push(
+        createStaggerGrid({
+          cards,
+          enterVariant: prefersReducedMotion ? 'fade' : 'card',
+          stagger: prefersReducedMotion ? 0 : 0.08,
+        }),
+      );
+    });
+
+    const timelineProgress = root.querySelector<HTMLElement>('[data-timeline-progress]');
+    const timelineSection = root.querySelector<HTMLElement>('[data-timeline-section]');
+    if (timelineProgress && timelineSection && !prefersReducedMotion) {
+      const tween = gsap.fromTo(
+        timelineProgress,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          transformOrigin: 'top',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: timelineSection,
+            start: 'top 80%',
+            end: 'bottom 30%',
+            scrub: true,
+          },
+        },
+      );
+      cleanups.push(() => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      });
+    }
+
+    if (allowParallax && !prefersReducedMotion) {
+      const parallaxItems = Array.from(root.querySelectorAll<HTMLElement>('[data-parallax]'));
+      parallaxItems.forEach((item) => {
+        const speed = parseFloat(item.dataset.parallaxSpeed ?? '0.2');
+        const axis = item.dataset.parallaxAxis === 'x' ? 'x' : 'y';
+        cleanups.push(
+          createParallax({
+            layers: [{ element: item, strength: 120 * speed, axis }],
+            mouse: false,
+            scroll: true,
+            root: item.closest<HTMLElement>('[data-parallax-root]') ?? item,
+          }),
+        );
+      });
+    }
+
+    if (!prefersReducedMotion && !isTouch) {
+      const badges = Array.from(root.querySelectorAll<HTMLElement>('.badge, .pill'));
+      badges.slice(0, 24).forEach((badge) => {
+        const tween = gsap.to(badge, {
+          opacity: gsap.utils.random(0.85, 1),
+          scale: gsap.utils.random(0.98, 1),
+          duration: gsap.utils.random(3, 6),
+          ease: 'sine.inOut',
+          yoyo: true,
+          repeat: -1,
+          delay: gsap.utils.random(0, 1.5),
+        });
+        cleanups.push(() => tween.kill());
+      });
+    }
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+      ScrollTrigger.refresh();
+    };
+  }, [allowParallax, containerRef, isTouch, prefersReducedMotion]);
 }

@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import { Flip } from 'gsap/all';
 import Home from './pages/Home';
 import Skills from './pages/Skills';
 import Experience from './pages/Experience';
@@ -18,7 +17,7 @@ import { AnimatedBackground } from './components/AnimatedBackground';
 import { LinkConfirm } from './components/LinkConfirm';
 import { useMotionSettings } from './motion/MotionProvider';
 
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, Flip);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 function App() {
   const { prefersReducedMotion } = useMotionSettings();

@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Sora', 'Manrope', sans-serif;
+  --font-body: 'Manrope', 'Sora', sans-serif;
+  --font-size-display: clamp(2.6rem, 4.6vw + 1.2rem, 4.2rem);
+  --font-size-h1: clamp(2.2rem, 3.5vw + 1.1rem, 3.3rem);
+  --font-size-h2: clamp(1.6rem, 2.4vw + 1rem, 2.4rem);
+  --font-size-h3: clamp(1.2rem, 1.5vw + 0.95rem, 1.7rem);
+  --font-size-body: clamp(0.98rem, 0.32vw + 0.92rem, 1.06rem);
+  --font-size-small: clamp(0.88rem, 0.24vw + 0.84rem, 0.98rem);
+  --line-height-display: 1.05;
+  --line-height-heading: 1.18;
+  --line-height-body: 1.6;
+  --letter-spacing-display: -0.02em;
+  --letter-spacing-heading: -0.012em;
+  --letter-spacing-body: 0.01em;
+
+  --space-1: 0.35rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.6rem;
+  --space-7: 2rem;
+  --space-8: 2.6rem;
+  --space-9: 3.4rem;
+  --space-10: 4.4rem;
+
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-pill: 999px;
+
+  --blur-sm: 6px;
+  --blur-md: 12px;
+  --blur-lg: 20px;
+
+  --content-width: 1160px;
+  --page-gutter: 1rem;
+  --header-offset: 76px;
+  --section-gap: clamp(2.6rem, 2vw + 2.2rem, 3.6rem);
+  --section-gap-tight: clamp(1.8rem, 1.4vw + 1.4rem, 2.5rem);
+
+  --shadow-sm: 0 6px 14px var(--shadow-color);
+  --shadow-md: 0 16px 40px var(--shadow-color);
+  --shadow-lg: 0 24px 64px var(--shadow-color);
+  --shadow-xl: 0 32px 80px var(--shadow-color);
+  --shadow-glow: 0 0 30px var(--color-glow);
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #0b0f17;
+  --color-surface: #101828;
+  --color-surface-2: #111b2e;
+  --color-surface-3: #0f1a2b;
+  --color-border: #1e2c45;
+  --color-border-strong: #293b5a;
+  --color-text: #e6eefb;
+  --color-muted: #9ba9c5;
+  --color-muted-strong: #c4d2ea;
+  --color-accent: #49c2ff;
+  --color-accent-strong: #1ea0ff;
+  --color-accent-soft: rgba(73, 194, 255, 0.18);
+  --color-glow: rgba(73, 194, 255, 0.34);
+  --color-glow-alt: rgba(251, 146, 60, 0.28);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(10, 16, 28, 0.62);
+  --glass-border: rgba(73, 194, 255, 0.2);
+  --focus-ring: #49c2ff;
+  --gradient-hero: radial-gradient(circle at 20% 20%, rgba(73, 194, 255, 0.18), transparent 55%),
+    radial-gradient(circle at 80% 28%, rgba(251, 146, 60, 0.16), transparent 62%),
+    linear-gradient(140deg, rgba(10, 16, 28, 0.95), rgba(10, 16, 28, 0.2));
+  --gradient-border: linear-gradient(120deg, rgba(73, 194, 255, 0.8), rgba(251, 146, 60, 0.65));
+  --gradient-highlight: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.45), transparent 62%);
+  --glow-1: radial-gradient(circle at 30% 30%, rgba(73, 194, 255, 0.22), transparent 60%);
+  --glow-2: radial-gradient(circle at 70% 40%, rgba(251, 146, 60, 0.18), transparent 65%);
+  --glow-3: radial-gradient(circle at 40% 50%, rgba(73, 194, 255, 0.16), transparent 70%);
+  --bg-root: #020617;
+  --line-color: rgba(56, 189, 248, 0.18);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-bg: #f6f9ff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f2f7ff;
+  --color-surface-3: #eef5ff;
+  --color-border: #d7e3f4;
+  --color-border-strong: #bfd3f1;
+  --color-text: #0b1220;
+  --color-muted: #64748b;
+  --color-muted-strong: #94a3b8;
+  --color-accent: #1d4ed8;
+  --color-accent-strong: #0ea5e9;
+  --color-accent-soft: rgba(29, 78, 216, 0.1);
+  --color-glow: rgba(29, 78, 216, 0.22);
+  --color-glow-alt: rgba(14, 165, 233, 0.18);
+  --shadow-color: rgba(15, 23, 42, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(29, 78, 216, 0.18);
+  --focus-ring: rgba(29, 78, 216, 0.25);
+  --gradient-hero: radial-gradient(circle at 20% 20%, rgba(29, 78, 216, 0.1), transparent 55%),
+    radial-gradient(circle at 80% 28%, rgba(14, 165, 233, 0.1), transparent 62%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4));
+  --gradient-border: linear-gradient(120deg, rgba(29, 78, 216, 0.75), rgba(14, 165, 233, 0.7));
+  --gradient-highlight: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.65), transparent 62%);
+  --glow-1: radial-gradient(circle at 30% 30%, rgba(29, 78, 216, 0.14), transparent 60%);
+  --glow-2: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.12), transparent 65%);
+  --glow-3: radial-gradient(circle at 40% 50%, rgba(29, 78, 216, 0.12), transparent 70%);
+}
+
+:root {
+  --bg: var(--color-bg);
+  --bg-2: var(--color-surface-3);
+  --bg-elevated: var(--color-surface-2);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-2);
+  --surface-glass: var(--glass-bg);
+  --text: var(--color-text);
+  --text-2: var(--color-muted-strong);
+  --text-muted: var(--color-muted);
+  --muted: var(--color-muted);
+  --muted-2: var(--color-muted-strong);
+  --primary: var(--color-accent);
+  --primary-strong: var(--color-accent-strong);
+  --primary-2: var(--color-accent-strong);
+  --primary-soft: var(--color-accent-soft);
+  --primary-ring: var(--focus-ring);
+  --primary-hover: var(--color-accent-strong);
+  --primary-contrast: #ffffff;
+  --border: var(--color-border);
+  --border-strong: var(--color-border-strong);
+  --shadow: var(--shadow-lg);
+  --chip-bg: var(--color-accent-soft);
+  --chip-text: var(--color-text);
+  --chip-border: var(--glass-border);
+  --card-bg: var(--color-surface);
+  --card-border: var(--color-border);
+  --button-bg: var(--color-surface-2);
+  --button-text: var(--color-text);
+  --button-hover: var(--color-accent-soft);
+  --link: var(--color-accent);
+  --link-hover: var(--color-accent-strong);
+  --nav-bg: rgba(11, 15, 23, 0.6);
+  --nav-bg-scrolled: rgba(11, 15, 23, 0.92);
+  --nav-border: rgba(31, 44, 69, 0.55);
+  --card-glow: var(--color-glow);
+  --input-bg: var(--color-surface-2);
+  --secondary-accent: var(--color-glow-alt);
+}
+
+:root[data-theme='light'] {
+  --primary-contrast: #ffffff;
+  --text-2: #334155;
+  --muted-2: #94a3b8;
+  --chip-text: var(--primary);
+  --chip-border: rgba(29, 78, 216, 0.18);
+  --nav-bg: var(--surface-glass);
+  --nav-bg-scrolled: var(--surface-glass);
+  --nav-border: var(--border);
+  --bg-root: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 60%, var(--bg) 100%);
+  --line-color: rgba(29, 78, 216, 0.18);
+  --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.1);
+  --primary-hover: #1e40af;
+}

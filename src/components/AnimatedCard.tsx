@@ -1,20 +1,12 @@
-import { useRef, type PropsWithChildren, type HTMLAttributes } from 'react';
-import { useCardTilt } from '../hooks/useCardTilt';
+import type { PropsWithChildren, HTMLAttributes } from 'react';
+import { Card } from './Card';
 
 type AnimatedCardProps = PropsWithChildren<HTMLAttributes<HTMLDivElement>>;
 
 export function AnimatedCard({ className, children, ...rest }: AnimatedCardProps) {
-  const cardRef = useRef<HTMLDivElement | null>(null);
-  useCardTilt(cardRef);
-
   return (
-    <div
-      ref={cardRef}
-      className={`card animated-card ${className ?? ''}`.trim()}
-      data-animate-card
-      {...rest}
-    >
+    <Card className={`animated-card ${className ?? ''}`.trim()} data-animate-card="true" {...rest}>
       {children}
-    </div>
+    </Card>
   );
 }

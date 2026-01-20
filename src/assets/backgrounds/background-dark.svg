@@ -1,0 +1,37 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="baseGrad1" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#49c2ff" stop-opacity="0.16" />
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0.12" />
+    </linearGradient>
+    <linearGradient id="baseGrad2" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0ea5e9" stop-opacity="0.12" />
+      <stop offset="1" stop-color="#49c2ff" stop-opacity="0.08" />
+    </linearGradient>
+    <linearGradient id="flowGrad" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#49c2ff" stop-opacity="0.32" />
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0.2" />
+    </linearGradient>
+    <radialGradient id="pulseGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(1)">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="1" stop-color="#49c2ff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <g id="bg-base">
+    <path d="M0 120C200 60 420 160 660 130C900 100 1080 140 1200 120V0H0V120Z" fill="url(#baseGrad1)" />
+    <path d="M0 760C260 700 520 790 820 750C1020 724 1140 760 1200 780V800H0V760Z" fill="url(#baseGrad2)" />
+  </g>
+  <g id="bg-flow" stroke="url(#flowGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.5">
+    <path data-flow-path stroke-dasharray="6 18" d="M-60 220C200 160 420 240 660 210C900 180 1080 230 1260 210" />
+    <path data-flow-path stroke-dasharray="6 18" d="M-40 320C220 260 460 340 700 310C940 280 1080 330 1240 310" />
+    <path data-flow-path stroke-dasharray="6 18" d="M-80 420C200 360 420 440 700 410C940 380 1080 430 1260 410" />
+    <path data-flow-path stroke-dasharray="6 18" d="M-20 520C240 460 480 540 740 510C980 480 1100 520 1240 510" />
+  </g>
+  <g id="bg-pulses">
+    <circle data-pulse cx="220" cy="180" r="110" fill="url(#pulseGrad)" opacity="0.12" />
+    <circle data-pulse cx="860" cy="220" r="120" fill="url(#pulseGrad)" opacity="0.1" />
+    <circle data-pulse cx="420" cy="520" r="130" fill="url(#pulseGrad)" opacity="0.1" />
+    <circle data-pulse cx="980" cy="560" r="90" fill="url(#pulseGrad)" opacity="0.08" />
+  </g>
+</svg>
+

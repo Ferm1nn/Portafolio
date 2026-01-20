@@ -2,8 +2,9 @@ import { useRef } from 'react';
 import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { CTAButton } from '../components/CTAButton';
-import { AnimatedCard } from '../components/AnimatedCard';
+import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
+import { ProjectsSection } from '../sections/ProjectsSection';
 
 export default function Projects() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -13,23 +14,27 @@ export default function Projects() {
     <div ref={pageRef}>
       <PageIntro
         eyebrow="Projects"
-        title="Portfolio expansion placeholder"
-        description="No project cards here yet—reserved for future case studies once they ship."
+        title="Automation and networking case studies"
+        description="Outcome-driven builds with clear problems, solutions, and measurable impact placeholders."
       />
 
+      <ProjectsSection />
+
       <Section
-        id="projects-empty"
-        eyebrow="In progress"
-        title="Projects page ready for future additions"
-        description="This space stays clean until new case studies are ready to share."
+        id="projects-cta"
+        eyebrow="Need a build?"
+        title="Share the context and desired outcome"
+        description="I can scope automation and support work quickly with clear deliverables."
       >
-        <AnimatedCard className="empty-state">
-          <p className="lead">No projects listed yet.</p>
-          <p className="muted">Check back soon or reach out directly for relevant work samples.</p>
+        <Card className="cta-panel" tilt={false}>
+          <div>
+            <h3>Request a walkthrough</h3>
+            <p className="muted">Send a short brief with tools, constraints, and timing.</p>
+          </div>
           <div className="hero-actions">
             <CTAButton to="/contact">Contact</CTAButton>
           </div>
-        </AnimatedCard>
+        </Card>
       </Section>
     </div>
   );

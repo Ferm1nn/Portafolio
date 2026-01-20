@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { profile } from '../data/portfolioData';
-import { AnimatedCard } from '../components/AnimatedCard';
+import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 
 export default function Contact() {
@@ -18,37 +18,37 @@ export default function Contact() {
     <div ref={pageRef}>
       <PageIntro
         eyebrow="Contact"
-        title="Let’s connect"
-        description="Share the context, stack, and desired outcomes—responses stay practical and rooted in the CV skill set."
+        title="Let us connect"
+        description="Share the context, stack, and desired outcomes. Responses stay practical and rooted in hands-on delivery."
       />
 
       <Section id="contact-info" eyebrow="Direct lines" title="Contact details">
         <div className="grid two">
-          <AnimatedCard>
-            <h3>Email</h3>
+          <Card tilt={false}>
+            <h3 data-tilt-layer="title">Email</h3>
             <a className="lead" href={`mailto:${profile.email}`}>
               {profile.email}
             </a>
             <p className="muted">Preferred channel for automation briefs, support requests, or availability checks.</p>
-          </AnimatedCard>
-          <AnimatedCard>
-            <h3>LinkedIn</h3>
+          </Card>
+          <Card tilt={false}>
+            <h3 data-tilt-layer="title">LinkedIn</h3>
             <a className="lead" href={profile.linkedin} target="_blank" rel="noreferrer">
               {profile.linkedin}
             </a>
             <p className="muted">Connect for updates or to sync on work-in-progress items.</p>
-          </AnimatedCard>
+          </Card>
         </div>
         <div className="grid two">
-          <AnimatedCard>
-            <h3>Location</h3>
+          <Card tilt={false}>
+            <h3 data-tilt-layer="title">Location</h3>
             <p className="lead">{profile.location}</p>
             <p className="muted">Remote-friendly for async collaboration.</p>
-          </AnimatedCard>
-          <AnimatedCard>
-            <h3>CV</h3>
-            <p className="muted">Happy to share details—just ask via email or LinkedIn.</p>
-          </AnimatedCard>
+          </Card>
+          <Card tilt={false}>
+            <h3 data-tilt-layer="title">CV</h3>
+            <p className="muted">Happy to share details. Ask via email or LinkedIn.</p>
+          </Card>
         </div>
       </Section>
 
@@ -56,9 +56,9 @@ export default function Contact() {
         id="contact-form"
         eyebrow="Optional form"
         title="Send a quick note"
-        description="Front-end only—no backend wiring. Use email/LinkedIn for guaranteed delivery."
+        description="Front-end only. Use email or LinkedIn for guaranteed delivery."
       >
-        <AnimatedCard>
+        <Card tilt={false}>
           <form className="contact-form" onSubmit={handleSubmit}>
             <label>
               Name
@@ -85,7 +85,7 @@ export default function Contact() {
               Send (front-end only)
             </button>
           </form>
-        </AnimatedCard>
+        </Card>
       </Section>
     </div>
   );

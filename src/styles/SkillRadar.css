@@ -1,0 +1,234 @@
+.skill-radar-container {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg,
+      var(--color-accent-soft) 0%,
+      var(--color-accent-soft) 100%);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+}
+
+.radar-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radar-circle {
+  position: absolute;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.radar-line {
+  position: absolute;
+  width: 1px;
+  height: 50%;
+  background: linear-gradient(to bottom,
+      var(--border-strong),
+      transparent);
+  transform-origin: bottom center;
+  left: 50%;
+  top: 0;
+  pointer-events: none;
+}
+
+.skill-points {
+  position: absolute;
+  inset: 0;
+}
+
+.skill-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skill-point-inner {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg,
+      var(--primary) 0%,
+      var(--color-accent-strong) 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 20px var(--color-glow),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.skill-point-pulse {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--color-glow);
+  border-radius: 50%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.skill-point:hover .skill-point-inner {
+  transform: scale(1.3);
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 30px var(--card-glow),
+    0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.skill-point.hovered .skill-label {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.skill-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.skill-title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.skill-level {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: linear-gradient(135deg,
+      var(--primary),
+      var(--color-accent-strong));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.radar-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.radar-center-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg,
+      var(--color-accent-soft) 0%,
+      var(--color-accent-soft) 100%);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  color: var(--primary);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.radar-center-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.radar-center-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .skill-point-inner {
+    width: 12px;
+    height: 12px;
+  }
+
+  .skill-label {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+
+  .radar-center-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .radar-center-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .skill-radar-container {
+    background: linear-gradient(135deg,
+        var(--color-accent-soft) 0%,
+        var(--color-accent-soft) 100%);
+  }
+
+  .skill-point-inner {
+    box-shadow:
+      0 0 0 2px var(--surface),
+      0 0 25px var(--card-glow),
+      0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+}

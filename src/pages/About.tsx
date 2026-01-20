@@ -2,7 +2,8 @@ import { useRef } from 'react';
 import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { profile, technicalSkills } from '../data/portfolioData';
-import { AnimatedCard } from '../components/AnimatedCard';
+import { Card } from '../components/Card';
+import { Badge } from '../components/Badge';
 import { useMotion } from '../hooks/useMotion';
 
 export default function About() {
@@ -24,15 +25,24 @@ export default function About() {
         description={profile.summary}
       >
         <div className="grid two">
-          <AnimatedCard>
-            <h3>How I work</h3>
-            <ul className="bullet-list">
+          <Card>
+            <h3 data-tilt-layer="title">How I work</h3>
+            <ul className="bullet-list" data-tilt-layer="bullets">
               <li>Structured troubleshooting across layers with clear documentation.</li>
               <li>Automation-first thinking with n8n, Supabase, and API integrations.</li>
               <li>Concise updates and maintainable, documented fixes for handoffs.</li>
-              <li>Values maintainable handoffs and measurable reliability improvements.</li>
+              <li>Outcome-driven delivery with measurable improvements [ADD METRIC].</li>
             </ul>
-          </AnimatedCard>
+          </Card>
+          <Card>
+            <h3 data-tilt-layer="title">What I prioritize</h3>
+            <ul className="bullet-list" data-tilt-layer="bullets">
+              <li>Clear runbooks and reusable troubleshooting steps.</li>
+              <li>Automation that removes manual handoffs and errors.</li>
+              <li>Stable networking fundamentals validated end to end.</li>
+              <li>Fast feedback loops and reliable communication.</li>
+            </ul>
+          </Card>
         </div>
       </Section>
 
@@ -40,14 +50,12 @@ export default function About() {
         id="about-focus"
         eyebrow="Focus areas"
         title="Domains I lean on daily"
-        description="Highlights from technical skills."
+        description="Highlights pulled directly from the capability map."
       >
         <div className="pill-row">
           {technicalSkills.flatMap((category) =>
-            category.items.map((item) => (
-              <span key={`${category.title}-${item}`} className="pill">
-                {item}
-              </span>
+            category.tools.map((item) => (
+              <Badge key={`${category.title}-${item}`}>{item}</Badge>
             )),
           )}
         </div>

@@ -1,4 +1,4 @@
-@import './styles/theme.css';
+@import './styles/tokens/tokens.css';
 @import './styles/style.css';
 
 :root {

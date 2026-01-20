@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from 'react';
+import { SectionHeader } from './SectionHeader';
 
 type SectionProps = PropsWithChildren<{
   id?: string;
@@ -11,13 +12,7 @@ type SectionProps = PropsWithChildren<{
 export function Section({ id, title, eyebrow, description, children, className }: SectionProps) {
   return (
     <section id={id} className={`section reveal ${className ?? ''}`.trim()}>
-      <div className="section-heading">
-        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <div className="section-title-row">
-          <h2>{title}</h2>
-          {description && <p className="section-description">{description}</p>}
-        </div>
-      </div>
+      <SectionHeader title={title} eyebrow={eyebrow} description={description} />
       {children}
     </section>
   );

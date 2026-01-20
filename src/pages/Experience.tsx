@@ -4,7 +4,7 @@ import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { TimelineItem } from '../components/TimelineItem';
 import { CTAButton } from '../components/CTAButton';
-import { AnimatedCard } from '../components/AnimatedCard';
+import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 
 export default function Experience() {
@@ -15,15 +15,11 @@ export default function Experience() {
     <div ref={pageRef}>
       <PageIntro
         eyebrow="Experience"
-        title="Freelance AI automation and networking labs"
+        title="Automation delivery and networking labs"
         description="Client automation delivery plus structured networking practice grounded in Cisco lab work."
       />
 
-      <Section
-        id="experience-timeline"
-        eyebrow="Roles"
-        title="Work history"
-      >
+      <Section id="experience-timeline" eyebrow="Roles" title="Work history">
         <div className="timeline-shell" data-timeline-section>
           <div className="timeline-progress-track" aria-hidden="true">
             <span className="timeline-progress" data-timeline-progress />
@@ -38,21 +34,21 @@ export default function Experience() {
 
       <Section
         id="experience-cta"
-        eyebrow="Let’s collaborate"
+        eyebrow="Let us collaborate"
         title="Available for automation builds and networking support"
         description="Fast prototypes, reliable rollouts, and documented fixes."
       >
-        <AnimatedCard className="cta-panel">
+        <Card className="cta-panel" tilt={false}>
           <div>
-            <h3>Let’s discuss your stack</h3>
+            <h3>Let us discuss your stack</h3>
             <p className="muted">
-              From webhook-driven automations to L1–L3 troubleshooting, responses stay grounded in repeatable steps.
+              From webhook-driven automations to L1-L3 troubleshooting, responses stay grounded in repeatable steps.
             </p>
           </div>
           <div className="hero-actions">
             <CTAButton to="/contact">Contact</CTAButton>
           </div>
-        </AnimatedCard>
+        </Card>
         <p className="muted text-center">
           Prefer email? Reach out at <a href={`mailto:${profile.email}`}>{profile.email}</a>.
         </p>

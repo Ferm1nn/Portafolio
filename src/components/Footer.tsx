@@ -19,9 +19,7 @@ export function Footer() {
           <span>{profile.location}</span>
         </div>
       </div>
-      <div className="footer-note">
-        © {new Date().getFullYear()} {profile.name}.
-      </div>
+      <div className="footer-note">Copyright {new Date().getFullYear()} {profile.name}. All rights reserved.</div>
     </footer>
   );
 }
