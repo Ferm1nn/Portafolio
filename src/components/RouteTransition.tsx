@@ -18,6 +18,7 @@ export function RouteTransition({ children }: RouteTransitionProps) {
 
   useLayoutEffect(() => {
     if (prefersReducedMotion) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayLocation(location);
       return;
     }

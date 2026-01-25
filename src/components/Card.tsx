@@ -1,6 +1,7 @@
 import { forwardRef, useLayoutEffect, type HTMLAttributes } from 'react';
 import { createTiltCard } from '../lib/animations/helpers/createTiltCard';
 import { useMotionSettings } from '../motion/MotionProvider';
+import { useResponsive } from '../context/ResponsiveContext';
 
 type CardProps = HTMLAttributes<HTMLDivElement> & {
   interactive?: boolean;
@@ -12,16 +13,18 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   ref,
 ) {
   const { allowTilt, prefersReducedMotion, isTouch } = useMotionSettings();
+  const { isMobile } = useResponsive();
+  const shouldTilt = tilt && !isMobile && !isTouch && allowTilt;
 
   useLayoutEffect(() => {
-    if (prefersReducedMotion || !allowTilt || !tilt || !ref || typeof ref === 'function') return;
+    if (prefersReducedMotion || !shouldTilt || !ref || typeof ref === 'function') return;
     const card = ref.current;
     if (!card) return;
 
     const glare = card.querySelector<HTMLElement>('.card-glare');
     const cleanup = createTiltCard({ card, glare });
     return () => cleanup();
-  }, [allowTilt, prefersReducedMotion, ref]);
+  }, [shouldTilt, prefersReducedMotion, ref]);
 
   useLayoutEffect(() => {
     if (isTouch) return;

@@ -32,11 +32,11 @@ export function createStaggerGrid({
     enterVariant === 'fade'
       ? { opacity: 0 }
       : {
-          opacity: 0,
-          y: 18,
-          scale: 0.98,
-          rotateZ: (index: number) => (index % 2 === 0 ? -3 : 3),
-        };
+        opacity: 0,
+        y: 18,
+        scale: 0.98,
+        rotateZ: (index: number) => (index % 2 === 0 ? -3 : 3),
+      };
 
   gsap.set(elements, fromVars);
 
@@ -52,25 +52,53 @@ export function createStaggerGrid({
         duration: 0.7,
         ease: 'power3.out',
         stagger,
-        onStart: () => {
-          (batch as HTMLElement[]).forEach((element) => {
-            element.style.willChange = 'opacity, transform';
-          });
-        },
-        onComplete: () => {
-          (batch as HTMLElement[]).forEach((element) => {
-            element.style.willChange = '';
-          });
-        },
+        overwrite: 'auto',
+      });
+    },
+    // Add reverse/replay logic if 'once' is false
+    onLeave: (batch) => {
+      if (once) return;
+      gsap.to(batch, {
+        opacity: 0,
+        y: -18, // Slide UP when leaving top
+        overwrite: 'auto',
+        duration: 0.5,
+        stagger,
+      });
+    },
+    onEnterBack: (batch) => {
+      if (once) return;
+      gsap.to(batch, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotateZ: 0,
+        duration: 0.7,
+        ease: 'power3.out',
+        stagger,
+        overwrite: 'auto',
+      });
+    },
+    onLeaveBack: (batch) => {
+      if (once) return;
+      gsap.to(batch, {
+        opacity: 0,
+        y: 18, // Slide DOWN when leaving bottom
+        overwrite: 'auto',
+        duration: 0.5,
+        stagger,
       });
     },
   });
 
   return () => {
-    if (Array.isArray(trigger)) {
-      trigger.forEach((item) => item.kill(true));
-    } else if (trigger && typeof trigger.kill === 'function') {
-      trigger.kill(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const t = trigger as any;
+    if (Array.isArray(t)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      t.forEach((item: any) => item.kill(true));
+    } else if (t && typeof t.kill === 'function') {
+      t.kill(true);
     }
     elements.forEach((element) => {
       element.style.willChange = '';

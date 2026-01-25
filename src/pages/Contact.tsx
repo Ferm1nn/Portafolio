@@ -1,17 +1,50 @@
 import type { FormEvent } from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { profile } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 
+type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
+
 export default function Contact() {
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const [status, setStatus] = useState<FormStatus>('idle');
   useMotion(pageRef);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!formRef.current) return;
+
+    setStatus('submitting');
+
+    const formData = new FormData(formRef.current);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      topic: formData.get('topic') as string,
+      message: formData.get('message') as string,
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        throw new Error('Submission failed');
+      }
+
+      setStatus('success');
+      formRef.current.reset();
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setStatus('error');
+    }
   };
 
   return (
@@ -54,39 +87,53 @@ export default function Contact() {
 
       <Section
         id="contact-form"
-        eyebrow="Optional form"
+        eyebrow="Form"
         title="Send a quick note"
-        description="Front-end only. Use email or LinkedIn for guaranteed delivery."
+        description="Use email or LinkedIn for guaranteed delivery."
       >
         <Card tilt={false}>
-          <form className="contact-form" onSubmit={handleSubmit}>
-            <label>
-              Name
-              <input name="name" type="text" placeholder="Your name" required />
-            </label>
-            <label>
-              Email
-              <input name="email" type="email" placeholder="you@example.com" required />
-            </label>
-            <label>
-              What do you need?
-              <select name="topic" defaultValue="automation">
-                <option value="automation">Automation build</option>
-                <option value="networking">Networking support</option>
-                <option value="consulting">Consulting</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-            <label>
-              Message
-              <textarea name="message" rows={4} placeholder="Context, tools, goals" />
-            </label>
-            <button type="submit" className="btn primary">
-              Send (front-end only)
-            </button>
-          </form>
+          {status === 'success' ? (
+            <div className="p-8 text-center">
+              <h3 className="text-2xl font-bold mb-4">Message sent!</h3>
+              <p className="muted mb-6">Thanks for reaching out. I'll get back to you shortly.</p>
+              <button onClick={() => setStatus('idle')} className="btn primary">Send another</button>
+            </div>
+          ) : (
+            <form ref={formRef} className="contact-form" onSubmit={handleSubmit}>
+              <label>
+                Name
+                <input name="name" type="text" placeholder="Your name" required disabled={status === 'submitting'} />
+              </label>
+              <label>
+                Email
+                <input name="email" type="email" placeholder="you@example.com" required disabled={status === 'submitting'} />
+              </label>
+              <label>
+                What do you need?
+                <select name="topic" defaultValue="automation" disabled={status === 'submitting'}>
+                  <option value="automation">Automation build</option>
+                  <option value="networking">Networking support</option>
+                  <option value="consulting">Consulting</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label>
+                Message
+                <textarea name="message" rows={4} placeholder="Context, tools, goals" required disabled={status === 'submitting'} />
+              </label>
+
+              {status === 'error' && (
+                <p className="text-red-500 mb-4">Something went wrong. Please try again or email directly.</p>
+              )}
+
+              <button type="submit" className="btn primary" disabled={status === 'submitting'}>
+                {status === 'submitting' ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
+          )}
         </Card>
       </Section>
     </div>
   );
 }
+

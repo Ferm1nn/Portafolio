@@ -38,6 +38,8 @@ export function ProjectsSection() {
                 <a
                   key={link.label}
                   href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="pill link"
                   onClick={(event) => {
                     if (link.href === '#') {

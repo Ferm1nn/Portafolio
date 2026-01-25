@@ -997,6 +997,10 @@ h5 {
   inset: 0;
   z-index: 30;
   pointer-events: none;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  overscroll-behavior: contain;
 }
 
 .expand-modal[data-state='open'] {
@@ -1012,13 +1016,13 @@ h5 {
 }
 
 .expand-panel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  position: relative;
+  z-index: 1;
   width: min(92vw, 760px);
   max-height: 82vh;
-  overflow-y: auto;
-  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
@@ -1043,6 +1047,10 @@ h5 {
 .expand-content {
   display: grid;
   gap: var(--space-4);
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 0.2rem;
+  scrollbar-gutter: stable;
 }
 
 .expand-section {

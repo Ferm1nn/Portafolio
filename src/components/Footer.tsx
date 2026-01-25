@@ -10,7 +10,7 @@ export function Footer() {
         </div>
         <div>
           <div className="eyebrow">LinkedIn</div>
-          <a href={profile.linkedin} target="_blank" rel="noreferrer">
+          <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">
             {profile.linkedin.replace('https://', '')}
           </a>
         </div>

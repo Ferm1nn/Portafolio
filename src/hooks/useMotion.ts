@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { createParallax } from '../lib/animations/helpers/createParallax';
 import { createScrollReveal } from '../lib/animations/helpers/createScrollReveal';
 import { createStaggerGrid } from '../lib/animations/helpers/createStaggerGrid';
+import { createBidirectionalReveal } from '../lib/animations/helpers/createBidirectionalReveal';
 import { splitTextToSpans } from '../lib/animations/helpers/splitText';
 import { useMotionSettings } from '../motion/MotionProvider';
 
@@ -92,15 +93,44 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
 
     const grids = Array.from(root.querySelectorAll<HTMLElement>('.grid, .timeline-grid, .cert-grid, .project-grid'));
     grids.forEach((grid) => {
-      const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]'));
-      if (!cards.length) return;
-      cleanups.push(
-        createStaggerGrid({
-          cards,
-          enterVariant: prefersReducedMotion ? 'fade' : 'card',
-          stagger: prefersReducedMotion ? 0 : 0.08,
-        }),
-      );
+      // Standard stagger cards (Exclude the special parallax cards)
+      const staggerCards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card]:not([data-parallax-card])'));
+      if (staggerCards.length) {
+        cleanups.push(
+          createStaggerGrid({
+            cards: staggerCards,
+            enterVariant: prefersReducedMotion ? 'fade' : 'card',
+            stagger: prefersReducedMotion ? 0 : 0.08,
+            once: false, // Enable persistent/replayable animations for all grids
+          }),
+        );
+      }
+
+      // Special bidirectional cards (Experience timeline items)
+      // These need to enter AND leave symmetrically
+      const bidirCards = Array.from(grid.querySelectorAll<HTMLElement>('[data-card][data-parallax-card="true"]'));
+      if (bidirCards.length) {
+        bidirCards.forEach((card) => {
+          // If reduced motion, we skip the animation (GSAP helper can handle it or we skip calling it)
+          // The helper normally sets initial opacity: 0. 
+          // So for reduced motion, we just ensure they are visible.
+          if (prefersReducedMotion) {
+            card.style.opacity = '1';
+            card.style.transform = 'none';
+            return;
+          }
+
+          cleanups.push(
+            createBidirectionalReveal({
+              element: card,
+              start: 'top 85%',
+              end: 'bottom 15%',
+              yOffset: 50, // 50px as requested in the "bullet" prompt (though user said 50px for bullet, applying here for card)
+              duration: 0.6,
+            })
+          );
+        });
+      }
     });
 
     const timelineProgress = root.querySelector<HTMLElement>('[data-timeline-progress]');

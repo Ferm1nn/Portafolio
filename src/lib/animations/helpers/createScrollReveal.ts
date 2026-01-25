@@ -63,7 +63,7 @@ export function createScrollReveal({
       ease: 'power3.out',
       stagger,
       scrollTrigger: {
-        trigger: trigger ?? elements[0],
+        trigger: (trigger ?? elements[0]) as Element,
         start,
         once,
       },

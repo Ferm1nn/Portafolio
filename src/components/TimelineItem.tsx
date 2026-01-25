@@ -81,6 +81,7 @@ export function TimelineItem({ index, ...props }: TimelineItemProps) {
     <ExpandableCard
       className="timeline-item"
       data-direction={direction}
+      data-parallax-card="true"
       data-timeline-item="true"
       modalTitle={isExperience ? experience.role : education.title}
       modalContent={modalContent}

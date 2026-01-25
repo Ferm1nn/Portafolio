@@ -5,7 +5,7 @@ import { CTAButton } from '../components/CTAButton';
 import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { SkillRadar } from '../components/SkillRadar';
-import { heroMetrics, profile, technicalSkills } from '../data/portfolioData';
+import { heroMetrics, profile } from '../data/portfolioData';
 import { useGSAPContext } from '../lib/animations/hooks/useGSAPContext';
 import { splitTextToSpans } from '../lib/animations/helpers/splitText';
 import { useMotionSettings } from '../motion/MotionProvider';
@@ -23,24 +23,32 @@ export function HeroSection() {
   const skillData = [
     { title: 'Networking', level: 85 },
     { title: 'IT Support', level: 90 },
-    { title: 'Automation', level: 80 },
+    { title: 'AI Automation', level: 80 },
     { title: 'Python', level: 70 },
-    { title: 'n8n', level: 85 },
-    { title: 'Supabase', level: 75 },
+    { title: 'Cybersecurity', level: 78 },
+    { title: 'Linux', level: 72 },
   ];
+  const focusAreas = ['Network Support Technician', 'Cybersecurity', 'Automations'];
 
   useLayoutEffect(() => {
     if (!heroRef.current) return;
 
     return addToContext(() => {
-      const titleWords = splitTextToSpans(titleRef.current);
-      const subhead = heroRef.current?.querySelector<HTMLElement>('.hero-lead');
-      const summary = heroRef.current?.querySelector<HTMLElement>('.hero-summary');
-      const actions = heroRef.current?.querySelector<HTMLElement>('.hero-actions');
+      const mm = gsap.matchMedia();
 
-      if (prefersReducedMotion) {
-        gsap.set([titleWords, subhead, summary, actions], { opacity: 1, y: 0 });
-      } else {
+      mm.add("(min-width: 768px)", () => {
+        const titleWords = splitTextToSpans(titleRef.current);
+        const subhead = heroRef.current?.querySelector<HTMLElement>('.hero-lead');
+        const summary = heroRef.current?.querySelector<HTMLElement>('.hero-summary');
+        const actions = heroRef.current?.querySelector<HTMLElement>('.hero-actions');
+
+        if (prefersReducedMotion) {
+          gsap.set([titleWords, subhead, summary, actions], { opacity: 1, y: 0 });
+          return;
+        }
+
+        if (!subhead || !summary || !actions) return;
+
         const tl = gsap.timeline();
         tl.fromTo(
           titleWords,
@@ -50,7 +58,41 @@ export function HeroSection() {
           .fromTo(subhead, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.3')
           .fromTo(summary, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35')
           .fromTo(actions, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35');
-      }
+
+        // Desktop-only float animation
+        if (!isTouch) {
+          const floatCards = heroRef.current?.querySelectorAll<HTMLElement>('[data-float]');
+          floatCards?.forEach((card) => {
+            gsap.to(card, {
+              y: gsap.utils.random(2, 6),
+              duration: gsap.utils.random(3, 6),
+              ease: 'sine.inOut',
+              yoyo: true,
+              repeat: -1,
+              delay: gsap.utils.random(0, 1.5),
+            });
+          });
+        }
+      });
+
+      mm.add("(max-width: 767px)", () => {
+        // Lighter mobile animation
+        const elements = heroRef.current?.querySelectorAll<HTMLElement>('.hero-title, .hero-lead, .hero-summary, .hero-actions');
+        if (elements) {
+          gsap.fromTo(elements,
+            { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out', clearProps: 'all' }
+          );
+        }
+      });
+
+      // Shared logic (Metrics counter) - careful with mobile perf, but simple counters are usually okay.
+      // Keeping it inside mm or outside depends on if we want it on mobile. User said "heavy effects" only on desktop.
+      // Metrics are critical content, let's keep them but maybe simplify?
+      // User said "Mobile branch... fewer targets... simpler reveal". 
+      // I'll keep logic outside matchMedia for metrics as it uses ScrollTrigger which is fine, 
+      // OR put it in both. I'll put it in a separate shared block or just outside if it's safe.
+      // Metrics counter is fine.
 
       if (metricsRef.current) {
         const metricValues = Array.from(metricsRef.current.querySelectorAll<HTMLElement>('[data-metric-value]'));
@@ -71,26 +113,14 @@ export function HeroSection() {
             },
             scrollTrigger: {
               trigger: metricsRef.current,
-              start: 'top 80%',
+              start: 'top 85%', // slightly earlier on mobile potentially
               once: true,
             },
           });
         });
       }
 
-      if (!prefersReducedMotion && !isTouch) {
-        const floatCards = heroRef.current?.querySelectorAll<HTMLElement>('[data-float]');
-        floatCards?.forEach((card) => {
-          gsap.to(card, {
-            y: gsap.utils.random(2, 6),
-            duration: gsap.utils.random(3, 6),
-            ease: 'sine.inOut',
-            yoyo: true,
-            repeat: -1,
-            delay: gsap.utils.random(0, 1.5),
-          });
-        });
-      }
+      return () => mm.revert();
     });
   }, [addToContext, isTouch, prefersReducedMotion]);
 
@@ -126,8 +156,8 @@ export function HeroSection() {
             <SkillRadar skills={skillData} />
             <h3 data-tilt-layer="title" style={{ marginTop: '1rem' }}>Focus areas</h3>
             <div className="pill-row" data-tilt-layer="badges">
-              {technicalSkills.slice(0, 3).map((skill) => (
-                <Badge key={skill.title}>{skill.title}</Badge>
+              {focusAreas.map((focus) => (
+                <Badge key={focus}>{focus}</Badge>
               ))}
             </div>
           </Card>

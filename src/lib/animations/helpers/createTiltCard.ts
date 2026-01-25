@@ -57,7 +57,7 @@ export function createTiltCard({
   });
 
   card.style.transformStyle = 'preserve-3d';
-  card.style.transformPerspective = '900px';
+  card.style.perspective = '900px';
 
   let bounds = card.getBoundingClientRect();
   let frame = 0;

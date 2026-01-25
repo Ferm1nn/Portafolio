@@ -4,40 +4,59 @@
   min-height: 280px;
   aspect-ratio: 1;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg,
-      var(--color-accent-soft) 0%,
-      var(--color-accent-soft) 100%);
+  background: #020617;
+  /* Solid Midnight Blue / Deep Navy */
   overflow: hidden;
-  backdrop-filter: blur(10px);
   border: 1px solid var(--border);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
 }
+
+
 
 .radar-bg {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.radar-circle {
-  position: absolute;
-  border: 1px solid var(--border);
-  border-radius: 50%;
   pointer-events: none;
 }
 
-.radar-line {
-  position: absolute;
-  width: 1px;
-  height: 50%;
-  background: linear-gradient(to bottom,
-      var(--border-strong),
-      transparent);
-  transform-origin: bottom center;
-  left: 50%;
-  top: 0;
-  pointer-events: none;
+.radar-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.radar-ring,
+.radar-spoke {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  opacity: 0.3;
+}
+
+.radar-shine {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 15 100;
+  stroke-dashoffset: 100;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 4px var(--color-accent));
+  animation: radarShine 3s linear infinite;
+}
+
+.radar-shine.active-shine {
+  stroke: #ffffff;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 8px var(--color-accent-strong));
+  animation-duration: 1.5s;
+  opacity: 1;
+}
+
+@keyframes radarShine {
+  to {
+    stroke-dashoffset: -100;
+  }
 }
 
 .skill-points {
@@ -106,20 +125,31 @@
 
 .skill-label {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  margin-top: 8px;
   padding: 6px 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  white-space: nowrap;
+  white-space: normal;
+  /* Allow text to wrap if it's somehow massive, though max-width handles it */
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  /* stronger shadow for contrast over lines */
+  z-index: 50;
+  /* Ensure above everything */
+  /* Default transform for animation */
+  transform: translateY(4px);
+}
+
+.skill-label.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modifier classes handled by JS for placement */
+.skill-label.flip-left {
+  /* Logic handled in JS positioning via inline styles mostly, but could add offsets here if needed */
 }
 
 .skill-title {
@@ -219,12 +249,8 @@
 
 /* Dark mode enhancements */
 @media (prefers-color-scheme: dark) {
-  .skill-radar-container {
-    background: linear-gradient(135deg,
-        var(--color-accent-soft) 0%,
-        var(--color-accent-soft) 100%);
-  }
 
+  /* Removed gradient override to keep solid background */
   .skill-point-inner {
     box-shadow:
       0 0 0 2px var(--surface),

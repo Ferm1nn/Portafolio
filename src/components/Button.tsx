@@ -42,9 +42,11 @@ export function Button({
       gsap.fromTo(
         shine,
         { xPercent: -120, opacity: 0 },
-        { xPercent: 120, opacity: 1, duration: 0.6, ease: 'power2.out', onComplete: () => {
-          shine.style.willChange = '';
-        } },
+        {
+          xPercent: 120, opacity: 1, duration: 0.6, ease: 'power2.out', onComplete: () => {
+            shine.style.willChange = '';
+          }
+        },
       );
     };
 
@@ -56,7 +58,7 @@ export function Button({
     };
   }, [isTouch, prefersReducedMotion]);
 
-  const classes = ['btn', variant, className].filter(Boolean).join(' ');
+  const classes = ['btn', variant, 'py-3.5 px-6 md:py-[0.7rem] md:px-[1.1rem] min-h-[48px] md:min-h-[44px]', className].filter(Boolean).join(' ');
 
   const content = (
     <>

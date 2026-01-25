@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode, type RefObject } from 'react';
+import { createPortal } from 'react-dom';
 
 type ExpandModalProps = {
   id?: string;
@@ -22,6 +23,38 @@ export function ExpandModal({
   closeButtonRef,
   children,
 }: ExpandModalProps) {
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return;
+
+    const { body, documentElement } = document;
+    const scrollY = window.scrollY;
+    const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+    const previous = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      paddingRight: body.style.paddingRight,
+    };
+
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      body.style.overflow = previous.overflow;
+      body.style.position = previous.position;
+      body.style.top = previous.top;
+      body.style.width = previous.width;
+      body.style.paddingRight = previous.paddingRight;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     const panel = modalRef.current;
     if (!panel || !isOpen) return;
@@ -47,7 +80,8 @@ export function ExpandModal({
     return () => panel.removeEventListener('keydown', handleKeyDown);
   }, [closeButtonRef, isOpen, modalRef]);
 
-  return (
+  const titleId = id ? `${id}-title` : undefined;
+  const modalMarkup = (
     <div className="expand-modal" data-state={isOpen ? 'open' : 'closed'} aria-hidden={!isOpen}>
       <div className="expand-overlay" ref={overlayRef} />
       <div
@@ -56,10 +90,11 @@ export function ExpandModal({
         id={id}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby={titleId}
+        aria-label={titleId ? undefined : title}
       >
         <div className="expand-header">
-          <h3>{title}</h3>
+          <h3 id={titleId}>{title}</h3>
           <button type="button" className="btn ghost expand-close" ref={closeButtonRef}>
             Close
           </button>
@@ -68,4 +103,10 @@ export function ExpandModal({
       </div>
     </div>
   );
+
+  if (typeof document === 'undefined') {
+    return modalMarkup;
+  }
+
+  return createPortal(modalMarkup, document.body);
 }

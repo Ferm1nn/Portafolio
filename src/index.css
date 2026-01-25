@@ -1,5 +1,6 @@
-@import './styles/tokens/tokens.css';
-@import './styles/style.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   scroll-behavior: auto;
