@@ -15,3 +15,5 @@ npm run dev
 ```powershell
 npm run build
 ```
+
+Last updated: February 1, 2026
