@@ -2,10 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CTAButton } from '../components/CTAButton';
-import { Badge } from '../components/Badge';
-import { Card } from '../components/Card';
-import { SkillRadar } from '../components/SkillRadar';
-import { heroMetrics, profile } from '../data/portfolioData';
+import { profile } from '../data/portfolioData';
 import { useGSAPContext } from '../lib/animations/hooks/useGSAPContext';
 import { splitTextToSpans } from '../lib/animations/helpers/splitText';
 import { useMotionSettings } from '../motion/MotionProvider';
@@ -16,19 +13,8 @@ export function HeroSection() {
   const { prefersReducedMotion, isTouch } = useMotionSettings();
   const heroRef = useRef<HTMLElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
-  const metricsRef = useRef<HTMLDivElement | null>(null);
+  // Removed metricsRef as metrics are moved to Skills page
   const addToContext = useGSAPContext(heroRef);
-
-  // Skill proficiency data for radar visualization
-  const skillData = [
-    { title: 'Networking', level: 85 },
-    { title: 'IT Support', level: 90 },
-    { title: 'AI Automation', level: 80 },
-    { title: 'Python', level: 70 },
-    { title: 'Cybersecurity', level: 78 },
-    { title: 'Linux', level: 72 },
-  ];
-  const focusAreas = ['Network Support Technician', 'Cybersecurity', 'Automations'];
 
   useLayoutEffect(() => {
     if (!heroRef.current) return;
@@ -59,20 +45,7 @@ export function HeroSection() {
           .fromTo(summary, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35')
           .fromTo(actions, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35');
 
-        // Desktop-only float animation
-        if (!isTouch) {
-          const floatCards = heroRef.current?.querySelectorAll<HTMLElement>('[data-float]');
-          floatCards?.forEach((card) => {
-            gsap.to(card, {
-              y: gsap.utils.random(2, 6),
-              duration: gsap.utils.random(3, 6),
-              ease: 'sine.inOut',
-              yoyo: true,
-              repeat: -1,
-              delay: gsap.utils.random(0, 1.5),
-            });
-          });
-        }
+        // Desktop-only float animation (removed data-float targets in simplified version, but keeping logic if we add more later)
       });
 
       mm.add("(max-width: 767px)", () => {
@@ -86,93 +59,79 @@ export function HeroSection() {
         }
       });
 
-      // Shared logic (Metrics counter) - careful with mobile perf, but simple counters are usually okay.
-      // Keeping it inside mm or outside depends on if we want it on mobile. User said "heavy effects" only on desktop.
-      // Metrics are critical content, let's keep them but maybe simplify?
-      // User said "Mobile branch... fewer targets... simpler reveal". 
-      // I'll keep logic outside matchMedia for metrics as it uses ScrollTrigger which is fine, 
-      // OR put it in both. I'll put it in a separate shared block or just outside if it's safe.
-      // Metrics counter is fine.
-
-      if (metricsRef.current) {
-        const metricValues = Array.from(metricsRef.current.querySelectorAll<HTMLElement>('[data-metric-value]'));
-        metricValues.forEach((element) => {
-          const targetValue = Number(element.dataset.metricValue ?? 0);
-          if (prefersReducedMotion) {
-            element.textContent = `${targetValue}`;
-            return;
-          }
-
-          const counter = { value: 0 };
-          gsap.to(counter, {
-            value: targetValue,
-            duration: 1.2,
-            ease: 'power2.out',
-            onUpdate: () => {
-              element.textContent = Math.round(counter.value).toString();
-            },
-            scrollTrigger: {
-              trigger: metricsRef.current,
-              start: 'top 85%', // slightly earlier on mobile potentially
-              once: true,
-            },
-          });
-        });
-      }
-
       return () => mm.revert();
     });
   }, [addToContext, isTouch, prefersReducedMotion]);
 
   return (
-    <section className="hero" id="hero" ref={heroRef}>
-      <div className="hero-grid">
-        <div className="hero-content">
-          <p className="eyebrow">Network Technician / IT Support</p>
-          <h1 className="hero-title" ref={titleRef}>
-            {profile.name}
+    <section className="hero relative w-full min-h-screen flex items-center justify-center overflow-hidden" id="hero" ref={heroRef}>
+
+      {/* 2. RADIAL GRADIENT OVERLAY (The Fix - Readability) */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.5) 40%, transparent 80%)' }}
+      ></div>
+
+      {/* 3. CONTENT (Centered & Balanced & Lifted) */}
+      <div className="relative z-20 container mx-auto px-6 h-full flex flex-col items-center justify-center text-center pb-32" style={{ maxWidth: '100%', width: '100%' }}>
+
+        {/* Constrained Width for Readability */}
+        <div className="max-w-4xl flex flex-col items-center space-y-6">
+
+          {/* Role Tag - Clean & Techy */}
+          <span className="inline-block py-1 px-4 text-xs font-mono font-bold tracking-[0.2em] text-cyan-400 border border-cyan-500/30 rounded-full bg-cyan-950/30 backdrop-blur-sm shadow-[0_0_10px_rgba(6,182,212,0.2)] mb-2">
+            {profile.role.toUpperCase()}
+          </span>
+
+          {/* Name - Balanced Scale */}
+          <h1 className="hero-title font-bold text-white tracking-tight leading-tight" ref={titleRef} style={{ fontSize: 'clamp(3rem, 5vw, 6rem)', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+            Fermin <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 font-extrabold filter drop-shadow-[0_2px_10px_rgba(6,182,212,0.3)]">Espinoza</span>
           </h1>
-          <p className="hero-role">{profile.role}</p>
-          <p className="lead hero-lead">{profile.headline}</p>
-          <p className="hero-summary">{profile.summary}</p>
-          <div className="hero-actions">
-            <CTAButton to="/contact">Contact</CTAButton>
-            <CTAButton to="/projects" variant="ghost">
-              View projects
+
+          {/* Bio - Readable & Centered */}
+          <div className="space-y-6">
+            <p className="hero-lead text-xl md:text-2xl text-slate-100 font-medium drop-shadow-md">
+              {profile.headline}
+            </p>
+            <p className="hero-summary text-slate-300 leading-relaxed text-lg font-normal drop-shadow-md max-w-2xl mx-auto">
+              {profile.summary}
+            </p>
+          </div>
+
+          {/* Buttons - Balanced Spacing */}
+          <div className="hero-actions flex flex-wrap justify-center gap-5 pt-6">
+            <CTAButton
+              to="/contact"
+              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-full shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] transition-all duration-300 transform hover:-translate-y-1 border-none"
+            >
+              Contact Me
+            </CTAButton>
+            <CTAButton
+              to="/projects"
+              variant="ghost"
+              className="px-8 py-3 bg-slate-900/40 hover:bg-gray-900/60 text-white font-semibold border border-slate-600 rounded-full backdrop-blur-sm transition-all duration-300 hover:border-white"
+            >
+              View Projects
             </CTAButton>
           </div>
-          <div className="hero-meta">
-            <Badge>{profile.location}</Badge>
-            <a className="pill link" href={`mailto:${profile.email}`}>
+
+          {/* Social / Location - Centered Row */}
+          <div className="hero-meta flex items-center justify-center gap-8 text-sm text-slate-400 font-medium pt-8 w-full drop-shadow-md">
+            <span className="flex items-center gap-2 tracking-wider">
+              🇨🇷 {profile.location}
+            </span>
+            <a href={`mailto:${profile.email}`} className="hover:text-cyan-400 transition-colors flex items-center gap-2 tracking-wider group">
+              <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full group-hover:shadow-[0_0_10px_cyan] transition-all"></span>
               {profile.email}
             </a>
-            <a className="pill link" href={profile.linkedin} target="_blank" rel="noreferrer">
+            <a href={profile.linkedin} target="_blank" rel="noreferrer" className="hover:text-cyan-400 transition-colors flex items-center gap-2 tracking-wider group">
+              <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full group-hover:shadow-[0_0_10px_cyan] transition-all"></span>
               LinkedIn
             </a>
           </div>
+
         </div>
-        <div className="hero-aside">
-          <Card className="hero-card" tilt>
-            <SkillRadar skills={skillData} />
-            <h3 data-tilt-layer="title" style={{ marginTop: '1rem' }}>Focus areas</h3>
-            <div className="pill-row" data-tilt-layer="badges">
-              {focusAreas.map((focus) => (
-                <Badge key={focus}>{focus}</Badge>
-              ))}
-            </div>
-          </Card>
-          <div className="hero-metrics" ref={metricsRef}>
-            {heroMetrics.map((metric) => (
-              <Card key={metric.label} className="metric-card" tilt={false} data-float>
-                <div className="metric-value">
-                  <span data-metric-value={metric.value}>{metric.value}</span>
-                  {metric.suffix && <span className="metric-suffix">{metric.suffix}</span>}
-                </div>
-                <div className="metric-label">{metric.label}</div>
-              </Card>
-            ))}
-          </div>
-        </div>
+
       </div>
     </section>
   );

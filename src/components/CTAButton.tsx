@@ -8,11 +8,12 @@ type CTAButtonProps = {
   children: ReactNode;
   external?: boolean;
   download?: boolean;
+  className?: string;
 };
 
-export function CTAButton({ to, href, variant = 'primary', children, external, download }: CTAButtonProps) {
+export function CTAButton({ to, href, variant = 'primary', children, external, download, className }: CTAButtonProps) {
   return (
-    <Button to={to} href={href} variant={variant} external={external} download={download}>
+    <Button to={to} href={href} variant={variant} external={external} download={download} className={className}>
       {children}
     </Button>
   );

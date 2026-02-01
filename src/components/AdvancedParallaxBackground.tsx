@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useMotionSettings } from '../motion/MotionProvider';
+import { ParallaxHUDOverlay } from './ParallaxHUDOverlay';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -64,8 +65,8 @@ export function AdvancedParallaxBackground({
     if (!container || !layerElements.length) return;
 
     const setters = layerElements.map((layer) => ({
-      x: gsap.quickTo(layer, 'x', { duration: 0.6, ease: 'power3.out' }),
-      y: gsap.quickTo(layer, 'y', { duration: 0.6, ease: 'power3.out' }),
+      x: gsap.quickTo(layer, 'x', { duration: 0.5, ease: 'power2.out' }),
+      y: gsap.quickTo(layer, 'y', { duration: 0.5, ease: 'power2.out' }),
     }));
 
     let frame = 0;
@@ -83,7 +84,7 @@ export function AdvancedParallaxBackground({
         layerElements.forEach((_, index) => {
           const layerConfig = resolvedLayers[index];
           if (!layerConfig) return;
-          const intensity = (index + 1) * 10 * parallaxStrength;
+          const intensity = (index + 1) * 25 * parallaxStrength;
           setters[index].x(dx * intensity);
           setters[index].y(dy * intensity);
         });
@@ -128,9 +129,9 @@ export function AdvancedParallaxBackground({
 
         gsap.fromTo(
           ref,
-          { y: `${fromY}%`, willChange: 'transform' },
+          { yPercent: fromY, willChange: 'transform' },
           {
-            y: `${toY}%`,
+            yPercent: toY,
             ease: 'none',
             scrollTrigger: {
               start: 0,
@@ -146,10 +147,70 @@ export function AdvancedParallaxBackground({
     return () => ctx.revert();
   }, [allowParallax, parallaxStrength, prefersReducedMotion, resolvedLayers]);
 
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let panX = 0; // Current pan X
+    let panY = 0; // Current pan Y
+
+    const onPointerDown = (e: PointerEvent) => {
+      // Button 1 is usually Middle Mouse (Scroll Wheel)
+      // Check e.buttons simply to be sure? e.button is the one that changed.
+      console.log('PointerDown', e.button, e.pointerType);
+
+      if (e.button === 1) {
+        e.preventDefault();
+        e.stopImmediatePropagation(); // Stop anything else from happening
+        isPanning = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        document.body.style.cursor = 'grabbing';
+        container.setPointerCapture(e.pointerId); // Retain focus
+      }
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isPanning) return;
+      e.preventDefault();
+
+      // Calculate new position
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+
+      console.log('Panning to', panX, panY);
+      gsap.set(container, { x: panX, y: panY });
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (isPanning) {
+        console.log('PointerUp');
+        isPanning = false;
+        document.body.style.cursor = '';
+        container.releasePointerCapture(e.pointerId);
+      }
+    };
+
+    // Use capture: true on window to intercept the event before it hits anything else
+    window.addEventListener('pointerdown', onPointerDown, { capture: true });
+    window.addEventListener('pointermove', onPointerMove); // Move/Up generally bubble or are captured
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown, { capture: true });
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      document.body.style.cursor = '';
+    };
+  }, []);
+
   return (
     <div
       ref={containerRef}
-      className={['animated-background', 'parallax-background', className].filter(Boolean).join(' ')}
+      className={['relative', 'animated-background', 'parallax-background', className].filter(Boolean).join(' ')}
       aria-hidden="true"
     >
       {!prefersReducedMotion && (
@@ -181,6 +242,7 @@ export function AdvancedParallaxBackground({
           }}
         />
       ))}
+      <ParallaxHUDOverlay />
       {children && <div className="parallax-bg-content">{children}</div>}
     </div>
   );

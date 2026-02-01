@@ -56,7 +56,7 @@ export const profile = {
   email: 'fezgar12@gmail.com',
   phone: '+506 8708 8364',
   linkedin: 'https://www.linkedin.com/in/fermin-espinoza',
-  headline: 'Systems engineering and cybersecurity student focused on networking, automation, and structured L1/L2 support.',
+  headline: 'Systems Engineering and Cybersecurity student specializing in secure networking, automation, and comprehensive L1-L3 technical support.',
   summary:
     'I document repeatable fixes, validate connectivity end to end, and build workflows that reduce manual handoffs.',
 };
