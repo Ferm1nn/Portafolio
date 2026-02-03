@@ -44,7 +44,7 @@ export function HeroSection() {
         const iterations = scrambleProxy.value;
         textRef.current.innerText = finalName
           .split("")
-          .map((letter, index) => {
+          .map((_letter, index) => {
             if (index < iterations) {
               return finalName[index];
             }

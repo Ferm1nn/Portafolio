@@ -7,7 +7,7 @@ type MagneticOptions = {
   radius?: number;
 };
 
-export function createMagnetic({ element, trigger, strength = 12, radius = 120 }: MagneticOptions) {
+export function createMagnetic({ element, trigger, radius = 120 }: MagneticOptions) {
   const targetListener = trigger || element;
 
   if (targetListener.dataset.magneticInit === 'true') {
@@ -43,7 +43,7 @@ export function createMagnetic({ element, trigger, strength = 12, radius = 120 }
     }
 
     // Prototype logic: consistent pull
-    const force = (radius - distance) / radius; // Stronger when closer 
+    // const force = (radius - distance) / radius; // Stronger when closer 
     // Or just mapping 1:1 like prototype?
     // Prototype: x * 0.5. 
     // Let's stick closer to the prototype's feel:

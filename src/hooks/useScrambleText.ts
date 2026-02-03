@@ -14,10 +14,10 @@ export function useScrambleText(text: string, speed: number = 40) {
         }
 
         intervalRef.current = window.setInterval(() => {
-            setDisplayText(prev =>
+            setDisplayText(_prev =>
                 text
                     .split("")
-                    .map((letter, index) => {
+                    .map((_letter, index) => {
                         if (index < iterations) {
                             return text[index];
                         }
