@@ -10,20 +10,10 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const getInitialTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'dark';
-
-  const stored = localStorage.getItem('theme');
-  if (stored === 'light' || stored === 'dark') return stored;
-
-  const initial = document.documentElement.dataset.theme;
-  if (initial === 'light' || initial === 'dark') return initial;
-
-  return 'dark';
-};
+// getInitialTheme removed
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
+  const [theme] = useState<Theme>('dark');
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -32,7 +22,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    // No-op: Dark mode enforced
   }, []);
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);

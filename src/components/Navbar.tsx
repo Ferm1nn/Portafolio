@@ -4,10 +4,11 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { profile } from '../data/portfolioData';
 import avatar from '../assets/profile-header.jpeg';
-import { useTheme } from '../hooks/useTheme';
+// import { useTheme } from '../hooks/useTheme'; // Removed unused import
 import { useMotionSettings } from '../motion/MotionProvider';
 // import { createActiveNavIndicator } from '../lib/animations/helpers/createActiveNavIndicator'; // Removed unused import
 import { CTAButton } from './CTAButton';
+import { ProfileAvatar } from './ProfileAvatar';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,7 +22,7 @@ const links = [
 ];
 
 export function Navbar() {
-  const { theme, toggleTheme } = useTheme();
+  // const { theme, toggleTheme } = useTheme(); // Removed for dark mode enforcement
   const { prefersReducedMotion } = useMotionSettings();
   const location = useLocation();
   const navRef = useRef<HTMLElement | null>(null);
@@ -30,7 +31,7 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Computed styles based on theme to maintain Light mode functionality/design while keeping Dark mode "Fancy"
-  const isDark = theme === 'dark';
+  const isDark = true; // Forced dark mode
 
   useLayoutEffect(() => {
     const nav = navRef.current;
@@ -108,7 +109,7 @@ export function Navbar() {
       { rotate: -90, scale: 0.9 },
       { rotate: 0, scale: 1, duration: 0.4, ease: 'power2.out' },
     );
-  }, [theme, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   // Dynamic classes based on theme
   // FORCED DARK BACKGROUND for both modes as per user request
@@ -124,9 +125,7 @@ export function Navbar() {
 
   // Removed unused navLink classes since they were for the old top-bar desktop nav
 
-  const themeToggleClasses = isDark
-    ? `bg-slate-800/50 text-slate-400 hover:text-cyan-400 hover:bg-slate-800`
-    : `bg-slate-800/50 text-slate-400 hover:text-indigo-400 hover:bg-slate-800`;
+  // : `bg-slate-800/50 text-slate-400 hover:text-indigo-400 hover:bg-slate-800`;
 
   // Indicator classes removed
   /*
@@ -160,13 +159,11 @@ export function Navbar() {
           className="group flex items-center gap-3 focus:outline-none"
           onClick={() => setIsMenuOpen(false)}
         >
-          <div className={`relative h-10 w-10 overflow-hidden rounded-xl border transition-all duration-300 group-hover:shadow-[0_0_12px_rgba(34,211,238,0.3)] ${isDark ? 'border-cyan-500/20 group-hover:border-cyan-400/40' : 'border-indigo-500/20 group-hover:border-indigo-400/40'}`}>
-            <img
-              src={avatar}
-              alt={`${profile.name} portrait`}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-          </div>
+          <ProfileAvatar
+            src={avatar}
+            alt={`${profile.name} portrait`}
+            isDark={isDark}
+          />
           <div className="flex flex-col justify-center">
             <span className={`font-bold leading-none transition-colors ${brandTextClasses}`}>
               {profile.name}
@@ -226,35 +223,7 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-3 sm:gap-4">
-          {/* Theme Toggle */}
-          <button
-            type="button"
-            className={`group relative flex h-9 w-9 items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${themeToggleClasses}`}
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          >
-            <span className="sr-only">{theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}</span>
-            <span ref={toggleIconRef} className="relative z-10 transform transition-transform duration-500">
-              {theme === 'dark' ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.5 14.5A8.5 8.5 0 1 1 12 3.5c0 .5 0 1.2.2 1.7a7 7 0 0 0 6.6 6.6c.5.1 1.2.1 1.7.2Z" />
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="2" x2="12" y2="5" />
-                  <line x1="12" y1="19" x2="12" y2="22" />
-                  <line x1="4.2" y1="4.2" x2="6.3" y2="6.3" />
-                  <line x1="17.7" y1="17.7" x2="19.8" y2="19.8" />
-                  <line x1="2" y1="12" x2="5" y2="12" />
-                  <line x1="19" y1="12" x2="22" y2="12" />
-                  <line x1="4.2" y1="19.8" x2="6.3" y2="17.7" />
-                  <line x1="17.7" y1="6.3" x2="19.8" y2="4.2" />
-                </svg>
-              )}
-            </span>
-          </button>
+          {/* Theme Toggle Removed */}
 
           {/* Contact CTA */}
           <div className="hidden sm:block">

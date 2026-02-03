@@ -2,25 +2,28 @@ import gsap from 'gsap';
 
 type MagneticOptions = {
   element: HTMLElement;
+  trigger?: HTMLElement;
   strength?: number;
   radius?: number;
 };
 
-export function createMagnetic({ element, strength = 12, radius = 120 }: MagneticOptions) {
-  if (element.dataset.magneticInit === 'true') {
+export function createMagnetic({ element, trigger, strength = 12, radius = 120 }: MagneticOptions) {
+  const targetListener = trigger || element;
+
+  if (targetListener.dataset.magneticInit === 'true') {
     return () => undefined;
   }
-  element.dataset.magneticInit = 'true';
+  targetListener.dataset.magneticInit = 'true';
 
   let frame = 0;
   let latestEvent: PointerEvent | null = null;
-  let bounds = element.getBoundingClientRect();
+  let bounds = targetListener.getBoundingClientRect();
 
   const setX = gsap.quickTo(element, 'x', { duration: 0.25, ease: 'power3.out' });
   const setY = gsap.quickTo(element, 'y', { duration: 0.25, ease: 'power3.out' });
 
   const updateBounds = () => {
-    bounds = element.getBoundingClientRect();
+    bounds = targetListener.getBoundingClientRect();
   };
 
   const animate = () => {
@@ -30,15 +33,22 @@ export function createMagnetic({ element, strength = 12, radius = 120 }: Magneti
     const y = latestEvent.clientY - bounds.top;
     const dx = x - bounds.width / 2;
     const dy = y - bounds.height / 2;
-    const distance = Math.hypot(dx, dy);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Calculate intensity based on distance within radius
     if (distance > radius) {
       setX(0);
       setY(0);
       return;
     }
-    const normalized = Math.min(1, distance / radius);
-    setX((dx / bounds.width) * strength * normalized);
-    setY((dy / bounds.height) * strength * normalized);
+
+    // Prototype logic: consistent pull
+    const force = (radius - distance) / radius; // Stronger when closer 
+    // Or just mapping 1:1 like prototype?
+    // Prototype: x * 0.5. 
+    // Let's stick closer to the prototype's feel:
+    setX(dx * 0.5);
+    setY(dy * 0.5);
   };
 
   const handlePointerMove = (event: PointerEvent) => {
@@ -58,22 +68,22 @@ export function createMagnetic({ element, strength = 12, radius = 120 }: Magneti
     element.style.willChange = '';
   };
 
-  element.addEventListener('pointerenter', handlePointerEnter);
-  element.addEventListener('pointermove', handlePointerMove);
-  element.addEventListener('pointerleave', reset);
-  element.addEventListener('pointerdown', reset);
+  targetListener.addEventListener('pointerenter', handlePointerEnter);
+  targetListener.addEventListener('pointermove', handlePointerMove);
+  targetListener.addEventListener('pointerleave', reset);
+  targetListener.addEventListener('pointerdown', reset);
   window.addEventListener('resize', updateBounds);
 
   return () => {
-    element.removeEventListener('pointerenter', handlePointerEnter);
-    element.removeEventListener('pointermove', handlePointerMove);
-    element.removeEventListener('pointerleave', reset);
-    element.removeEventListener('pointerdown', reset);
+    targetListener.removeEventListener('pointerenter', handlePointerEnter);
+    targetListener.removeEventListener('pointermove', handlePointerMove);
+    targetListener.removeEventListener('pointerleave', reset);
+    targetListener.removeEventListener('pointerdown', reset);
     window.removeEventListener('resize', updateBounds);
     if (frame) {
       window.cancelAnimationFrame(frame);
     }
     element.style.willChange = '';
-    delete element.dataset.magneticInit;
+    delete targetListener.dataset.magneticInit;
   };
 }

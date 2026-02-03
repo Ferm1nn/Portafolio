@@ -135,8 +135,7 @@ export function AnimatedBackground() {
     <div className="bg-root" aria-hidden="true">
       <div className="bg-layer base-parallax" id="baseParallax">
         <div className="base-drift" id="baseDrift">
-          <div className="bg-img bg-img-night" id="bgNight" />
-          <div className="bg-img bg-img-light" id="bgLight" />
+          {/* Background images removed */}
         </div>
       </div>
       <ParallaxHUDOverlay />

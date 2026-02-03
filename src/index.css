@@ -5,3 +5,46 @@
 :root {
   scroll-behavior: auto;
 }
+
+/* Moved to Global Scope to guarantee it's not purged or overridden */
+.live-wire {
+  animation: live-wire-anim 5s infinite !important;
+}
+
+@keyframes live-wire-anim {
+
+  /* 1. Base State (Stable flowing current) */
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6)) brightness(1.1);
+    transform: skewX(0deg);
+  }
+
+  /* 2. Breathing Phase (Slow pulse) */
+  50% {
+    filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.6)) brightness(1.2);
+    transform: skewX(0deg);
+  }
+
+  /* 3. The Surge (High Voltage Glitch) */
+  92% {
+    filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6)) brightness(1.1);
+    transform: skewX(0deg);
+  }
+
+  93% {
+    /* Double Shadow for RGB Split + Skew */
+    filter: drop-shadow(4px 4px 0px rgba(6, 182, 212, 1)) drop-shadow(-4px -4px 0px rgba(139, 92, 246, 1));
+    transform: skewX(-10deg) scale(1.02);
+  }
+
+  94% {
+    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 1));
+    transform: skewX(10deg);
+  }
+
+  95% {
+    filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6)) brightness(1.1);
+    transform: skewX(0deg);
+  }
+}

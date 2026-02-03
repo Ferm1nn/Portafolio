@@ -106,7 +106,13 @@ export default function Contact() {
               </label>
               <label>
                 Email
-                <input name="email" type="email" placeholder="you@example.com" required disabled={status === 'submitting'} />
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  disabled={status === 'submitting'}
+                />
               </label>
               <label>
                 What do you need?
@@ -119,7 +125,13 @@ export default function Contact() {
               </label>
               <label>
                 Message
-                <textarea name="message" rows={4} placeholder="Context, tools, goals" required disabled={status === 'submitting'} />
+                <textarea
+                  name="message"
+                  rows={4}
+                  placeholder="Context, tools, goals"
+                  required
+                  disabled={status === 'submitting'}
+                />
               </label>
 
               {status === 'error' && (

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useMotion } from '../hooks/useMotion';
+import { NetworkBackground } from '../components/NetworkBackground';
 import { CTASection } from '../sections/CTASection';
 import { EducationSection } from '../sections/EducationSection';
 import { ExpandedSkillsSection } from '../sections/ExpandedSkillsSection';
@@ -12,7 +13,8 @@ export default function Home() {
   useMotion(pageRef);
 
   return (
-    <div ref={pageRef}>
+    <div ref={pageRef} className="relative z-0">
+      <NetworkBackground />
       <HeroSection />
       <SkillsSection />
       <ExperienceSection />
