@@ -1,11 +1,9 @@
 import { useRef } from 'react';
-
 import { Section } from '../components/Section';
 import { CTAButton } from '../components/CTAButton';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 import { ProjectsSection } from '../sections/ProjectsSection';
-
 import { HexGridBackground } from '../components/HexGridBackground';
 
 export default function Projects() {

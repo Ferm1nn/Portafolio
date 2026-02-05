@@ -2,11 +2,16 @@ import type { Capability } from '../data/portfolioData';
 import { Badge } from './Badge';
 import { ExpandableCard } from './ExpandableCard';
 
+import AutomationStatusBadge from './AutomationStatusBadge';
+import AutomationLiveStrip from './AutomationLiveStrip';
+
 type SkillCardProps = {
   skill: Capability;
 };
 
 export function SkillCard({ skill }: SkillCardProps) {
+  const isAutomation = skill.title === 'Automation & Systems';
+
   const modalContent = (
     <>
       <div className="expand-section">
@@ -52,8 +57,11 @@ export function SkillCard({ skill }: SkillCardProps) {
 
   return (
     <ExpandableCard modalTitle={skill.title} modalContent={modalContent} className="skill-card">
-      <div className="card-header">
-        <h3 data-tilt-layer="title">{skill.title}</h3>
+      <div className="card-header relative">
+        <div className="flex justify-between items-start">
+          <h3 data-tilt-layer="title">{skill.title}</h3>
+          {isAutomation && <AutomationStatusBadge />}
+        </div>
         <p className="muted" data-tilt-layer="meta">
           {skill.summary}
         </p>
@@ -71,6 +79,12 @@ export function SkillCard({ skill }: SkillCardProps) {
       <p className="muted proof-line" data-tilt-layer="meta">
         {skill.proof}
       </p>
+
+      {isAutomation && (
+        <div className="mt-4 -mx-6 -mb-6">
+          <AutomationLiveStrip />
+        </div>
+      )}
     </ExpandableCard>
   );
 }

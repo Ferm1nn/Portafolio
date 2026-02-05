@@ -2,6 +2,7 @@ import { Badge } from '../components/Badge';
 import { Card } from '../components/Card';
 import { Section } from '../components/Section';
 import { projects } from '../data/portfolioData';
+import NetworkLogTerminal from '../components/NetworkLogTerminal';
 
 export function ProjectsSection() {
   return (
@@ -11,6 +12,10 @@ export function ProjectsSection() {
       title="Selected automation and networking builds"
       description="Real-world workflow and lab work, documented with clear outcomes."
     >
+      <div className="mb-12">
+        <NetworkLogTerminal />
+      </div>
+
       <div className="grid three project-grid">
         {projects.map((project) => (
           <Card key={project.title} className="project-card">

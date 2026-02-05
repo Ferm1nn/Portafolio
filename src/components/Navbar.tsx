@@ -1,16 +1,13 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useState, useRef } from 'react';
+import { Menu, X, ChevronRight } from 'lucide-react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 import { profile } from '../data/portfolioData';
 import avatar from '../assets/profile-header.jpeg';
-// import { useTheme } from '../hooks/useTheme'; // Removed unused import
-import { useMotionSettings } from '../motion/MotionProvider';
-// import { createActiveNavIndicator } from '../lib/animations/helpers/createActiveNavIndicator'; // Removed unused import
-import { CTAButton } from './CTAButton';
 import { ProfileAvatar } from './ProfileAvatar';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(useGSAP);
 
 const links = [
   { to: '/', label: 'Home' },
@@ -21,259 +18,235 @@ const links = [
 ];
 
 export function Navbar() {
-  // const { theme, toggleTheme } = useTheme(); // Removed for dark mode enforcement
-  const { prefersReducedMotion } = useMotionSettings();
   const location = useLocation();
-  const navRef = useRef<HTMLElement | null>(null);
-  const shellRef = useRef<HTMLDivElement | null>(null);
-  const toggleIconRef = useRef<HTMLSpanElement | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Computed styles based on theme to maintain Light mode functionality/design while keeping Dark mode "Fancy"
-  const isDark = true; // Forced dark mode
+  const containerRef = useRef<HTMLElement>(null);
+  const borderBeamRef = useRef<HTMLDivElement>(null);
+  const statusRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLAnchorElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    const nav = navRef.current;
-    if (!nav) return;
-
-    const trigger = ScrollTrigger.create({
-      trigger: document.body,
-      start: 'top -24',
-      toggleClass: { targets: nav, className: 'is-scrolled' },
-    });
-
-    return () => trigger.kill();
-  }, []);
-
-  // Animations removed to support pure CSS/Tailwind Pill design
-  useLayoutEffect(() => {
-    // Optional: Add simple hover/click animations here if needed in future
-  }, [prefersReducedMotion]);
-
-  useLayoutEffect(() => {
-    const shell = shellRef.current;
-    if (!shell) return;
-
-    const root = document.documentElement;
-    const updateOffset = () => {
-      const height = shell.getBoundingClientRect().height;
-      root.style.setProperty('--header-offset', `${height + 16}px`);
-    };
-
-    updateOffset();
-
-    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateOffset) : null;
-    resizeObserver?.observe(shell);
-    window.addEventListener('resize', updateOffset);
-
-    return () => {
-      resizeObserver?.disconnect();
-      window.removeEventListener('resize', updateOffset);
-    };
-  }, []);
-
-  useEffect(() => {
+  // Close mobile menu on route change
+  useGSAP(() => {
     setIsMenuOpen(false);
-  }, [location.pathname]);
+  }, { dependencies: [location.pathname] });
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-    const handleResize = () => {
-      if (window.innerWidth >= 1025) {
-        setIsMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return undefined;
-    if (isMenuOpen) {
-      document.body.style.setProperty('overflow', 'hidden');
-    } else {
-      document.body.style.removeProperty('overflow');
-    }
-    return () => {
-      document.body.style.removeProperty('overflow');
-    };
-  }, [isMenuOpen]);
-
-  useLayoutEffect(() => {
-    const icon = toggleIconRef.current;
-    if (!icon || prefersReducedMotion) return;
-
-    gsap.fromTo(
-      icon,
-      { rotate: -90, scale: 0.9 },
-      { rotate: 0, scale: 1, duration: 0.4, ease: 'power2.out' },
+  // Entrance Animation
+  useGSAP(() => {
+    gsap.fromTo(containerRef.current,
+      { y: -100, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
     );
-  }, [prefersReducedMotion]);
+  }, { scope: containerRef });
 
-  // Dynamic classes based on theme
-  // FORCED DARK BACKGROUND for both modes as per user request
-  const headerClasses = `bg-slate-900/60 backdrop-blur-md border-b border-white/5 ${isDark ? 'shadow-lg shadow-cyan-900/20' : 'shadow-sm'}`;
+  // "Live Wire" Border Animation
+  useGSAP(() => {
+    if (!borderBeamRef.current) return;
 
-  const brandTextClasses = isDark
-    ? `text-slate-100 group-hover:text-cyan-100`
-    : `text-slate-100 group-hover:text-indigo-200`;
+    const beam = borderBeamRef.current;
 
-  const brandRoleClasses = isDark
-    ? `text-cyan-400`
-    : `text-indigo-600`;
+    // Create the "Beam" timeline
+    // Shoots across with a random-ish delay feel via repeatDelay
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 2.5 });
 
-  // Removed unused navLink classes since they were for the old top-bar desktop nav
+    tl.fromTo(beam,
+      { left: '-20%', width: '20%', opacity: 0, background: 'linear-gradient(90deg, transparent, #22d3ee, transparent)' },
+      {
+        left: '120%',
+        duration: 1.2,
+        ease: "power2.inOut",
+        opacity: 1,
+        onStart: () => { gsap.set(beam, { opacity: 1 }); },
+        onComplete: () => { gsap.set(beam, { opacity: 0 }); }
+      }
+    );
 
-  // : `bg-slate-800/50 text-slate-400 hover:text-indigo-400 hover:bg-slate-800`;
+  }, { scope: containerRef });
 
-  // Indicator classes removed
-  /*
-  const indicatorClasses = isDark
-    ? `bg-cyan-500/10 border-cyan-500/20`
-    : `bg-cyan-500/10 border-cyan-200`;
-  */
+  // "Voltage Flicker" Status Badge
+  useGSAP(() => {
+    if (!statusRef.current) return;
 
+    // Rapid micro-flicker to simulate unstable energy
+    gsap.to(statusRef.current, {
+      opacity: 0.5,
+      duration: 0.1,
+      repeat: -1,
+      yoyo: true,
+      ease: "rough({ template: none.out, strength: 1, points: 20, taper: 'none', randomize: true, clamp: false})"
+    });
+  }, { scope: containerRef });
 
+  // "Thunder" Hover Effect on Button
+  const { contextSafe } = useGSAP({ scope: containerRef });
 
-  const mobileMenuClasses = `bg-slate-900 border-white/5`;
+  const handleButtonHoverRaw = contextSafe(() => {
+    if (!buttonRef.current) return;
 
-  const mobileLinkActive = isDark
-    ? `bg-cyan-500/10 text-cyan-400`
-    : `bg-indigo-500/10 text-indigo-400`;
+    // Intense flash
+    gsap.fromTo(buttonRef.current,
+      { backgroundColor: '#ffffff', color: '#000000', borderColor: '#ffffff', boxShadow: '0 0 20px 5px rgba(255,255,255,0.5)' },
+      { backgroundColor: 'rgba(6, 182, 212, 0.1)', color: '#22d3ee', borderColor: 'rgba(34, 211, 238, 0.5)', boxShadow: 'none', duration: 0.4, ease: "power2.out" }
+    );
+  });
 
-  const mobileLinkInactive = `text-slate-400 hover:text-slate-100 hover:bg-white/5`;
+  const handleButtonHover = () => {
+    handleButtonHoverRaw();
+  };
+
+  // Mobile Menu Animation
+  useGSAP(() => {
+    if (!menuRef.current) return;
+
+    if (isMenuOpen) {
+      gsap.set(menuRef.current, { display: 'flex' });
+      gsap.to(menuRef.current, { height: '100vh', opacity: 1, duration: 0.4, ease: "power3.out" });
+    } else {
+      gsap.to(menuRef.current, { height: 0, opacity: 0, duration: 0.3, ease: "power3.in", onComplete: () => gsap.set(menuRef.current, { display: 'none' }) });
+    }
+  }, [isMenuOpen]);
 
   return (
     <header
-      ref={navRef}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b py-2 ${headerClasses} ${isMenuOpen ? 'bg-slate-900' : ''}`}
+      ref={containerRef}
+      className={`fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-md transition-all duration-300`}
     >
-      <div
-        ref={shellRef}
-        className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6"
-      >
-        {/* Brand */}
+      {/* "Live Wire" Border */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-white/5 overflow-hidden">
+        <div ref={borderBeamRef} className="absolute top-0 bottom-0 w-[20%] h-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-0"></div>
+      </div>
+
+      <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 relative z-10">
+
+        {/* LEFT: Identity & Status */}
         <Link
           to="/"
-          className="group flex items-center gap-3 focus:outline-none"
+          className="flex items-center gap-4 group"
           onClick={() => setIsMenuOpen(false)}
         >
-          <ProfileAvatar
-            src={avatar}
-            alt={`${profile.name} portrait`}
-            isDark={isDark}
-          />
-          <div className="flex flex-col justify-center">
-            <span className={`font-bold leading-none transition-colors ${brandTextClasses}`}>
+          <div className="relative">
+            <ProfileAvatar
+              src={avatar}
+              alt={`${profile.name} portrait`}
+              isDark={true}
+              className="h-10 w-10 ring-2 ring-white/10 group-hover:ring-cyan-400 transition-all duration-300"
+            />
+            {/* Mobile Status Dot */}
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-cyan-400 rounded-full border-2 border-[#050505] animate-pulse lg:hidden shadow-[0_0_10px_rgba(34,211,238,0.8)]"></div>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-white font-bold tracking-tight text-sm sm:text-base group-hover:text-cyan-400 transition-colors">
               {profile.name}
             </span>
-            <span className={`mt-0.5 text-[10px] font-medium tracking-wider uppercase ${brandRoleClasses}`}>
-              {profile.role}
-            </span>
+            <div className="hidden lg:flex items-center gap-2" ref={statusRef}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span>
+              </span>
+              <span className="text-[10px] font-mono text-cyan-400 tracking-wider shadow-cyan-500/50 drop-shadow-[0_0_2px_rgba(34,211,238,0.5)]">SYSTEM ONLINE</span>
+            </div>
           </div>
         </Link>
 
-        {/* Desktop Nav - Horizontal Pill Design */}
-        <div className="hidden lg:flex items-center gap-2">
-          <nav
-            className={`
-               relative flex items-center gap-1 p-1.5 rounded-full border transition-all duration-300
-               ${isDark
-                ? 'bg-slate-900/50 border-white/5 shadow-inner'
-                : 'bg-white/50 border-slate-200/60 shadow-inner'
-              }
-             `}
+        {/* CENTER: Navigation (The Console) */}
+        <nav className="hidden lg:flex items-center gap-8">
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => `
+                relative group flex items-center gap-1 font-mono text-sm transition-all duration-300
+                ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'}
+              `}
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={`transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-cyan-400`}>
+                    &gt;
+                  </span>
+                  {link.label}
+                  {isActive && (
+                    <div className="absolute -bottom-1 left-0 right-0 h-[1px] bg-cyan-400/50 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* RIGHT: Action (The Trigger) */}
+        <div className="flex items-center gap-4">
+          <Link
+            to="/contact"
+            ref={buttonRef}
+            onMouseEnter={handleButtonHover}
+            className="hidden sm:flex items-center justify-center px-6 py-2 text-sm font-mono tracking-wide
+              text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-sm
+              transition-all duration-300 uppercase relative overflow-hidden group"
           >
-            {links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) => `
-                  relative z-10 block px-5 py-2 text-sm font-bold tracking-wide transition-all duration-300 rounded-full
-                  ${isActive
-                    ? (isDark
-                      ? 'text-white shadow-[0_0_15px_rgba(34,211,238,0.25)]'
-                      : 'text-white shadow-md shadow-indigo-500/20')
-                    : (isDark ? 'text-slate-400 hover:text-cyan-200 hover:bg-white/5' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-100/50')
-                  }
-                `}
-              >
-                {({ isActive }) => (
-                  <>
-                    {/* Active Background Pill */}
-                    {isActive && (
-                      <span
-                        className={`
-                          absolute inset-0 rounded-full -z-10
-                          ${isDark
-                            ? 'bg-cyan-500/10 border border-cyan-400/20'
-                            : 'bg-indigo-600'
-                          }
-                        `}
-                      />
-                    )}
-                    {link.label}
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-
-        {/* Right Actions */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          {/* Theme Toggle Removed */}
-
-          {/* Contact CTA */}
-          <div className="hidden sm:block">
-            <CTAButton to="/contact">Contact</CTAButton>
-          </div>
+            <span className="relative z-10">Initiate Contact</span>
+          </Link>
 
           {/* Mobile Menu Toggle */}
           <button
-            type="button"
-            className={`lg:hidden relative flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-full transition-colors ${isDark ? 'text-slate-400 hover:text-cyan-400' : 'text-slate-400 hover:text-indigo-400'}`}
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
-            aria-label="Toggle navigation"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors"
+            aria-label="Toggle menu"
           >
-            <span className={`h-0.5 w-5 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-[3.5px]' : ''}`} />
-            <span className={`h-0.5 w-5 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-[3.5px]' : ''}`} />
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Backdrop & Drawer */}
+      {/* MOBILE MENU OVERLAY */}
       <div
-        className={`fixed inset-0 top-[calc(var(--header-offset,60px))] z-40 lg:hidden transition-all duration-300 ${isMenuOpen ? 'visible' : 'invisible pointer-events-none'}`}
-        id="mobile-menu"
+        ref={menuRef}
+        className="fixed inset-0 top-[80px] z-40 lg:hidden bg-[#050505]/95 backdrop-blur-xl border-t border-white/5 overflow-hidden hidden"
+        style={{ height: 0, opacity: 0 }}
       >
-        {/* Backdrop */}
-        <div
-          className={`absolute inset-0 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'} bg-slate-900/80`}
-          onClick={() => setIsMenuOpen(false)}
-          aria-hidden="true"
-        />
-
-        {/* Drawer Content */}
-        <nav className={`relative z-50 border-b p-4 shadow-xl transition-all duration-300 origin-top ${mobileMenuClasses} ${isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
-          <div className="flex flex-col space-y-1">
-            {links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block px-4 py-3 text-base font-medium rounded-lg transition-colors ${isActive ? mobileLinkActive : mobileLinkInactive}`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+        <nav className="flex flex-col p-6 gap-2">
+          <div className="mb-6 flex items-center gap-2 px-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            </span>
+            <span className="text-xs font-mono text-cyan-400 tracking-wider">SYSTEM STATUS: ONLINE</span>
           </div>
-          <div className={`mt-4 pt-4 border-t border-white/5`}>
-            <CTAButton to="/contact" className="w-full justify-center">Contact</CTAButton>
+
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              onClick={() => setIsMenuOpen(false)}
+              className={({ isActive }) => `
+                group flex items-center justify-between p-4 rounded-sm border border-transparent
+                transition-all duration-300 font-mono
+                ${isActive
+                  ? 'bg-white/5 border-white/10 text-white'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                }
+              `}
+            >
+              <span className="flex items-center gap-3">
+                <span className="text-cyan-500 opacity-50 group-hover:opacity-100">&gt;</span>
+                {link.label}
+              </span>
+              <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500" />
+            </NavLink>
+          ))}
+
+          <div className="mt-8 border-t border-white/10 pt-8">
+            <Link
+              to="/contact"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex w-full items-center justify-center px-6 py-3 text-sm font-mono tracking-wide
+                text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-sm
+                active:bg-cyan-500 active:text-white transition-all duration-300 uppercase"
+            >
+              Initiate Contact
+            </Link>
           </div>
         </nav>
       </div>

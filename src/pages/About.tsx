@@ -5,6 +5,7 @@ import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { useMotion } from '../hooks/useMotion';
 import { CircuitBackground } from '../components/CircuitBackground';
+import { EducationSection } from '../sections/EducationSection';
 
 export default function About() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +64,8 @@ export default function About() {
           )}
         </div>
       </Section>
+
+      <EducationSection />
     </div>
   );
 }

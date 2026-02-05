@@ -5,6 +5,7 @@ interface ProfileAvatarProps {
     src: string;
     alt: string;
     isDark?: boolean;
+    className?: string;
 }
 
 /**
@@ -19,7 +20,7 @@ interface ProfileAvatarProps {
  * - Sets z-index to 50 to overlay navbar content
  * - Smooth retraction with power2.out ease
  */
-export function ProfileAvatar({ src, alt, isDark = true }: ProfileAvatarProps) {
+export function ProfileAvatar({ src, alt, isDark = true, className = '' }: ProfileAvatarProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const imgRef = useRef<HTMLImageElement>(null);
     const glowRef = useRef<HTMLDivElement>(null);
@@ -91,7 +92,7 @@ export function ProfileAvatar({ src, alt, isDark = true }: ProfileAvatarProps) {
     return (
         <div
             ref={wrapperRef}
-            className="relative h-10 w-10"
+            className={`relative h-10 w-10 ${className}`}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             style={{
