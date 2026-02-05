@@ -92,7 +92,7 @@ export const AuroraBackground = () => {
         };
 
         // --- Animation Loop ---
-        const render = (time: number, deltaTime: number, frame: number) => {
+        const render = (_time: number, _deltaTime: number, _frame: number) => {
             // GSAP ticker provides time in seconds since start
             // We can use that or accumulate our own.
             // Let's use our param.time which we manually increment for control or just use ticker time?

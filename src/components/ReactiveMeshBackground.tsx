@@ -122,8 +122,6 @@ export const ReactiveMeshBackground = () => {
 
         // --- Helpers ---
         // Fast color interpolation (Lerp)
-        const lerp = (start: number, end: number, t: number) => start + (end - start) * t;
-
         // --- Render Loop ---
         const render = () => {
             ctx.clearRect(0, 0, width, height);
