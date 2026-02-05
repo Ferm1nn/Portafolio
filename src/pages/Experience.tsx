@@ -1,6 +1,6 @@
 import { useRef } from 'react';
+import { HexGridBackground } from '../components/HexGridBackground';
 import { experiences, profile } from '../data/portfolioData';
-import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { TimelineItem } from '../components/TimelineItem';
 import { CTAButton } from '../components/CTAButton';
@@ -12,12 +12,15 @@ export default function Experience() {
   useMotion(pageRef);
 
   return (
-    <div ref={pageRef}>
-      <PageIntro
-        eyebrow="Experience"
-        title="Automation delivery and networking labs"
-        description="Client automation delivery plus structured networking practice grounded in Cisco lab work."
-      />
+    <div ref={pageRef} className="relative z-0 min-h-screen">
+      <HexGridBackground />
+      <div className="page-intro reveal">
+        <div className="page-intro-content">
+          <p className="eyebrow">Experience</p>
+          <h1 data-split="words">Automation delivery and networking labs</h1>
+          <p className="lead">Client automation delivery plus structured networking practice grounded in Cisco lab work.</p>
+        </div>
+      </div>
 
       <Section id="experience-timeline" eyebrow="Roles" title="Work history">
         <div className="timeline-shell" data-timeline-section>

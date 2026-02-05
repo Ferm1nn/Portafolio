@@ -1,22 +1,25 @@
 import { useRef } from 'react';
-import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { profile, technicalSkills } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { useMotion } from '../hooks/useMotion';
+import { CircuitBackground } from '../components/CircuitBackground';
 
 export default function About() {
   const pageRef = useRef<HTMLDivElement | null>(null);
   useMotion(pageRef);
 
   return (
-    <div ref={pageRef}>
-      <PageIntro
-        eyebrow="About"
-        title="Profile summary"
-        description="Network technician focused on cybersecurity, networking, and structured IT support."
-      />
+    <div ref={pageRef} style={{ position: 'relative' }}>
+      <CircuitBackground />
+      <div className="page-intro reveal">
+        <div className="page-intro-content">
+          <p className="eyebrow">About</p>
+          <h1 data-split="words">Profile summary</h1>
+          <p className="lead">Network technician focused on cybersecurity, networking, and structured IT support.</p>
+        </div>
+      </div>
 
       <Section
         id="about-summary"

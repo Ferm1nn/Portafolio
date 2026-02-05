@@ -15,7 +15,7 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { RouteTransition } from './components/RouteTransition';
 import { ScrollToTop } from './components/ScrollToTop';
-import { AnimatedBackground } from './components/AnimatedBackground';
+import { SystemBootLoader } from './components/SystemBootLoader';
 import { LinkConfirm } from './components/LinkConfirm';
 import { useMotionSettings } from './motion/MotionProvider';
 
@@ -30,7 +30,8 @@ function App() {
 
   return (
     <div className="app-shell">
-      <AnimatedBackground />
+      <SystemBootLoader />
+
       <LinkConfirm />
       <Navbar />
       <ScrollToTop />

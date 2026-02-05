@@ -2,12 +2,12 @@ import { useRef } from 'react';
 import { expandedSkills, profile, technicalSkills, heroMetrics } from '../data/portfolioData';
 import { Section } from '../components/Section';
 import { ExpandedSkillCard, SkillCategoryCard } from '../components/SkillCard';
-import { PageIntro } from '../components/PageIntro';
 import { CTAButton } from '../components/CTAButton';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 import { SkillRadar } from '../components/SkillRadar';
 import { Badge } from '../components/Badge';
+import { CircuitBackground } from '../components/CircuitBackground';
 
 export default function Skills() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -25,12 +25,15 @@ export default function Skills() {
   const focusAreas = ['Network Support Technician', 'Cybersecurity', 'Automations'];
 
   return (
-    <div ref={pageRef}>
-      <PageIntro
-        eyebrow="Skills"
-        title="Technical strengths grounded in real delivery"
-        description="From structured troubleshooting to no-code automation, every skill maps back to lab work and real delivery."
-      />
+    <div ref={pageRef} style={{ position: 'relative' }}>
+      <CircuitBackground />
+      <div className="page-intro reveal">
+        <div className="page-intro-content">
+          <p className="eyebrow">Skills</p>
+          <h1 data-split="words">Technical strengths grounded in real delivery</h1>
+          <p className="lead">From structured troubleshooting to no-code automation, every skill maps back to lab work and real delivery.</p>
+        </div>
+      </div>
 
       <div className="container" style={{ marginBottom: '4rem' }}>
         <div className="grid two" style={{ alignItems: 'start' }}>

@@ -76,20 +76,14 @@ export function ParallaxBulletList({ items, className = '' }: ParallaxBulletList
     return (
         <ul
             ref={containerRef}
-            className={`parallax-bullet-list ${className}`}
-            // Ensure basic list styling if no external CSS is provided
-            style={{ listStyle: 'none', padding: 0, margin: 0 }}
+            className={`space-y-2 list-none m-0 p-0 ${className}`}
         >
             {items.map((item, index) => (
                 <li
                     key={index}
-                    className="bullet-item"
-                    style={{
-                        // Basic layout styling - can be moved to CSS class
-                        marginBottom: '1rem',
-                        // Default visibility ensured for reduced motion users (since GSAP .set() won't run)
-                    }}
+                    className="bullet-item relative pl-5 text-slate-400 leading-relaxed"
                 >
+                    <span className="absolute left-0 top-[10px] w-1.5 h-1.5 bg-cyan-400 rounded-full" />
                     {item}
                 </li>
             ))}

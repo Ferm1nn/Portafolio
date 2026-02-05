@@ -1,22 +1,27 @@
 import { useRef } from 'react';
-import { PageIntro } from '../components/PageIntro';
+
 import { Section } from '../components/Section';
 import { CTAButton } from '../components/CTAButton';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 import { ProjectsSection } from '../sections/ProjectsSection';
 
+import { HexGridBackground } from '../components/HexGridBackground';
+
 export default function Projects() {
   const pageRef = useRef<HTMLDivElement | null>(null);
   useMotion(pageRef);
 
   return (
-    <div ref={pageRef}>
-      <PageIntro
-        eyebrow="Projects"
-        title="Automation and networking case studies"
-        description="Outcome-driven builds with clear problems, solutions, and measurable impact placeholders."
-      />
+    <div ref={pageRef} className="relative z-0 min-h-screen">
+      <HexGridBackground />
+      <div className="page-intro reveal">
+        <div className="page-intro-content">
+          <p className="eyebrow">Projects</p>
+          <h1 data-split="words">Automation and networking case studies</h1>
+          <p className="lead">Outcome-driven builds with clear problems, solutions, and measurable impact placeholders.</p>
+        </div>
+      </div>
 
       <ProjectsSection />
 

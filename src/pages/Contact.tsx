@@ -1,9 +1,10 @@
 import type { FormEvent } from 'react';
 import { useRef, useState } from 'react';
-import { PageIntro } from '../components/PageIntro';
 import { Section } from '../components/Section';
 import { profile } from '../data/portfolioData';
 import { Card } from '../components/Card';
+import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
+import AmbientCyberLayer from '../components/AmbientCyberLayer';
 import { useMotion } from '../hooks/useMotion';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -49,11 +50,15 @@ export default function Contact() {
 
   return (
     <div ref={pageRef}>
-      <PageIntro
-        eyebrow="Contact"
-        title="Let us connect"
-        description="Share the context, stack, and desired outcomes. Responses stay practical and rooted in hands-on delivery."
-      />
+      <AmbientCyberLayer />
+      <ReactiveMeshBackground />
+      <div className="page-intro reveal">
+        <div className="page-intro-content">
+          <p className="eyebrow">Contact</p>
+          <h1 data-split="words">Let us connect</h1>
+          <p className="lead">Share the context, stack, and desired outcomes. Responses stay practical and rooted in hands-on delivery.</p>
+        </div>
+      </div>
 
       <Section id="contact-info" eyebrow="Direct lines" title="Contact details">
         <div className="grid two">

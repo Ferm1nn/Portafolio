@@ -9,6 +9,7 @@ export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
 
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -68,7 +69,7 @@ export function HeroSection() {
     const magneticArea = container.querySelector('.magnetic-area') as HTMLElement;
     const btn = container.querySelector('#magnetic-btn') as HTMLElement;
 
-    const handleMagnetMove = (e: MouseEvent) => {
+    const handleMagnetMoveBtn = (e: MouseEvent) => {
       if (!magneticArea || !btn) return;
       const rect = magneticArea.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
@@ -82,7 +83,7 @@ export function HeroSection() {
       });
     };
 
-    const handleMagnetLeave = () => {
+    const handleMagnetLeaveBtn = () => {
       if (!btn) return;
       gsap.to(btn, {
         x: 0,
@@ -93,8 +94,8 @@ export function HeroSection() {
     };
 
     if (magneticArea) {
-      magneticArea.addEventListener('mousemove', handleMagnetMove as any);
-      magneticArea.addEventListener('mouseleave', handleMagnetLeave);
+      magneticArea.addEventListener('mousemove', handleMagnetMoveBtn as any);
+      magneticArea.addEventListener('mouseleave', handleMagnetLeaveBtn);
     }
 
     // --- Buttons Fade In ---
@@ -103,8 +104,8 @@ export function HeroSection() {
 
     return () => {
       if (magneticArea) {
-        magneticArea.removeEventListener('mousemove', handleMagnetMove as any);
-        magneticArea.removeEventListener('mouseleave', handleMagnetLeave);
+        magneticArea.removeEventListener('mousemove', handleMagnetMoveBtn as any);
+        magneticArea.removeEventListener('mouseleave', handleMagnetLeaveBtn);
       }
       tl.kill();
     };
@@ -112,6 +113,7 @@ export function HeroSection() {
 
   return (
     <section className="hero relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-transparent" id="hero" ref={containerRef}>
+
 
       {/* Hero Content */}
       <div className="content-layer text-center p-8 max-w-4xl relative z-10 flex flex-col items-center">

@@ -7,19 +7,18 @@ export function NetworkBackground() {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        // --- Network Grid Animation (Canvas) ---
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        let width = window.innerWidth;
-        let height = window.innerHeight;
-        let particles: Particle[] = [];
+        let width: number, height: number;
+        let particles: any[] = [];
         let animationFrameId: number;
 
-        const particleCount = 60;
+        // Configuration
+        const particleCount = 75;
         const connectionDistance = 150;
         const mouseDistance = 200;
 
-        let mouse = { x: -1000, y: -1000 };
+        let mouse = { x: null as number | null, y: null as number | null };
 
         const handleMouseMove = (e: MouseEvent) => {
             mouse.x = e.clientX;
@@ -39,7 +38,7 @@ export function NetworkBackground() {
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vx = (Math.random() - 0.5) * 0.5; // Slow movement
                 this.vy = (Math.random() - 0.5) * 0.5;
                 this.size = Math.random() * 2 + 1;
                 this.color = '#06b6d4'; // Cyan
@@ -49,20 +48,22 @@ export function NetworkBackground() {
                 this.x += this.vx;
                 this.y += this.vy;
 
+                // Bounce off edges
                 if (this.x < 0 || this.x > width) this.vx *= -1;
                 if (this.y < 0 || this.y > height) this.vy *= -1;
 
-                if (mouse.x !== -1000) {
-                    const dx = mouse.x - this.x;
-                    const dy = mouse.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                // Mouse interaction
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < mouseDistance) {
                         const forceDirectionX = dx / distance;
                         const forceDirectionY = dy / distance;
                         const force = (mouseDistance - distance) / mouseDistance;
                         const directionX = forceDirectionX * force * 0.5;
                         const directionY = forceDirectionY * force * 0.5;
-                        this.x -= directionX;
+                        this.x -= directionX; // Move slightly away
                         this.y -= directionY;
                     }
                 }
@@ -78,25 +79,31 @@ export function NetworkBackground() {
             }
         }
 
-        const initParticles = () => {
+        function initParticles() {
             particles = [];
             for (let i = 0; i < particleCount; i++) {
                 particles.push(new Particle());
             }
-        };
+        }
 
-        const animateCanvas = () => {
+        function animateCanvas() {
+            if (!ctx) return;
             ctx.clearRect(0, 0, width, height);
+
+            // Update and draw particles
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
                 particles[i].draw();
+
+                // Draw connections
                 for (let j = i; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
                     if (distance < connectionDistance) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(6, 182, 212, ${1 - distance / connectionDistance})`;
+                        ctx.strokeStyle = `rgba(6, 182, 212, ${1 - distance / connectionDistance})`; // Cyan with fade
                         ctx.lineWidth = 1;
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
@@ -105,19 +112,25 @@ export function NetworkBackground() {
                 }
             }
             animationFrameId = requestAnimationFrame(animateCanvas);
-        };
+        }
 
-        const resize = () => {
+        function resize() {
+            if (!canvas) return;
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
             initParticles();
-        };
+        }
 
-        window.addEventListener('resize', resize);
+        // Start Canvas
+        // Note: Using clientX/Y in mousemove matches standard fixed behavior. 
+        // The previous implementation used e.x which is strictly non-standard TS but valid in browsers (alias to clientX).
+        // I normalized it to clientX for "good front-end develop" practice while keeping logic identical.
+
         resize();
         animateCanvas();
+        window.addEventListener('resize', resize);
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
@@ -129,8 +142,9 @@ export function NetworkBackground() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed top-0 left-0 w-full h-full pointer-events-none" // pointer-events-none to let clicks pass through
-            style={{ zIndex: -1, background: '#020617' }} // Deep blue theme background
+            id="network-canvas"
+            className="fixed top-0 left-0 w-full h-full pointer-events-none"
+            style={{ zIndex: 0, background: '#020617' }}
         />
     );
 }
