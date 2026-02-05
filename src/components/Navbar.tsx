@@ -103,7 +103,7 @@ export function Navbar() {
       gsap.set(menuRef.current, { display: 'flex' });
       gsap.to(menuRef.current, { height: '100vh', opacity: 1, duration: 0.4, ease: "power3.out" });
     } else {
-      gsap.to(menuRef.current, { height: 0, opacity: 0, duration: 0.3, ease: "power3.in", onComplete: () => gsap.set(menuRef.current, { display: 'none' }) });
+      gsap.to(menuRef.current, { height: 0, opacity: 0, duration: 0.3, ease: "power3.in", onComplete: () => { gsap.set(menuRef.current, { display: 'none' }); } });
     }
   }, [isMenuOpen]);
 
