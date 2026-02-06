@@ -68,13 +68,13 @@ export function Navbar() {
   useGSAP(() => {
     if (!statusRef.current) return;
 
-    // Rapid micro-flicker to simulate unstable energy
+    // Slow breathing pulse
     gsap.to(statusRef.current, {
-      opacity: 0.5,
-      duration: 0.1,
+      opacity: 0.6,
+      duration: 2,
       repeat: -1,
       yoyo: true,
-      ease: "rough({ template: none.out, strength: 1, points: 20, taper: 'none', randomize: true, clamp: false})"
+      ease: "sine.inOut"
     });
   }, { scope: containerRef });
 
@@ -133,7 +133,7 @@ export function Navbar() {
               className="h-10 w-10 ring-2 ring-white/10 group-hover:ring-cyan-400 transition-all duration-300"
             />
             {/* Mobile Status Dot */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-cyan-400 rounded-full border-2 border-[#050505] animate-pulse lg:hidden shadow-[0_0_10px_rgba(34,211,238,0.8)]"></div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#050505] animate-pulse lg:hidden shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
           </div>
 
           <div className="flex flex-col">
@@ -142,10 +142,10 @@ export function Navbar() {
             </span>
             <div className="hidden lg:flex items-center gap-2" ref={statusRef}>
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
               </span>
-              <span className="text-[10px] font-mono text-cyan-400 tracking-wider shadow-cyan-500/50 drop-shadow-[0_0_2px_rgba(34,211,238,0.5)]">SYSTEM ONLINE</span>
+              <span className="text-[10px] font-mono text-emerald-400 tracking-wider shadow-emerald-500/50 drop-shadow-[0_0_2px_rgba(52,211,153,0.5)]">SYSTEM ONLINE</span>
             </div>
           </div>
         </Link>
@@ -209,10 +209,10 @@ export function Navbar() {
         <nav className="flex flex-col p-6 gap-2">
           <div className="mb-6 flex items-center gap-2 px-2">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-xs font-mono text-cyan-400 tracking-wider">SYSTEM STATUS: ONLINE</span>
+            <span className="text-xs font-mono text-emerald-400 tracking-wider">SYSTEM STATUS: ONLINE</span>
           </div>
 
           {links.map((link) => (
