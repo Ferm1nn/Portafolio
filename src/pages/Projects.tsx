@@ -1,44 +1,56 @@
-import { useRef } from 'react';
-import { Section } from '../components/Section';
-import { CTAButton } from '../components/CTAButton';
-import { Card } from '../components/Card';
-import { useMotion } from '../hooks/useMotion';
-import { ProjectsSection } from '../sections/ProjectsSection';
+import React from 'react';
+import { Network, Terminal, Code2 } from 'lucide-react';
+import ProjectPlaceholder from '../components/projects/ProjectPlaceholder';
 import { HexGridBackground } from '../components/HexGridBackground';
+import AutomationShowcase from '../components/labs/AutomationShowcase';
 
-export default function Projects() {
-  const pageRef = useRef<HTMLDivElement | null>(null);
-  useMotion(pageRef);
-
+const Projects = () => {
   return (
-    <div ref={pageRef} className="relative z-0 min-h-screen">
+    <div className="min-h-screen px-4 pt-24 pb-16 md:px-8">
       <HexGridBackground />
-      <div className="page-intro reveal">
-        <div className="page-intro-content">
-          <p className="eyebrow">Projects</p>
-          <h1 data-split="words">Automation and networking case studies</h1>
-          <p className="lead">Outcome-driven builds with clear problems, solutions, and measurable impact placeholders.</p>
+      <div className="mx-auto max-w-6xl">
+
+        {/* Page Header */}
+        <div className="mb-16">
+          <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
+            Projects <span className="text-cyan-500">&</span> Automations
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg text-slate-400">
+            A showcase of full-stack engineering, network automation, and real-world client builds.
+          </p>
         </div>
+
+        {/* Section 1: Selected Client Projects */}
+        <section className="mb-20">
+          <div className="mb-8 flex items-center space-x-2">
+            <Code2 className="h-5 w-5 text-cyan-500" />
+            <h2 className="text-xl font-semibold text-white tracking-wide">SELECTED CLIENT PROJECTIONS</h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <ProjectPlaceholder />
+            <ProjectPlaceholder />
+          </div>
+        </section>
+
+        {/* Section 2: Interactive Automation Lab */}
+        <section>
+          <div className="mb-8 flex items-center space-x-3">
+            <div className="rounded bg-rose-500/10 p-2 ring-1 ring-rose-500/20">
+              <Terminal className="h-6 w-6 text-rose-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Sentinel: Adversarial AI Security Core</h2>
+              <p className="text-sm text-slate-500">Live Red Team vs Blue Team simulation managed by n8n.</p>
+            </div>
+          </div>
+
+          <AutomationShowcase />
+        </section>
+
       </div>
-
-      <ProjectsSection />
-
-      <Section
-        id="projects-cta"
-        eyebrow="Need a build?"
-        title="Share the context and desired outcome"
-        description="I can scope automation and support work quickly with clear deliverables."
-      >
-        <Card className="cta-panel" tilt={false}>
-          <div>
-            <h3>Request a walkthrough</h3>
-            <p className="muted">Send a short brief with tools, constraints, and timing.</p>
-          </div>
-          <div className="hero-actions">
-            <CTAButton to="/contact">Contact</CTAButton>
-          </div>
-        </Card>
-      </Section>
     </div>
   );
-}
+};
+
+export default Projects;
