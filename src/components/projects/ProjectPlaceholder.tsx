@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FolderGit2 } from 'lucide-react';
 
 const ProjectPlaceholder = () => {

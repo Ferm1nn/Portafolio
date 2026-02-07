@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Globe, ScanLine, Search } from 'lucide-react';
 import { useTypewriter } from '../../hooks/useTypewriter';
 

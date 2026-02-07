@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Terminal, Shield, Play, Activity, Lock, Unlock, Cpu, Wifi, Info } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useTypewriter } from '../../hooks/useTypewriter';

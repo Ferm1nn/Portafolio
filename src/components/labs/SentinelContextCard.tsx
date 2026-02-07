@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, ShieldCheck, Cpu, X } from 'lucide-react';
+import { Info, ShieldCheck, X } from 'lucide-react';
 
 interface SentinelContextCardProps {
     onClose?: () => void;

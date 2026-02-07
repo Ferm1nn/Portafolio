@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { AlertTriangle, BellRing, Siren } from 'lucide-react';
+import { useState } from 'react';
+import { BellRing, Siren } from 'lucide-react';
 import { useTypewriter } from '../../hooks/useTypewriter';
 
 const IncidentResponseCard = () => {

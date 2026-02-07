@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Activity, ShieldCheck, Wifi } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, Wifi } from 'lucide-react';
 import { useTypewriter } from '../../hooks/useTypewriter';
 
 const NetworkHealthCard = () => {

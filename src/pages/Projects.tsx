@@ -1,5 +1,4 @@
-import React from 'react';
-import { Network, Terminal, Code2 } from 'lucide-react';
+import { Terminal, Code2 } from 'lucide-react';
 import ProjectPlaceholder from '../components/projects/ProjectPlaceholder';
 import { HexGridBackground } from '../components/HexGridBackground';
 import AutomationShowcase from '../components/labs/AutomationShowcase';
