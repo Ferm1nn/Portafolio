@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info, ShieldCheck, ShieldAlert, Terminal } from 'lucide-react';
+import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info, ShieldCheck, ShieldAlert } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import SentinelContextCard from './SentinelContextCard';
