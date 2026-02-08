@@ -1,59 +1,139 @@
 import { useState, useRef } from 'react';
-import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info } from 'lucide-react';
+import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info, ShieldCheck, ShieldAlert, Terminal } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { useTypewriter } from '../../hooks/useTypewriter';
 import SentinelContextCard from './SentinelContextCard';
 
-interface SimulationResult {
-    redTeamLogs: string;
-    blueTeamLogs: string;
+interface AnalysisResult {
+    threat_detected: boolean;
+    attack_type: string;
+    confidence_score: number;
+    evidence: string;
+    action_taken: string;
+    analysis_summary: string;
+}
+
+interface SentinelResponse {
+    raw_logs: string[];
+    analysis: AnalysisResult;
 }
 
 const AutomationShowcase = () => {
+    // Refs for DOM manipulation (No re-renders)
     const containerRef = useRef<HTMLDivElement>(null);
     const leftPanelRef = useRef<HTMLDivElement>(null);
     const rightPanelRef = useRef<HTMLDivElement>(null);
     const controlsRef = useRef<HTMLDivElement>(null);
+    const logsContainerRef = useRef<HTMLDivElement>(null);
+    const confidenceRef = useRef<HTMLSpanElement>(null);
+    const rightPanelContentRef = useRef<HTMLDivElement>(null);
 
+    // State for Data Handling & UI Toggles only
     const [scenario, setScenario] = useState('Brute Force');
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<SimulationResult | null>(null);
     const [showInfo, setShowInfo] = useState(false);
+    const [data, setData] = useState<SentinelResponse | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    // Faster Typewriter (10ms)
-    const redTeamTypewriter = useTypewriter(result?.redTeamLogs || '', 10);
-    const blueTeamTypewriter = useTypewriter(result?.blueTeamLogs || '', 10);
+    // Status State (for the header badge)
+    const [status, setStatus] = useState<'IDLE' | 'ATTACK' | 'SECURE'>('IDLE');
 
     useGSAP(() => {
         const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-        // Initial Entrance
+        // Initial Interactive Entrance
         tl.set(containerRef.current, { visibility: 'visible' });
 
-        // Slide in panels from sides (Locking mechanism effect)
+        // Locking Mechanism Reveal
         tl.fromTo(leftPanelRef.current,
-            { x: -100, opacity: 0 },
+            { x: -50, opacity: 0 },
             { x: 0, opacity: 1, duration: 1 }
         );
-
         tl.fromTo(rightPanelRef.current,
-            { x: 100, opacity: 0 },
+            { x: 50, opacity: 0 },
             { x: 0, opacity: 1, duration: 1 },
-            "<" // Start at same time
+            "<"
         );
-
-        // Fade in controls last
         tl.fromTo(controlsRef.current,
             { y: -20, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5 }
+            { y: 0, opacity: 1, duration: 0.5 },
+            "-=0.5"
         );
 
     }, { scope: containerRef });
 
+    // The Cinematic Animation Sequence
+    useGSAP(() => {
+        if (!data || loading) return;
+
+        const mm = gsap.matchMedia();
+        const logs = logsContainerRef.current?.children;
+        const timeline = gsap.timeline();
+
+        // Check for reduced motion preference
+        mm.add("(prefers-reduced-motion: no-preference)", () => {
+            // Phase 1: Attack (Red Team)
+            setStatus('ATTACK');
+
+            if (logs && logs.length > 0) {
+                timeline.to(logs, {
+                    autoAlpha: 1,
+                    x: 0,
+                    stagger: 0.1, // 100ms per line
+                    duration: 0.3,
+                    ease: "power2.out",
+                    onUpdate: () => {
+                        // Auto-scroll to bottom during animation 
+                        if (logsContainerRef.current) {
+                            logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+                        }
+                    }
+                });
+            }
+
+            // Phase 2: Defense (Blue Team)
+            timeline.call(() => setStatus('SECURE')); // Switch status badge
+
+            timeline.to(rightPanelContentRef.current, {
+                autoAlpha: 1,
+                duration: 0.8
+            }, "+=0.2"); // Small pause before analysis reveal
+
+            // Phase 3: Verdict (Confidence Score)
+            if (confidenceRef.current) {
+                timeline.fromTo(confidenceRef.current,
+                    { innerText: 0 },
+                    {
+                        innerText: data.analysis.confidence_score,
+                        duration: 1.5,
+                        snap: { innerText: 1 }, // Snap to whole numbers
+                        ease: "power1.inOut"
+                    },
+                    "<"
+                );
+            }
+        });
+
+        // Fallback for reduced motion
+        mm.add("(prefers-reduced-motion: reduce)", () => {
+            setStatus('SECURE');
+            gsap.set(logs!, { autoAlpha: 1, x: 0 });
+            gsap.set(rightPanelContentRef.current, { autoAlpha: 1 });
+            if (confidenceRef.current) confidenceRef.current.innerText = data.analysis.confidence_score.toString();
+        });
+
+    }, { scope: containerRef, dependencies: [data, loading] });
+
+
     const initiateSimulation = async () => {
         setLoading(true);
-        setResult(null);
+        setError(null);
+        setData(null);
+        setStatus('IDLE');
+
+        // Reset animations manually before new fetching
+        if (logsContainerRef.current) gsap.set(logsContainerRef.current.children, { autoAlpha: 0, x: -10 });
+        gsap.set(rightPanelContentRef.current, { autoAlpha: 0 });
 
         try {
             const response = await fetch('/api/automation', {
@@ -65,21 +145,23 @@ const AutomationShowcase = () => {
                 }),
             });
 
-            const data = await response.json();
+            const rawData = await response.json();
 
-            if (data.error) {
-                setResult({
-                    redTeamLogs: `[ERROR] Connection Failed: ${data.error}`,
-                    blueTeamLogs: `[SYSTEM] Neural Engine Offline. Check configuration.`
-                });
-            } else {
-                setResult(data);
+            if (rawData.error) {
+                throw new Error(rawData.error);
             }
-        } catch (error) {
-            setResult({
-                redTeamLogs: `[ERROR] Critical Network Failure.`,
-                blueTeamLogs: `[SYSTEM] Local Defense Protocol Initiated.`
-            });
+
+            // CRITICAL: Parse the array response
+            const responseData = Array.isArray(rawData) ? rawData[0] : rawData;
+
+            if (!responseData?.raw_logs) {
+                throw new Error("Invalid Data Structure");
+            }
+
+            setData(responseData);
+
+        } catch (err: any) {
+            setError(err.message || "Unknown Error");
         } finally {
             setLoading(false);
         }
@@ -97,7 +179,7 @@ const AutomationShowcase = () => {
                 </div>
             )}
 
-            {/* Top Bar: Controls */}
+            {/* Controls Bar */}
             <div ref={controlsRef} className="flex flex-col md:flex-row items-center justify-between mb-2 bg-slate-950/90 p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-10 rounded-t-lg">
                 <div className="flex items-center space-x-4 mb-4 md:mb-0">
                     <div className="relative">
@@ -108,12 +190,25 @@ const AutomationShowcase = () => {
                     </div>
                     <div>
                         <h2 className="text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
-                        <div className="flex items-center space-x-2">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            <p className="text-xs text-emerald-500 font-mono tracking-wider">SYSTEM ONLINE // AWAITING THREAT VECTOR</p>
+                        <div className="flex items-center space-x-2 font-mono text-xs font-bold tracking-wider">
+                            {status === 'ATTACK' && (
+                                <span className="text-rose-500 animate-pulse flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    SYSTEM ALERT: INTRUSION DETECTED
+                                </span>
+                            )}
+                            {status === 'SECURE' && (
+                                <span className="text-emerald-500 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    ANALYSIS COMPLETE: THREAT NEUTRALIZED
+                                </span>
+                            )}
+                            {status === 'IDLE' && (
+                                <span className="text-emerald-500/50 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500/50"></span>
+                                    SYSTEM ONLINE // AWAITING THREAT VECTOR
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -129,7 +224,7 @@ const AutomationShowcase = () => {
                     <select
                         value={scenario}
                         onChange={(e) => setScenario(e.target.value)}
-                        disabled={loading}
+                        disabled={loading || status === 'ATTACK'}
                         className="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase"
                     >
                         <option>Brute Force</option>
@@ -139,14 +234,14 @@ const AutomationShowcase = () => {
 
                     <button
                         onClick={initiateSimulation}
-                        disabled={loading}
+                        disabled={loading || status === 'ATTACK'}
                         className={`group relative flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded font-mono text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
                     >
                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         {loading ? (
                             <>
                                 <Activity className="w-4 h-4 animate-spin" />
-                                <span>SIMULATION ACTIVE</span>
+                                <span>INITIALIZING...</span>
                             </>
                         ) : (
                             <>
@@ -158,7 +253,7 @@ const AutomationShowcase = () => {
                 </div>
             </div>
 
-            {/* War Room Layout */}
+            {/* Operations Console */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-1 h-[600px] bg-slate-950 border border-slate-800 relative overflow-hidden">
 
                 {/* Scanline Overlay */}
@@ -166,40 +261,42 @@ const AutomationShowcase = () => {
 
                 {/* Left Panel: Red Team */}
                 <div ref={leftPanelRef} className="relative flex flex-col border-r border-rose-900/30 bg-red-950/10">
-                    {/* Header */}
                     <div className="flex items-center justify-between p-3 bg-red-950/30 border-b border-rose-900/30">
                         <div className="flex items-center space-x-2 text-rose-500">
                             <Unlock className="w-4 h-4" />
-                            <h3 className="font-mono text-xs font-bold tracking-[0.2em]">INCOMING_THREAT_STREAM</h3>
+                            <h3 className="font-mono text-xs font-bold tracking-[0.2em] glitch-text">INCOMING_THREAT_STREAM</h3>
                         </div>
                         <Wifi className="w-4 h-4 text-rose-800 animate-pulse" />
                     </div>
 
-                    {/* Terminal Content */}
-                    <div className="flex-grow p-6 font-mono text-xs md:text-sm text-rose-500/90 leading-relaxed whitespace-pre-wrap overflow-y-auto custom-scrollbar font-bold shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-                        {loading ? (
+                    <div className="flex-grow p-6 font-mono text-xs md:text-sm text-rose-500/90 leading-relaxed overflow-y-auto custom-scrollbar font-bold shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]" ref={logsContainerRef}>
+                        {error ? (
+                            <div className="flex items-center space-x-2 text-rose-500 animate-pulse">
+                                <ShieldAlert className="w-5 h-5" />
+                                <span>CONNECTION_LOST // RETRYING ({error})</span>
+                            </div>
+                        ) : !data && !loading ? (
+                            <span className="text-rose-900/50">Waiting for target acquisition...</span>
+                        ) : (
+                            // Render ALL logs immediately, let GSAP handle visibility
+                            data?.raw_logs.map((log, i) => (
+                                <div key={i} className="break-all border-l-2 border-rose-900 pl-2 opacity-0 transform -translate-x-2 mb-1">
+                                    <span className="text-rose-700 mr-2">{'>'}</span>
+                                    {log}
+                                </div>
+                            ))
+                        )}
+                        {loading && (
                             <div className="flex flex-col space-y-2">
                                 <span className="animate-pulse">[!] ESTABLISHING C2 CONNECTION...</span>
                                 <span className="animate-pulse delay-75">[!] BYPASSING FIREWALL RULES...</span>
-                                <span className="animate-pulse delay-150">[!] INJECTING PAYLOAD...</span>
-                                <div className="w-full bg-rose-900/20 h-1 mt-4 rounded overflow-hidden">
-                                    <div className="bg-rose-600 h-full animate-[progress_2s_ease-in-out_infinite] w-full origin-left"></div>
-                                </div>
                             </div>
-                        ) : result ? (
-                            <>
-                                {redTeamTypewriter.displayedText}
-                                {redTeamTypewriter.isTyping && <span className="animate-pulse inline-block w-2 h-4 bg-rose-500 ml-1"></span>}
-                            </>
-                        ) : (
-                            <span className="text-rose-900/50">Waiting for target acquisition...</span>
                         )}
                     </div>
                 </div>
 
                 {/* Right Panel: Blue Team */}
                 <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10">
-                    {/* Header */}
                     <div className="flex items-center justify-between p-3 bg-cyan-950/30 border-b border-cyan-900/30">
                         <div className="flex items-center space-x-2 text-cyan-500">
                             <Shield className="w-4 h-4" />
@@ -208,30 +305,75 @@ const AutomationShowcase = () => {
                         <Activity className="w-4 h-4 text-cyan-800 animate-pulse" />
                     </div>
 
-                    {/* Terminal Content */}
-                    <div className="flex-grow p-6 font-mono text-xs md:text-sm text-cyan-400/90 leading-relaxed whitespace-pre-wrap overflow-y-auto custom-scrollbar shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-                        {loading ? (
-                            <div className="flex flex-col space-y-2">
-                                <div className="text-cyan-600 flex items-center space-x-2">
-                                    <span className="animate-spin">⏵</span>
-                                    <span>NEURAL LINK ACTIVE</span>
-                                </div>
-                                <span className="text-cyan-700 animate-pulse">Running heuristic analysis...</span>
-                            </div>
-                        ) : result ? (
-                            <>
-                                {blueTeamTypewriter.displayedText}
-                                {blueTeamTypewriter.isTyping && <span className="animate-pulse inline-block w-2 h-4 bg-cyan-500 ml-1"></span>}
-                            </>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-cyan-900/40 space-y-4">
+                    <div className="flex-grow p-6 font-mono text-xs md:text-sm text-cyan-400/90 leading-relaxed overflow-y-auto custom-scrollbar shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] flex flex-col justify-center">
+                        {/* Content Wrapper for GSAP Reveal */}
+                        <div ref={rightPanelContentRef} className="opacity-0 space-y-6">
+                            {data && (
+                                <>
+                                    <div className="border border-cyan-500/30 bg-cyan-950/50 p-4 rounded">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-cyan-600 text-xs uppercase tracking-widest">Confidence Score</span>
+                                            <span className="text-2xl font-bold text-cyan-400">
+                                                <span ref={confidenceRef}>0</span>%
+                                            </span>
+                                        </div>
+                                        {/* Progress Bar (Visual only, animates via CSS width or separate GSAP) */}
+                                        <div className="w-full bg-cyan-900/30 h-1.5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-cyan-500 w-full animate-[progress_1.5s_ease-out]"></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Attack Vector Detected</h4>
+                                            <div className="flex items-center space-x-2 text-red-400">
+                                                <ShieldAlert className="w-4 h-4" />
+                                                <span className="font-bold border-b border-red-500/30">{data.analysis.attack_type.toUpperCase()}</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Analysis Summary</h4>
+                                            <p className="text-cyan-300 leading-relaxed bg-cyan-950/30 p-2 rounded border-l-2 border-cyan-500">
+                                                {data.analysis.analysis_summary}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Automated Response</h4>
+                                            <div className="flex items-start space-x-2 text-emerald-400">
+                                                <ShieldCheck className="w-4 h-4 mt-0.5" />
+                                                <span className="font-bold">{data.analysis.action_taken}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-auto border-t border-cyan-900/30 pt-4 flex justify-between text-xs text-cyan-800">
+                                        <span>TICKET_ID: #SEC-{Math.floor(Math.random() * 9000) + 1000}</span>
+                                        <span>AUTO_RESOLVED</span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {!data && !loading && !error && (
+                            <div className="flex flex-col items-center justify-center h-full text-cyan-900/40 space-y-4 absolute inset-0">
                                 <Shield className="w-16 h-16 opacity-20" />
                                 <span>SYSTEM SECURE</span>
                             </div>
                         )}
+
+                        {loading && (
+                            <div className="flex flex-col space-y-2 opacity-50 absolute inset-0 items-center justify-center">
+                                <div className="text-cyan-600 flex items-center space-x-2">
+                                    <span className="animate-spin">⏵</span>
+                                    <span>NEURAL LINK ACTIVE</span>
+                                </div>
+                                <span className="text-cyan-700 animate-pulse">Monitoring stream...</span>
+                            </div>
+                        )}
                     </div>
                 </div>
-
             </div>
         </div>
     );
