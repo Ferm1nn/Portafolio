@@ -1,8 +1,12 @@
-import { useState, useRef } from 'react';
-import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info, ShieldCheck, ShieldAlert, Maximize2, Minimize2 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { Flip } from 'gsap/all';
 import SentinelContextCard from './SentinelContextCard';
+
+gsap.registerPlugin(Flip);
 
 interface AnalysisResult {
     threat_detected: boolean;
@@ -21,6 +25,7 @@ interface SentinelResponse {
 const AutomationShowcase = () => {
     // Refs for DOM manipulation (No re-renders)
     const containerRef = useRef<HTMLDivElement>(null);
+    const layoutRef = useRef<HTMLDivElement>(null); // Inner container for Flip
     const leftPanelRef = useRef<HTMLDivElement>(null);
     const rightPanelRef = useRef<HTMLDivElement>(null);
     const controlsRef = useRef<HTMLDivElement>(null);
@@ -34,6 +39,7 @@ const AutomationShowcase = () => {
     const [showInfo, setShowInfo] = useState(false);
     const [data, setData] = useState<SentinelResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isFullScreen, setIsFullScreen] = useState(false);
 
     // Status State (for the header badge)
     const [status, setStatus] = useState<'IDLE' | 'ATTACK' | 'SECURE'>('IDLE');
@@ -61,6 +67,46 @@ const AutomationShowcase = () => {
         );
 
     }, { scope: containerRef });
+
+    // State for Flip Transition - must persist across renders/portals
+    const flipState = useRef<Flip.FlipState>(null);
+
+    useLayoutEffect(() => {
+        if (!flipState.current || !layoutRef.current) return;
+
+        Flip.from(flipState.current, {
+            duration: 0.6,
+            ease: "power2.inOut",
+            absolute: true,
+            zIndex: 100, // Ensure high z-index during transition
+            onComplete: () => {
+                // Ensure scroll position is correct after resize
+                if (logsContainerRef.current) {
+                    logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+                }
+            }
+        });
+
+        flipState.current = null; // Reset
+    }, [isFullScreen]);
+
+    // Handle Full Screen Transition (FLIP)
+    const toggleFullScreen = () => {
+        if (layoutRef.current) {
+            // Capture state BEFORE state change/portal move
+            flipState.current = Flip.getState(layoutRef.current);
+            setIsFullScreen(!isFullScreen);
+        }
+    };
+
+    // Exit on ESC
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isFullScreen) toggleFullScreen();
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [isFullScreen]);
 
     // The Cinematic Animation Sequence
     useGSAP(() => {
@@ -126,6 +172,9 @@ const AutomationShowcase = () => {
 
 
     const initiateSimulation = async () => {
+        // Auto-trigger Focus Mode if not already
+        if (!isFullScreen) toggleFullScreen();
+
         setLoading(true);
         setError(null);
         setData(null);
@@ -167,11 +216,10 @@ const AutomationShowcase = () => {
         }
     };
 
-    return (
-        <div className="w-full max-w-7xl mx-auto my-12 invisible" ref={containerRef}>
-
+    const mainContent = (
+        <>
             {showInfo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
                     <div className="absolute inset-0" onClick={() => setShowInfo(false)}></div>
                     <div className="relative z-10 w-full max-w-3xl animate-in fade-in zoom-in-95 duration-200">
                         <SentinelContextCard onClose={() => setShowInfo(false)} />
@@ -179,202 +227,246 @@ const AutomationShowcase = () => {
                 </div>
             )}
 
-            {/* Controls Bar */}
-            <div ref={controlsRef} className="flex flex-col md:flex-row items-center justify-between mb-2 bg-slate-950/90 p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-10 rounded-t-lg">
-                <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                    <div className="relative">
-                        <div className="absolute -inset-1 rounded-full bg-rose-500/20 animate-ping"></div>
-                        <div className="relative p-2 bg-slate-900 rounded-full border border-rose-500/50">
-                            <Cpu className="w-6 h-6 text-rose-500" />
-                        </div>
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
-                        <div className="flex items-center space-x-2 font-mono text-xs font-bold tracking-wider">
-                            {status === 'ATTACK' && (
-                                <span className="text-rose-500 animate-pulse flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                                    SYSTEM ALERT: INTRUSION DETECTED
-                                </span>
-                            )}
-                            {status === 'SECURE' && (
-                                <span className="text-emerald-500 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    ANALYSIS COMPLETE: THREAT NEUTRALIZED
-                                </span>
-                            )}
-                            {status === 'IDLE' && (
-                                <span className="text-emerald-500/50 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500/50"></span>
-                                    SYSTEM ONLINE // AWAITING THREAT VECTOR
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center space-x-4 bg-slate-900 p-2 rounded border border-slate-800">
-                    <button
-                        onClick={() => setShowInfo(!showInfo)}
-                        className={`flex items-center space-x-2 px-3 py-2 rounded border transition-all ${showInfo ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50'}`}
-                    >
-                        <Info className="w-4 h-4" />
-                        <span className="font-mono text-sm font-bold">INFO</span>
-                    </button>
-                    <select
-                        value={scenario}
-                        onChange={(e) => setScenario(e.target.value)}
-                        disabled={loading || status === 'ATTACK'}
-                        className="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase"
-                    >
-                        <option>Brute Force</option>
-                        <option>SQL Injection</option>
-                        <option>DDoS Simulation</option>
-                    </select>
-
-                    <button
-                        onClick={initiateSimulation}
-                        disabled={loading || status === 'ATTACK'}
-                        className={`group relative flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded font-mono text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
-                    >
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                        {loading ? (
-                            <>
-                                <Activity className="w-4 h-4 animate-spin" />
-                                <span>INITIALIZING...</span>
-                            </>
-                        ) : (
-                            <>
-                                <Play className="w-4 h-4 fill-current" />
-                                <span className="group-hover:animate-pulse">INITIATE SIMULATION</span>
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
-
-            {/* Operations Console */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 h-[600px] bg-slate-950 border border-slate-800 relative overflow-hidden">
-
+            {/* FLIP Container: Toggles between embedded and fixed */}
+            <div
+                ref={layoutRef}
+                className={`flex flex-col border border-slate-800 overflow-hidden transition-all duration-500
+                    ${isFullScreen ? 'fixed inset-0 z-[100] rounded-none border-0 bg-slate-950/95 backdrop-blur-xl' : 'relative rounded-lg h-[600px] bg-slate-950'}
+                `}
+            >
                 {/* Scanline Overlay */}
                 <div className="absolute inset-0 pointer-events-none z-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] opacity-20"></div>
 
-                {/* Left Panel: Red Team */}
-                <div ref={leftPanelRef} className="relative flex flex-col border-r border-rose-900/30 bg-red-950/10">
-                    <div className="flex items-center justify-between p-3 bg-red-950/30 border-b border-rose-900/30">
-                        <div className="flex items-center space-x-2 text-rose-500">
-                            <Unlock className="w-4 h-4" />
-                            <h3 className="font-mono text-xs font-bold tracking-[0.2em] glitch-text">INCOMING_THREAT_STREAM</h3>
+                {/* Controls Bar */}
+                <div ref={controlsRef} className="flex flex-col md:flex-row items-center justify-between bg-slate-950/90 p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-30 shrink-0">
+                    <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                        <div className="relative">
+                            <div className="absolute -inset-1 rounded-full bg-rose-500/20 animate-ping"></div>
+                            <div className="relative p-2 bg-slate-900 rounded-full border border-rose-500/50">
+                                <Cpu className="w-6 h-6 text-rose-500" />
+                            </div>
                         </div>
-                        <Wifi className="w-4 h-4 text-rose-800 animate-pulse" />
+                        <div>
+                            <h2 className="text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
+                            <div className="flex items-center space-x-2 font-mono text-xs font-bold tracking-wider">
+                                {status === 'ATTACK' && (
+                                    <span className="text-rose-500 animate-pulse flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                                        SYSTEM ALERT: INTRUSION DETECTED
+                                    </span>
+                                )}
+                                {status === 'SECURE' && (
+                                    <span className="text-emerald-500 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        ANALYSIS COMPLETE: THREAT NEUTRALIZED
+                                    </span>
+                                )}
+                                {status === 'IDLE' && (
+                                    <span className="text-emerald-500/50 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500/50"></span>
+                                        SYSTEM ONLINE // AWAITING THREAT VECTOR
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="flex-grow p-6 font-mono text-xs md:text-sm text-rose-500/90 leading-relaxed overflow-y-auto custom-scrollbar font-bold shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]" ref={logsContainerRef}>
-                        {error ? (
-                            <div className="flex items-center space-x-2 text-rose-500 animate-pulse">
-                                <ShieldAlert className="w-5 h-5" />
-                                <span>CONNECTION_LOST // RETRYING ({error})</span>
-                            </div>
-                        ) : !data && !loading ? (
-                            <span className="text-rose-900/50">Waiting for target acquisition...</span>
-                        ) : (
-                            // Render ALL logs immediately, let GSAP handle visibility
-                            data?.raw_logs.map((log, i) => (
-                                <div key={i} className="break-all border-l-2 border-rose-900 pl-2 opacity-0 transform -translate-x-2 mb-1">
-                                    <span className="text-rose-700 mr-2">{'>'}</span>
-                                    {log}
-                                </div>
-                            ))
-                        )}
-                        {loading && (
-                            <div className="flex flex-col space-y-2">
-                                <span className="animate-pulse">[!] ESTABLISHING C2 CONNECTION...</span>
-                                <span className="animate-pulse delay-75">[!] BYPASSING FIREWALL RULES...</span>
-                            </div>
-                        )}
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-4 bg-slate-900 p-2 rounded border border-slate-800">
+                            <button
+                                onClick={() => setShowInfo(!showInfo)}
+                                className={`flex items-center space-x-2 px-3 py-2 rounded border transition-all ${showInfo ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50'}`}
+                            >
+                                <Info className="w-4 h-4" />
+                                <span className="font-mono text-sm font-bold">INFO</span>
+                            </button>
+                            <select
+                                value={scenario}
+                                onChange={(e) => setScenario(e.target.value)}
+                                disabled={loading || status === 'ATTACK'}
+                                className="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase"
+                            >
+                                <option>Brute Force</option>
+                                <option>SQL Injection</option>
+                                <option>DDoS Simulation</option>
+                            </select>
+
+                            <button
+                                onClick={initiateSimulation}
+                                disabled={loading || status === 'ATTACK'}
+                                className={`group relative flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded font-mono text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
+                            >
+                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                {loading ? (
+                                    <>
+                                        <Activity className="w-4 h-4 animate-spin" />
+                                        <span>INITIALIZING...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play className="w-4 h-4 fill-current" />
+                                        <span className="group-hover:animate-pulse">INITIATE SIMULATION</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Full Screen Toggle Button */}
+                        <button
+                            onClick={toggleFullScreen}
+                            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+                            title={isFullScreen ? "Minimize (Esc)" : "Maximize"}
+                        >
+                            {isFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                        </button>
                     </div>
                 </div>
 
-                {/* Right Panel: Blue Team */}
-                <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10">
-                    <div className="flex items-center justify-between p-3 bg-cyan-950/30 border-b border-cyan-900/30">
-                        <div className="flex items-center space-x-2 text-cyan-500">
-                            <Shield className="w-4 h-4" />
-                            <h3 className="font-mono text-xs font-bold tracking-[0.2em]">SENTINEL_DEFENSE_LOG</h3>
+                {/* Main Content Area (Split Grid) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1 flex-grow overflow-hidden relative">
+
+                    {/* Left Panel: Red Team */}
+                    <div ref={leftPanelRef} className={`relative flex flex-col border-r border-rose-900/30 bg-red-950/10 transition-all duration-500`}>
+                        <div className="flex items-center justify-between p-3 bg-red-950/30 border-b border-rose-900/30 shrink-0">
+                            <div className="flex items-center space-x-2 text-rose-500">
+                                <Unlock className="w-4 h-4" />
+                                <h3 className="font-mono text-xs font-bold tracking-[0.2em] glitch-text">INCOMING_THREAT_STREAM</h3>
+                            </div>
+                            <Wifi className="w-4 h-4 text-rose-800 animate-pulse" />
                         </div>
-                        <Activity className="w-4 h-4 text-cyan-800 animate-pulse" />
-                    </div>
 
-                    <div className="flex-grow p-6 font-mono text-xs md:text-sm text-cyan-400/90 leading-relaxed overflow-y-auto custom-scrollbar shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] flex flex-col justify-center">
-                        {/* Content Wrapper for GSAP Reveal */}
-                        <div ref={rightPanelContentRef} className="opacity-0 space-y-6">
-                            {data && (
-                                <>
-                                    <div className="border border-cyan-500/30 bg-cyan-950/50 p-4 rounded">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-cyan-600 text-xs uppercase tracking-widest">Confidence Score</span>
-                                            <span className="text-2xl font-bold text-cyan-400">
-                                                <span ref={confidenceRef}>0</span>%
-                                            </span>
-                                        </div>
-                                        {/* Progress Bar (Visual only, animates via CSS width or separate GSAP) */}
-                                        <div className="w-full bg-cyan-900/30 h-1.5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-cyan-500 w-full animate-[progress_1.5s_ease-out]"></div>
-                                        </div>
+                        {/* Logs Container */}
+                        <div
+                            ref={logsContainerRef}
+                            className={`
+                                flex-grow p-6 font-mono text-rose-500/90 leading-relaxed overflow-y-auto custom-scrollbar font-bold shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]
+                                ${isFullScreen ? 'text-lg' : 'text-xs md:text-sm'} 
+                            `}
+                        >
+                            {error ? (
+                                <div className="flex items-center space-x-2 text-rose-500 animate-pulse">
+                                    <ShieldAlert className="w-5 h-5" />
+                                    <span>CONNECTION_LOST // RETRYING ({error})</span>
+                                </div>
+                            ) : !data && !loading ? (
+                                <span className="text-rose-900/50">Waiting for target acquisition...</span>
+                            ) : (
+                                // Render ALL logs immediately, let GSAP handle visibility
+                                data?.raw_logs.map((log, i) => (
+                                    <div key={i} className="break-all border-l-2 border-rose-900 pl-2 opacity-0 transform -translate-x-2 mb-1">
+                                        <span className="text-rose-700 mr-2">{'>'}</span>
+                                        {/* Regex to dim timestamp if present (YYYY-MM-DD...) */}
+                                        {log.match(/^\d{4}-\d{2}-\d{2}/) ? (
+                                            <>
+                                                <span className="text-rose-900/50 mr-2">{log.split(' - ')[0]}</span>
+                                                {log.split(' - ').slice(1).join(' - ')}
+                                            </>
+                                        ) : log}
                                     </div>
-
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Attack Vector Detected</h4>
-                                            <div className="flex items-center space-x-2 text-red-400">
-                                                <ShieldAlert className="w-4 h-4" />
-                                                <span className="font-bold border-b border-red-500/30">{data.analysis.attack_type.toUpperCase()}</span>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Analysis Summary</h4>
-                                            <p className="text-cyan-300 leading-relaxed bg-cyan-950/30 p-2 rounded border-l-2 border-cyan-500">
-                                                {data.analysis.analysis_summary}
-                                            </p>
-                                        </div>
-
-                                        <div>
-                                            <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Automated Response</h4>
-                                            <div className="flex items-start space-x-2 text-emerald-400">
-                                                <ShieldCheck className="w-4 h-4 mt-0.5" />
-                                                <span className="font-bold">{data.analysis.action_taken}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-auto border-t border-cyan-900/30 pt-4 flex justify-between text-xs text-cyan-800">
-                                        <span>TICKET_ID: #SEC-{Math.floor(Math.random() * 9000) + 1000}</span>
-                                        <span>AUTO_RESOLVED</span>
-                                    </div>
-                                </>
+                                ))
+                            )}
+                            {loading && (
+                                <div className="flex flex-col space-y-2">
+                                    <span className="animate-pulse">[!] ESTABLISHING C2 CONNECTION...</span>
+                                    <span className="animate-pulse delay-75">[!] BYPASSING FIREWALL RULES...</span>
+                                    <span className="animate-pulse delay-150">[!] INJECTING PAYLOAD...</span>
+                                </div>
                             )}
                         </div>
+                    </div>
 
-                        {!data && !loading && !error && (
-                            <div className="flex flex-col items-center justify-center h-full text-cyan-900/40 space-y-4 absolute inset-0">
-                                <Shield className="w-16 h-16 opacity-20" />
-                                <span>SYSTEM SECURE</span>
+                    {/* Right Panel: Blue Team */}
+                    <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10 transition-all duration-500">
+                        <div className="flex items-center justify-between p-3 bg-cyan-950/30 border-b border-cyan-900/30 shrink-0">
+                            <div className="flex items-center space-x-2 text-cyan-500">
+                                <Shield className="w-4 h-4" />
+                                <h3 className="font-mono text-xs font-bold tracking-[0.2em]">SENTINEL_DEFENSE_LOG</h3>
                             </div>
-                        )}
+                            <Activity className="w-4 h-4 text-cyan-800 animate-pulse" />
+                        </div>
 
-                        {loading && (
-                            <div className="flex flex-col space-y-2 opacity-50 absolute inset-0 items-center justify-center">
-                                <div className="text-cyan-600 flex items-center space-x-2">
-                                    <span className="animate-spin">⏵</span>
-                                    <span>NEURAL LINK ACTIVE</span>
+                        <div
+                            className={`
+                                flex-grow p-6 font-mono text-cyan-400/90 leading-relaxed overflow-y-auto custom-scrollbar shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] flex flex-col justify-center
+                                ${isFullScreen ? 'text-base' : 'text-xs md:text-sm'}
+                            `}
+                        >
+                            {/* Content Wrapper for GSAP Reveal */}
+                            <div ref={rightPanelContentRef} className="opacity-0 space-y-6">
+                                {data && (
+                                    <>
+                                        <div className="border border-cyan-500/30 bg-cyan-950/50 p-4 rounded">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-cyan-600 text-xs uppercase tracking-widest">Confidence Score</span>
+                                                <span className="text-2xl font-bold text-cyan-400">
+                                                    <span ref={confidenceRef}>0</span>%
+                                                </span>
+                                            </div>
+                                            {/* Progress Bar */}
+                                            <div className="w-full bg-cyan-900/30 h-1.5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-cyan-500 w-full animate-[progress_1.5s_ease-out]"></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Attack Vector Detected</h4>
+                                                <div className="flex items-center space-x-2 text-red-400">
+                                                    <ShieldAlert className="w-4 h-4" />
+                                                    <span className="font-bold border-b border-red-500/30">{data.analysis.attack_type.toUpperCase()}</span>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Analysis Summary</h4>
+                                                <p className="text-cyan-300 leading-relaxed bg-cyan-950/30 p-2 rounded border-l-2 border-cyan-500">
+                                                    {data.analysis.analysis_summary}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <h4 className="text-cyan-700 text-xs mb-1 uppercase tracking-wider">Automated Response</h4>
+                                                <div className="flex items-start space-x-2 text-emerald-400">
+                                                    <ShieldCheck className="w-4 h-4 mt-0.5" />
+                                                    <span className="font-bold">{data.analysis.action_taken}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-auto border-t border-cyan-900/30 pt-4 flex justify-between text-xs text-cyan-800">
+                                            <span>TICKET_ID: #SEC-{Math.floor(Math.random() * 9000) + 1000}</span>
+                                            <span>AUTO_RESOLVED</span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {!data && !loading && !error && (
+                                <div className="flex flex-col items-center justify-center h-full text-cyan-900/40 space-y-4 absolute inset-0">
+                                    <Shield className="w-16 h-16 opacity-20" />
+                                    <span>SYSTEM SECURE</span>
                                 </div>
-                                <span className="text-cyan-700 animate-pulse">Monitoring stream...</span>
-                            </div>
-                        )}
+                            )}
+
+                            {loading && (
+                                <div className="flex flex-col space-y-2 opacity-50 absolute inset-0 items-center justify-center">
+                                    <div className="text-cyan-600 flex items-center space-x-2">
+                                        <span className="animate-spin">⏵</span>
+                                        <span>NEURAL LINK ACTIVE</span>
+                                    </div>
+                                    <span className="text-cyan-700 animate-pulse">Monitoring stream...</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
+        </>
+    );
+
+    return (
+        <div ref={containerRef} className="w-full max-w-7xl mx-auto my-12 invisible">
+            {isFullScreen ? createPortal(mainContent, document.body) : mainContent}
         </div>
     );
 };
