@@ -1,4 +1,4 @@
-import { CTAButton } from '../components/CTAButton';
+import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Section } from '../components/Section';
 
@@ -18,7 +18,7 @@ export function CTASection() {
           </p>
         </div>
         <div className="hero-actions">
-          <CTAButton to="/contact">Contact</CTAButton>
+          <Button to="/contact">Contact</Button>
         </div>
       </Card>
     </Section>

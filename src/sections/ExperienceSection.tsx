@@ -1,5 +1,5 @@
 import { Section } from '../components/Section';
-import { CTAButton } from '../components/CTAButton';
+import { Button } from '../components/Button';
 import { TimelineItem } from '../components/TimelineItem';
 import { experiences } from '../data/portfolioData';
 
@@ -17,7 +17,7 @@ export function ExperienceSection() {
         ))}
       </div>
       <div className="section-cta">
-        <CTAButton to="/experience">View detailed experience</CTAButton>
+        <Button to="/experience">View detailed experience</Button>
       </div>
     </Section>
   );

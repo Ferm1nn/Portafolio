@@ -23,7 +23,7 @@ const Projects = () => {
         <section className="mb-20">
           <div className="mb-8 flex items-center space-x-2">
             <Code2 className="h-5 w-5 text-cyan-500" />
-            <h2 className="text-xl font-semibold text-white tracking-wide">SELECTED CLIENT PROJECTIONS</h2>
+            <h2 className="text-xl font-semibold text-white tracking-wide">SELECTED CLIENT PROJECTS</h2>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">

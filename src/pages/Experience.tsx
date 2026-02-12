@@ -3,7 +3,7 @@ import { HexGridBackground } from '../components/HexGridBackground';
 import { experiences, profile } from '../data/portfolioData';
 import { Section } from '../components/Section';
 import { TimelineItem } from '../components/TimelineItem';
-import { CTAButton } from '../components/CTAButton';
+import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 
@@ -49,7 +49,7 @@ export default function Experience() {
             </p>
           </div>
           <div className="hero-actions">
-            <CTAButton to="/contact">Contact</CTAButton>
+            <Button to="/contact">Contact</Button>
           </div>
         </Card>
         <p className="muted text-center">

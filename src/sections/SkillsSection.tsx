@@ -1,6 +1,6 @@
 import { Section } from '../components/Section';
-import { CTAButton } from '../components/CTAButton';
-import { SkillCategoryCard } from '../components/SkillCard';
+import { Button } from '../components/Button';
+import { SkillCard } from '../components/SkillCard';
 import { technicalSkills } from '../data/portfolioData';
 
 export function SkillsSection() {
@@ -13,18 +13,18 @@ export function SkillsSection() {
     >
       <div className="grid three">
         {technicalSkills.slice(0, 3).map((category) => (
-          <SkillCategoryCard key={category.title} {...category} />
+          <SkillCard key={category.title} skill={category} />
         ))}
       </div>
       <div className="grid two">
         {technicalSkills.slice(3).map((category) => (
-          <SkillCategoryCard key={category.title} {...category} />
+          <SkillCard key={category.title} skill={category} />
         ))}
       </div>
       <div className="section-cta">
-        <CTAButton to="/skills" variant="ghost">
+        <Button to="/skills" variant="ghost">
           View all skills
-        </CTAButton>
+        </Button>
       </div>
     </Section>
   );

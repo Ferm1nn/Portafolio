@@ -1,6 +1,6 @@
-import { CTAButton } from '../components/CTAButton';
+import { Button } from '../components/Button';
 import { Section } from '../components/Section';
-import { ExpandedSkillCard } from '../components/SkillCard';
+import { SkillCard } from '../components/SkillCard';
 import { expandedSkills } from '../data/portfolioData';
 
 export function ExpandedSkillsSection() {
@@ -13,7 +13,7 @@ export function ExpandedSkillsSection() {
     >
       <div className="grid three">
         {expandedSkills.slice(0, 3).map((skill) => (
-          <ExpandedSkillCard key={skill.title} {...skill} />
+          <SkillCard key={skill.title} skill={skill} />
         ))}
       </div>
       <div className="grid three">
@@ -22,9 +22,9 @@ export function ExpandedSkillsSection() {
         ))}
       </div>
       <div className="section-cta">
-        <CTAButton to="/skills" variant="ghost">
+        <Button to="/skills" variant="ghost">
           Explore expanded skills
-        </CTAButton>
+        </Button>
       </div>
     </Section>
   );

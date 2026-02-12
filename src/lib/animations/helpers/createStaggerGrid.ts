@@ -92,13 +92,11 @@ export function createStaggerGrid({
   });
 
   return () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const t = trigger as any;
+    const t = trigger as ScrollTrigger | ScrollTrigger[];
     if (Array.isArray(t)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      t.forEach((item: any) => item.kill(true));
+      t.forEach((item) => item.kill());
     } else if (t && typeof t.kill === 'function') {
-      t.kill(true);
+      t.kill();
     }
     elements.forEach((element) => {
       element.style.willChange = '';

@@ -193,7 +193,9 @@ export function Navbar() {
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors"
-            aria-label="Toggle menu"
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-nav-menu"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -203,6 +205,9 @@ export function Navbar() {
       {/* MOBILE MENU OVERLAY */}
       <div
         ref={menuRef}
+        id="mobile-nav-menu"
+        role="dialog"
+        aria-label="Navigation menu"
         className="fixed inset-0 top-[80px] z-40 lg:hidden bg-[#050505]/95 backdrop-blur-xl border-t border-white/5 overflow-hidden hidden"
         style={{ height: 0, opacity: 0 }}
       >

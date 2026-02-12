@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { expandedSkills, profile, technicalSkills, heroMetrics } from '../data/portfolioData';
 import { Section } from '../components/Section';
-import { ExpandedSkillCard, SkillCategoryCard } from '../components/SkillCard';
-import { CTAButton } from '../components/CTAButton';
+import { SkillCard } from '../components/SkillCard';
+import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 import { SkillRadar } from '../components/SkillRadar';
@@ -81,7 +81,7 @@ export default function Skills() {
       >
         <div className="grid three">
           {technicalSkills.map((category) => (
-            <SkillCategoryCard key={category.title} {...category} />
+            <SkillCard key={category.title} skill={category} />
           ))}
         </div>
       </Section>
@@ -94,11 +94,11 @@ export default function Skills() {
       >
         <div className="grid three">
           {expandedSkills.map((skill) => (
-            <ExpandedSkillCard key={skill.title} {...skill} />
+            <SkillCard key={skill.title} skill={skill} />
           ))}
         </div>
         <div className="section-cta">
-          <CTAButton to="/contact">Discuss a build</CTAButton>
+          <Button to="/contact">Discuss a build</Button>
         </div>
       </Section>
 
@@ -113,7 +113,7 @@ export default function Skills() {
             <h3>Let us build reliable workflows</h3>
             <p className="muted">Clear logic, documented handoffs, and maintainable automations.</p>
           </div>
-          <CTAButton to="/contact">Contact</CTAButton>
+          <Button to="/contact">Contact</Button>
         </Card>
       </Section>
     </div>

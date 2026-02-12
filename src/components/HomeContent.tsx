@@ -3,47 +3,11 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { motion, useMotionValue, useSpring, useTransform, type Variants } from 'framer-motion';
-import { Network, Bot, Activity, Zap, Router, Database, type LucideIcon } from 'lucide-react';
-import { SiPython, SiCisco, SiLinux, SiN8N, SiReact, SiMongodb, SiDocker, SiWireshark } from 'react-icons/si';
+import { Zap, Router, Database, type LucideIcon } from 'lucide-react';
+import { TECH_STACK, HIGHLIGHT_CARDS } from '../data/homeData';
 import SystemCheckOverlay from './SystemCheckOverlay';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const techStack = [
-    { name: 'Python', icon: SiPython, color: 'group-hover:text-[#3776AB]' }, // Python Blue
-    { name: 'Networking', icon: SiCisco, color: 'group-hover:text-[#1BA0D7]' }, // Cisco Blue
-    { name: 'Linux', icon: SiLinux, color: 'group-hover:text-white' }, // Linux White/Group
-    { name: 'n8n', icon: SiN8N, color: 'group-hover:text-[#EA4B71]' }, // n8n Red
-    { name: 'React', icon: SiReact, color: 'group-hover:text-[#61DAFB]' }, // React Cyan
-    { name: 'MongoDB', icon: SiMongodb, color: 'group-hover:text-[#47A248]' }, // MongoDB Green
-    { name: 'Docker', icon: SiDocker, color: 'group-hover:text-[#2496ED]' }, // Docker Blue
-    { name: 'Wireshark', icon: SiWireshark, color: 'group-hover:text-[#1679A7]' }, // Wireshark Blue
-];
-
-const cards = [
-    {
-        title: 'Network Architecture',
-        desc: 'L1-L3 Support & Topology Design.',
-        icon: Network,
-        color: 'text-cyan-400',
-        border: 'border-cyan-500/30'
-    },
-    {
-        title: 'Process Automation',
-        desc: 'Python & n8n Workflow Orchestration.',
-        icon: Bot,
-        color: 'text-violet-400',
-        border: 'border-violet-500/30'
-    },
-    {
-        title: 'System Visibility',
-        desc: 'Real-time Dashboards & Monitoring.',
-        icon: Activity,
-        color: 'text-emerald-400',
-        border: 'border-emerald-500/30'
-    }
-];
 
 // --- Methodology Types & Components ---
 
@@ -52,56 +16,43 @@ interface MethodologyCardProps {
     title: string;
     subtitle: string;
     glowColor: string;
-    delay: number;
     pulse?: boolean;
 }
 
-const TiltCard: React.FC<MethodologyCardProps> = ({ icon: Icon, title, subtitle, glowColor, delay, pulse }) => {
+const TiltCard: React.FC<MethodologyCardProps> = ({ icon: Icon, title, subtitle, glowColor, pulse }) => {
     const ref = useRef<HTMLDivElement>(null);
-
-    // Motion values for tilt effect
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
-
-    // Smooth spring physics for the tilt
-    const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
-    const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
-
-    // Transform mouse position to rotation (max +/- 10 degrees)
-    const rotateX = useTransform(mouseY, [-0.5, 0.5], ["10deg", "-10deg"]);
-    const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-10deg", "10deg"]);
-
-    // Glow opacity based on hover state (simulated via mouse enter/leave)
     const [isHovered, setIsHovered] = useState(false);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!ref.current) return;
-
         const rect = ref.current.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
+        const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+        const yPct = (e.clientY - rect.top) / rect.height - 0.5;
 
-        const mouseXPos = e.clientX - rect.left;
-        const mouseYPos = e.clientY - rect.top;
-
-        const xPct = mouseXPos / width - 0.5;
-        const yPct = mouseYPos / height - 0.5;
-
-        x.set(xPct);
-        y.set(yPct);
+        gsap.to(ref.current, {
+            rotateX: yPct * -20,
+            rotateY: xPct * 20,
+            duration: 0.4,
+            ease: "power2.out",
+            overwrite: 'auto',
+        });
     };
 
     const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
+        if (!ref.current) return;
+        gsap.to(ref.current, {
+            rotateX: 0,
+            rotateY: 0,
+            duration: 0.6,
+            ease: "elastic.out(1, 0.5)",
+        });
         setIsHovered(false);
     };
 
     const handleMouseEnter = () => {
         setIsHovered(true);
-    }
+    };
 
-    // Determine glow class based on color prop
     const getGlowClass = () => {
         switch (glowColor) {
             case 'blue': return 'shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] border-blue-500/30';
@@ -120,25 +71,17 @@ const TiltCard: React.FC<MethodologyCardProps> = ({ icon: Icon, title, subtitle,
             case 'orange': return 'text-orange-400';
             default: return 'text-white';
         }
-    }
+    };
 
     return (
-        <motion.div
+        <div
             ref={ref}
-            style={{
-                rotateX,
-                rotateY,
-                transformStyle: "preserve-3d",
-            }}
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: delay, ease: "easeOut" }}
+            style={{ transformStyle: "preserve-3d" }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             onMouseEnter={handleMouseEnter}
             className={`
-                relative w-full p-6 mb-6 rounded-xl
+                tilt-card relative w-full p-6 mb-6 rounded-xl
                 backdrop-blur-md bg-white/5 border 
                 transition-all duration-300
                 flex items-center gap-6 group cursor-default
@@ -161,14 +104,13 @@ const TiltCard: React.FC<MethodologyCardProps> = ({ icon: Icon, title, subtitle,
             </div>
 
             {/* Pulse Effect for n8n */}
-
             {pulse && (
                 <div className="absolute inset-0 rounded-xl border border-orange-500/20 animate-pulse opacity-50 pointer-events-none" />
             )}
 
             {/* Subtle sheen effect */}
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-        </motion.div >
+        </div>
     );
 };
 
@@ -180,35 +122,52 @@ export default function HomeContent() {
     const cardsRef = useRef<HTMLDivElement>(null);
     const ctaButtonRef = useRef<HTMLButtonElement>(null);
 
-    // --- Methodology Variants ---
-    const containerVariants: Variants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.2,
-            },
-        },
-    };
-
-    const textVariants: Variants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.8, ease: "easeOut" }
-        }
-    };
-
     useGSAP(() => {
+
+        // --- Section 0: Methodology Text Reveal ---
+        const methodologyTexts = gsap.utils.toArray('.methodology-text');
+        gsap.set(methodologyTexts, { opacity: 0, y: 20 });
+
+        ScrollTrigger.create({
+            trigger: '.methodology-section',
+            start: "top 80%",
+            onEnter: () => {
+                gsap.to(methodologyTexts, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: "power2.out",
+                });
+            },
+            once: true,
+        });
+
+        // --- Tilt Cards Entrance ---
+        const tiltCards = gsap.utils.toArray('.tilt-card');
+        gsap.set(tiltCards, { opacity: 0, x: 50 });
+
+        ScrollTrigger.create({
+            trigger: '.tilt-cards-container',
+            start: "top 80%",
+            onEnter: () => {
+                gsap.to(tiltCards, {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.6,
+                    stagger: 0.2,
+                    ease: "power2.out",
+                });
+            },
+            once: true,
+        });
+
         // --- Section 1: Infinite Marquee ---
-        // Clone the content for seamless loop
         const marqueeContent = marqueeRef.current;
         if (marqueeContent) {
-            const duration = 20; // Time for one full cycle
-
+            const duration = 20;
             gsap.to(marqueeContent, {
-                xPercent: -50, // Move left by half (since we doubled content)
+                xPercent: -50,
                 ease: "none",
                 duration: duration,
                 repeat: -1,
@@ -218,20 +177,18 @@ export default function HomeContent() {
         // --- Section 2: Service Pillars (Cards) ---
         const cardElements = gsap.utils.toArray('.service-card');
 
-        // Initial state set via CSS or GSAP set to ensure no flash
         gsap.set(cardElements, {
             opacity: 0,
-            y: 50, // Default Y offset
+            y: 50,
         });
 
-        // Customized initial offsets
-        if (cardElements[0]) gsap.set(cardElements[0], { x: -100 }); // Left card
-        if (cardElements[1]) gsap.set(cardElements[1], { x: 0 });    // Center card
-        if (cardElements[2]) gsap.set(cardElements[2], { x: 100 });  // Right card
+        if (cardElements[0]) gsap.set(cardElements[0], { x: -100 });
+        if (cardElements[1]) gsap.set(cardElements[1], { x: 0 });
+        if (cardElements[2]) gsap.set(cardElements[2], { x: 100 });
 
         ScrollTrigger.create({
             trigger: cardsRef.current,
-            start: "top 80%", // When top of section hits 80% of viewport
+            start: "top 80%",
             onEnter: () => {
                 gsap.to(cardElements, {
                     x: 0,
@@ -239,10 +196,10 @@ export default function HomeContent() {
                     opacity: 1,
                     duration: 1,
                     stagger: 0.2,
-                    ease: "power3.out", // Requested elastic or power3.out. Choosing power3.out for cleaner pro look, elastic can be too bouncy for "cyber" sometimes, but let's try a subtle backOut which is close to elastic. User asked for "elastic" OR "power3.out".
+                    ease: "power3.out",
                 });
             },
-            once: true // Animate only once
+            once: true
         });
 
         // --- Section 3: Pulsing CTA ---
@@ -272,66 +229,58 @@ export default function HomeContent() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
 
                         {/* Column 1: The Doctrine */}
-                        <motion.div
-                            variants={containerVariants}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: "-100px" }}
-                            className="flex flex-col gap-6"
-                        >
+                        <div className="methodology-section flex flex-col gap-6">
                             {/* Label */}
-                            <motion.div variants={textVariants}>
+                            <div className="methodology-text">
                                 <span className="font-mono text-cyan-400 text-sm tracking-widest uppercase shadow-[0_0_10px_rgba(34,211,238,0.3)]">
                                     // Operational_Strategy
                                 </span>
-                            </motion.div>
+                            </div>
 
                             {/* Headline */}
-                            <motion.h2
-                                variants={textVariants}
-                                className="text-5xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight"
+                            <h2
+                                className="methodology-text text-5xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight"
                             >
                                 Connect. Automate. <br />
                                 <span className="text-white">Scale.</span>
-                            </motion.h2>
+                            </h2>
 
                             {/* Sub-headline */}
-                            <motion.p
-                                variants={textVariants}
-                                className="text-xl text-gray-300 font-light max-w-lg leading-relaxed border-l-2 border-white/20 pl-6 my-4"
+                            <p
+                                className="methodology-text text-xl text-gray-300 font-light max-w-lg leading-relaxed border-l-2 border-white/20 pl-6 my-4"
                             >
                                 Building the bridges between physical infrastructure and digital workflows.
-                            </motion.p>
+                            </p>
 
                             {/* Body */}
-                            <motion.p
-                                variants={textVariants}
-                                className="text-gray-400 text-base leading-relaxed max-w-lg"
+                            <p
+                                className="methodology-text text-gray-400 text-base leading-relaxed max-w-lg"
                             >
-                                I specialize in Network Reliability. Once the infrastructure is stable (L1-L3), I use n8n Orchestration and API Webhooks to eliminate manual tasks, turning static systems into self-driving pipelines.
-                            </motion.p>
+                                I specialize in Network Reliability. Once the infrastructure is stable (L1-L3).
+                                <br />
+                                <br />
+                                I design backend automation systems using n8n as an orchestration layer, integrating webhooks, APIs, databases, and conditional logic to eliminate manual processes and create self-operating pipelines.
+                            </p>
 
-                        </motion.div>
+                        </div>
 
                         {/* Column 2: The 3 Pillars (Visual Hook) */}
                         <div className="relative [perspective:1000px]">
                             {/* Decorative line connecting cards */}
                             <div className="absolute left-8 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent z-0" />
 
-                            <div className="relative z-10 flex flex-col gap-4">
+                            <div className="tilt-cards-container relative z-10 flex flex-col gap-4">
                                 <TiltCard
                                     icon={Router}
                                     title="Infrastructure & Troubleshooting"
                                     subtitle="L1-L3 Support, VLANs, & Packet Analysis."
                                     glowColor="blue"
-                                    delay={0.2}
                                 />
                                 <TiltCard
                                     icon={Zap}
                                     title="n8n Automation Engine"
                                     subtitle="Complex Logic, Webhooks, & Error Handling."
                                     glowColor="orange"
-                                    delay={0.4}
                                     pulse={true}
                                 />
                                 <TiltCard
@@ -339,7 +288,6 @@ export default function HomeContent() {
                                     title="API & Data Bridging"
                                     subtitle="Rest APIs, JSON Transformation, & NoSQL."
                                     glowColor="green"
-                                    delay={0.6}
                                 />
                             </div>
                         </div>
@@ -354,28 +302,28 @@ export default function HomeContent() {
                     {/* Wrapper for the seamless loop */}
                     <div ref={marqueeRef} className="flex gap-16 whitespace-nowrap px-10 items-center">
                         {/* Original Set */}
-                        {techStack.map((tech, index) => (
+                        {TECH_STACK.map((tech, index) => (
                             <div key={`tech-${index}`} className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity duration-300">
                                 <tech.icon className={`text-4xl text-gray-500 transition-colors duration-300 ${tech.color}`} />
                                 <span className="text-lg font-mono font-semibold tracking-wider text-slate-300 group-hover:text-white transition-colors duration-300">{tech.name}</span>
                             </div>
                         ))}
                         {/* Duplicated Set for Loop */}
-                        {techStack.map((tech, index) => (
+                        {TECH_STACK.map((tech, index) => (
                             <div key={`tech-dup-${index}`} className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity duration-300">
                                 <tech.icon className={`text-4xl text-gray-500 transition-colors duration-300 ${tech.color}`} />
                                 <span className="text-lg font-mono font-semibold tracking-wider text-slate-300 group-hover:text-white transition-colors duration-300">{tech.name}</span>
                             </div>
                         ))}
                         {/* Triplicated Set for Safety on wide screens */}
-                        {techStack.map((tech, index) => (
+                        {TECH_STACK.map((tech, index) => (
                             <div key={`tech-trip-${index}`} className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity duration-300">
                                 <tech.icon className={`text-4xl text-gray-500 transition-colors duration-300 ${tech.color}`} />
                                 <span className="text-lg font-mono font-semibold tracking-wider text-slate-300 group-hover:text-white transition-colors duration-300">{tech.name}</span>
                             </div>
                         ))}
                         {/* Quadruplicated Set for Safety on ultra-wide screens */}
-                        {techStack.map((tech, index) => (
+                        {TECH_STACK.map((tech, index) => (
                             <div key={`tech-quad-${index}`} className="flex items-center gap-4 group opacity-60 hover:opacity-100 transition-opacity duration-300">
                                 <tech.icon className={`text-4xl text-gray-500 transition-colors duration-300 ${tech.color}`} />
                                 <span className="text-lg font-mono font-semibold tracking-wider text-slate-300 group-hover:text-white transition-colors duration-300">{tech.name}</span>
@@ -388,7 +336,7 @@ export default function HomeContent() {
             {/* SECTION 2: The Service Pillars (The Cards) */}
             <section ref={cardsRef} className="max-w-7xl mx-auto px-6 mb-32">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {cards.map((card, index) => (
+                    {HIGHLIGHT_CARDS.map((card, index) => (
                         <div
                             key={index}
                             className={`service-card p-8 rounded-2xl bg-[#0a0a0a]/80 backdrop-blur-md border ${card.border} hover:bg-[#111] transition-colors duration-500 group relative overflow-hidden`}

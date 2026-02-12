@@ -89,10 +89,3 @@ export function SkillCard({ skill }: SkillCardProps) {
   );
 }
 
-export function ExpandedSkillCard(skill: Capability) {
-  return <SkillCard skill={skill} />;
-}
-
-export function SkillCategoryCard(skill: Capability) {
-  return <SkillCard skill={skill} />;
-}

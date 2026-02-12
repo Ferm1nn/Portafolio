@@ -209,8 +209,9 @@ const AutomationShowcase = () => {
 
             setData(responseData);
 
-        } catch (err: any) {
-            setError(err.message || "Unknown Error");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'An unknown error occurred';
+            setError(message);
         } finally {
             setLoading(false);
         }

@@ -10,7 +10,7 @@ export function NetworkBackground() {
         // --- Network Grid Animation (Canvas) ---
         const ctx = canvas.getContext('2d');
         let width: number, height: number;
-        let particles: any[] = [];
+        let particles: InstanceType<typeof Particle>[] = [];
         let animationFrameId: number;
 
         // Configuration
