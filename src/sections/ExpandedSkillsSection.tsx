@@ -18,7 +18,7 @@ export function ExpandedSkillsSection() {
       </div>
       <div className="grid three">
         {expandedSkills.slice(3).map((skill) => (
-          <ExpandedSkillCard key={skill.title} {...skill} />
+          <SkillCard key={skill.title} skill={skill} />
         ))}
       </div>
       <div className="section-cta">
