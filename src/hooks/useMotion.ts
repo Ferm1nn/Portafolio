@@ -100,7 +100,7 @@ export function useMotion(containerRef: RefObject<HTMLElement | null>) {
           createStaggerGrid({
             cards: staggerCards,
             enterVariant: prefersReducedMotion ? 'fade' : 'card',
-            stagger: prefersReducedMotion ? 0 : 0.08,
+            stagger: prefersReducedMotion ? 0 : 0.25,
             once: false, // Enable persistent/replayable animations for all grids
           }),
         );

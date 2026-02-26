@@ -140,13 +140,7 @@ export function Navbar() {
             <span className="text-white font-bold tracking-tight text-sm sm:text-base group-hover:text-cyan-400 transition-colors">
               {profile.name}
             </span>
-            <div className="hidden lg:flex items-center gap-2" ref={statusRef}>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-              </span>
-              <span className="text-[10px] font-mono text-emerald-400 tracking-wider shadow-emerald-500/50 drop-shadow-[0_0_2px_rgba(52,211,153,0.5)]">SYSTEM ONLINE</span>
-            </div>
+
           </div>
         </Link>
 

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Play, Activity, Unlock, Cpu, Wifi, Info, ShieldCheck, ShieldAlert, Maximize2, Minimize2 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -43,6 +44,20 @@ const AutomationShowcase = () => {
 
     // Status State (for the header badge)
     const [status, setStatus] = useState<'IDLE' | 'ATTACK' | 'SECURE'>('IDLE');
+
+    // Deep Linking Handling
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check if we arrived here via the Sentinel Toast
+        if (location.state?.launchSentinel) {
+            setIsFullScreen(true);
+            setShowInfo(true);
+            // Clear state so it doesn't persist on refresh/reload
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, navigate, location.pathname]);
 
     useGSAP(() => {
         const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });

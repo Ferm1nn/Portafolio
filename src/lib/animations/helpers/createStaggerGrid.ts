@@ -16,7 +16,7 @@ export function createStaggerGrid({
   enterVariant = 'card',
   start = 'top 85%',
   once = true,
-  stagger = 0.08,
+  stagger = 0.25,
 }: StaggerGridOptions) {
   const elements = cards.filter((card) => {
     if (card.dataset.gridInit === 'true') return false;
@@ -33,7 +33,7 @@ export function createStaggerGrid({
       ? { opacity: 0 }
       : {
         opacity: 0,
-        y: 18,
+        y: 40,
         scale: 0.98,
         rotateZ: (index: number) => (index % 2 === 0 ? -3 : 3),
       };
@@ -49,8 +49,8 @@ export function createStaggerGrid({
         y: 0,
         scale: 1,
         rotateZ: 0,
-        duration: 0.7,
-        ease: 'power3.out',
+        duration: 1.5,
+        ease: 'expo.out',
         stagger,
         overwrite: 'auto',
       });
@@ -73,8 +73,8 @@ export function createStaggerGrid({
         y: 0,
         scale: 1,
         rotateZ: 0,
-        duration: 0.7,
-        ease: 'power3.out',
+        duration: 1.5,
+        ease: 'expo.out',
         stagger,
         overwrite: 'auto',
       });

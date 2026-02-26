@@ -1,0 +1,340 @@
+/* ── TcpLayerStack (Giant Monolith) ────────────────────────── */
+
+.tcp-stack {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* Massive container */
+    max-width: 1536px;
+    /* max-w-screen-2xl equivalent */
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 255, 0.12);
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow:
+        0 0 60px rgba(0, 0, 0, 0.6),
+        0 0 2px rgba(0, 255, 255, 0.3);
+}
+
+/* Wrapper for each layer */
+.tcp-layer-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* ── Collapsed bar (100px tall) ────────────────────────────── */
+
+.tcp-layer-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 32px;
+    /* More breathing room */
+    padding: 0 40px;
+    /* Bigger side padding */
+    height: 112px;
+    /* The "Rack Unit" height */
+    cursor: pointer;
+    border: none;
+    border-left: 4px solid rgba(0, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.08);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    user-select: none;
+}
+
+.tcp-layer-bar:last-child {
+    border-bottom: none;
+}
+
+.tcp-layer-bar:hover {
+    background: rgba(0, 255, 255, 0.03);
+    border-left-color: rgba(0, 255, 255, 0.5);
+}
+
+.tcp-layer-bar.active {
+    background: rgba(0, 255, 255, 0.08);
+    border-left-color: #00ffff;
+    box-shadow: inset 6px 0 20px -6px rgba(0, 255, 255, 0.25);
+}
+
+/* Layer ID (L5, L4...) - Massive Industrial Stamp */
+.tcp-layer-id {
+    flex-shrink: 0;
+    width: 64px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 1.75rem;
+    /* text-3xl approx */
+    font-weight: 800;
+    color: #00ffff;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(0, 255, 255, 0.06);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+.tcp-layer-bar.active .tcp-layer-id {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: rgba(0, 255, 255, 0.6);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+/* Title setup */
+.tcp-layer-titles {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.tcp-layer-title {
+    font-family: 'Chakra Petch', 'Inter', sans-serif;
+    font-size: 1.5rem;
+    /* text-2xl */
+    font-weight: 700;
+    color: #e2e8f0;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tcp-layer-subtitle {
+    font-size: 1rem;
+    /* text-base / lg */
+    color: rgba(148, 163, 184, 0.8);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.02em;
+}
+
+/* Chevron */
+.tcp-layer-chevron {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    color: rgba(0, 255, 255, 0.4);
+    transition: transform 0.4s ease, color 0.3s ease;
+}
+
+.tcp-layer-bar.active .tcp-layer-chevron {
+    color: #00ffff;
+}
+
+/* ── Expanded content - Grid Layout ────────────────────────── */
+
+.tcp-layer-content {
+    position: relative;
+    height: 0;
+    overflow: hidden;
+    background: rgba(0, 10, 20, 0.6);
+    border-left: 4px solid #00ffff;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.08);
+}
+
+.tcp-layer-content-inner {
+    padding: 40px 48px 48px;
+}
+
+/* Large Description Text */
+.tcp-layer-description {
+    font-size: 1.125rem;
+    /* text-lg+ */
+    line-height: 1.75;
+    color: #cbd5e1;
+    margin-bottom: 48px;
+    font-family: 'Inter', sans-serif;
+    max-width: 90ch;
+    /* Readability cap */
+}
+
+/* ── Scanner line ──────────────────────────────────────────── */
+
+.tcp-scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(0, 255, 255, 0.3) 15%,
+            #00ffff 50%,
+            rgba(0, 255, 255, 0.3) 85%,
+            transparent 100%);
+    box-shadow:
+        0 0 12px rgba(0, 255, 255, 0.7),
+        0 0 30px rgba(0, 255, 255, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* ── Modules Grid ──────────────────────────────────────────── */
+
+.tcp-modules-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(0, 255, 255, 0.6);
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    padding-bottom: 8px;
+    width: 100%;
+}
+
+.tcp-modules-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+/* Tablet & Desktop Grid */
+@media (min-width: 768px) {
+    .tcp-modules-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .tcp-modules-list {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+}
+
+.tcp-module-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    border-radius: 6px;
+    background: rgba(0, 255, 255, 0.03);
+    border: 1px solid rgba(0, 255, 255, 0.08);
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    height: 100%;
+}
+
+.tcp-module-row:hover {
+    background: rgba(0, 255, 255, 0.08);
+    border-color: rgba(0, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.tcp-module-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #00ffff;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+}
+
+.tcp-module-detail {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ── Header Update ─────────────────────────────────────────── */
+
+.tcp-stack-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.tcp-stack-header .eyebrow {
+    font-size: 0.9rem;
+    letter-spacing: 0.3em;
+    margin-bottom: 12px;
+}
+
+.tcp-stack-header h3 {
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+}
+
+/* ── Status indicator ──────────────────────────────────────── */
+
+.tcp-stack-status {
+    padding: 14px 40px;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+
+.tcp-status-dot {
+    width: 8px;
+    height: 8px;
+}
+
+/* ── Mobile Responsive ─────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .tcp-stack {
+        border-radius: 8px;
+    }
+
+    .tcp-layer-bar {
+        gap: 16px;
+        padding: 0 20px;
+        height: 72px;
+    }
+
+    .tcp-layer-id {
+        width: 48px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .tcp-layer-title {
+        font-size: 1rem;
+    }
+
+    .tcp-layer-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .tcp-layer-content-inner {
+        padding: 24px;
+    }
+
+    .tcp-layer-description {
+        font-size: 0.95rem;
+    }
+
+    .tcp-modules-list {
+        grid-template-columns: 1fr;
+    }
+
+    .tcp-module-row {
+        gap: 4px;
+        padding: 12px;
+    }
+
+    .tcp-stack-header h3 {
+        font-size: 1.5rem;
+    }
+}

@@ -55,6 +55,7 @@ export const profile = {
   location: 'Costa Rica',
   email: 'fezgar12@gmail.com',
   phone: '+506 8708 8364',
+  github: 'https://github.com/Ferm1nn',
   linkedin: 'https://www.linkedin.com/in/fermin-espinoza',
   headline: 'Systems Engineering and Cybersecurity student specializing in secure networking, automation, and comprehensive L1-L3 technical support.',
   summary:

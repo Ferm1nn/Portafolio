@@ -1,6 +1,6 @@
 # Cybersecurity Portfolio Platform
 
-**Production-Grade Single-Page Application**  
+*Single-Page Application* 
 Built with React 19, TypeScript, GSAP, and Vite for mission-critical performance and type safety.
 
 ---
@@ -22,7 +22,7 @@ Built with React 19, TypeScript, GSAP, and Vite for mission-critical performance
 
 ## Overview
 
-This repository contains a **professional-grade portfolio platform** designed to demonstrate cybersecurity expertise, automation capabilities, and full-stack engineering competencies. The application serves as both a technical showcase and a recruitment artifact, engineered to communicate architectural decisions to hiring managers and senior engineering teams.
+This repository contains a **professional-grade portfolio** designed to demonstrate cybersecurity expertise, automation capabilities, and full-stack engineering competencies. The application serves as both a technical showcase and a recruitment artifact, engineered to communicate architectural decisions to hiring managers and senior engineering teams.
 
 ### Key Features
 
@@ -331,8 +331,8 @@ ESLint configuration enforces:
 
 ## Contact
 
-**Portfolio Owner**: [CONTACT]  
-**Repository**: [REPO_URL]  
+**Portfolio Owner**: [Fermin Espinoza --> fezgar12@gmail.com]  
+**Repository**: [https://github.com/Ferm1nn/Portafolio.git]  
 **Documentation**: This README serves as the technical reference
 
 ---

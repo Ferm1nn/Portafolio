@@ -22,7 +22,7 @@ export function HeroSection() {
     // Reset initial state
     if (textRef.current) {
       textRef.current.innerText = "";
-      textRef.current.classList.remove('live-wire');
+      // Removed live-wire reset
     }
     if (subtitleElement) gsap.set(subtitleElement, { opacity: 0 });
     if (descriptionElement) gsap.set(descriptionElement, { opacity: 0 });
@@ -54,9 +54,9 @@ export function HeroSection() {
           .join("");
       },
       onComplete: () => {
-        // 3. Live Wire Trigger
+        // 3. Scanline/Glitch Trigger
         if (textRef.current) {
-          textRef.current.classList.add('live-wire');
+          // Optional: Add specific class if needed, or rely on hover
         }
       }
     });
@@ -113,35 +113,33 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="hero relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-transparent" id="hero" ref={containerRef}>
+    <section className="hero relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-transparent font-sans" id="hero" ref={containerRef}>
 
 
       {/* Hero Content */}
       <div className="content-layer text-center p-8 max-w-4xl relative z-10 flex flex-col items-center">
-        <p className="text-blue-500 text-lg mb-4 tracking-widest uppercase opacity-0 font-mono" id="subtitle">
+        <p className="text-green-400 text-sm md:text-base mb-4 tracking-widest uppercase opacity-0 font-code font-bold" id="subtitle">
           Network & Cybersecurity Analyst
         </p>
 
-        {/* Decryption Text - GRADIENT + LIVE WIRE */}
+        {/* Decryption Text - HUD STYLE */}
         <h1
           ref={textRef}
           aria-label="Fermin Espinoza"
-          className="inline-block text-5xl md:text-7xl font-bold mb-6 font-mono tracking-tighter min-h-[5rem] sm:min-h-[6rem] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-500 pb-2"
+          className="glitch-hover inline-block text-5xl md:text-7xl font-bold mb-6 font-hud tracking-tight min-h-[5rem] sm:min-h-[6rem] text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 pb-2 drop-shadow-[0_0_10px_rgba(56,189,248,0.6)]"
           id="scramble-text">
           {/* Text injected by JS */}
         </h1>
 
-        <div className="text-slate-400 mb-12 max-w-xl mx-auto text-lg leading-relaxed opacity-0" id="description">
+        <div className="text-slate-400 mb-12 max-w-xl mx-auto text-lg leading-relaxed opacity-0 font-light" id="description">
           <p>Systems Engineering student with hands on Network & Cybersecurity specializing in secure networking, automation, and comprehensive L1-L3 technical support.</p>
         </div>
 
-        {/* Magnetic Button */}
+        {/* Angular HUD Button */}
         <div className="hero-actions opacity-0">
           <div className="magnetic-area inline-block relative p-5 -m-5">
-            <Link to="/contact" id="magnetic-btn" aria-label="Contact Fermin Espinoza" className="relative group bg-transparent border border-cyan-500/30 hover:border-cyan-500 text-cyan-500 px-8 py-3 rounded-full text-lg font-medium transition-colors duration-300 overflow-hidden inline-flex items-center justify-center">
-              <span className="relative z-10 group-hover:text-white transition-colors duration-300">Contact Me</span>
-              <div className="absolute inset-0 bg-cyan-500/10 scale-0 group-hover:scale-100 rounded-full transition-transform duration-300 origin-center"></div>
-              <div className="absolute inset-0 bg-cyan-500 blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
+            <Link to="/contact" id="magnetic-btn" aria-label="Contact Fermin Espinoza" className="relative group bg-transparent border border-cyan-500 text-cyan-500 px-8 py-3 text-lg font-medium transition-all duration-200 overflow-hidden inline-flex items-center justify-center hover:bg-cyan-500 hover:text-black hover:shadow-[0_0_20px_rgba(6,182,212,0.6)] clip-path-polygon-[0_0,100%_0,100%_80%,90%_100%,0_100%] rounded-none">
+              <span className="relative z-10 font-hud tracking-wider">CONTACT</span>
             </Link>
           </div>
         </div>

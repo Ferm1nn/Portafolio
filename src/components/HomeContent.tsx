@@ -6,6 +6,7 @@ import { useGSAP } from '@gsap/react';
 import { Zap, Router, Database, type LucideIcon } from 'lucide-react';
 import { TECH_STACK, HIGHLIGHT_CARDS } from '../data/homeData';
 import SystemCheckOverlay from './SystemCheckOverlay';
+import { SentinelToast } from './SentinelToast';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -117,12 +118,27 @@ const TiltCard: React.FC<MethodologyCardProps> = ({ icon: Icon, title, subtitle,
 
 export default function HomeContent() {
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+    const [showSentinel, setShowSentinel] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const marqueeRef = useRef<HTMLDivElement>(null);
     const cardsRef = useRef<HTMLDivElement>(null);
     const ctaButtonRef = useRef<HTMLButtonElement>(null);
 
     useGSAP(() => {
+
+        // --- Sentinel Toast Trigger ---
+        ScrollTrigger.create({
+            trigger: containerRef.current,
+            start: "top 60%",
+            onEnter: () => {
+                const hasSeen = sessionStorage.getItem('has_seen_project_spotlight');
+                if (!hasSeen) {
+                    setShowSentinel(true);
+                    sessionStorage.setItem('has_seen_project_spotlight', 'true');
+                }
+            },
+            once: true,
+        });
 
         // --- Section 0: Methodology Text Reveal ---
         const methodologyTexts = gsap.utils.toArray('.methodology-text');
@@ -135,9 +151,9 @@ export default function HomeContent() {
                 gsap.to(methodologyTexts, {
                     opacity: 1,
                     y: 0,
-                    duration: 0.8,
-                    stagger: 0.2,
-                    ease: "power2.out",
+                    duration: 1.5,
+                    stagger: 0.3,
+                    ease: "expo.out",
                 });
             },
             once: true,
@@ -145,7 +161,7 @@ export default function HomeContent() {
 
         // --- Tilt Cards Entrance ---
         const tiltCards = gsap.utils.toArray('.tilt-card');
-        gsap.set(tiltCards, { opacity: 0, x: 50 });
+        gsap.set(tiltCards, { opacity: 0, x: 80 });
 
         ScrollTrigger.create({
             trigger: '.tilt-cards-container',
@@ -154,9 +170,9 @@ export default function HomeContent() {
                 gsap.to(tiltCards, {
                     opacity: 1,
                     x: 0,
-                    duration: 0.6,
-                    stagger: 0.2,
-                    ease: "power2.out",
+                    duration: 1.5,
+                    stagger: 0.3,
+                    ease: "expo.out",
                 });
             },
             once: true,
@@ -179,12 +195,12 @@ export default function HomeContent() {
 
         gsap.set(cardElements, {
             opacity: 0,
-            y: 50,
+            y: 60,
         });
 
-        if (cardElements[0]) gsap.set(cardElements[0], { x: -100 });
+        if (cardElements[0]) gsap.set(cardElements[0], { x: -120 });
         if (cardElements[1]) gsap.set(cardElements[1], { x: 0 });
-        if (cardElements[2]) gsap.set(cardElements[2], { x: 100 });
+        if (cardElements[2]) gsap.set(cardElements[2], { x: 120 });
 
         ScrollTrigger.create({
             trigger: cardsRef.current,
@@ -194,9 +210,9 @@ export default function HomeContent() {
                     x: 0,
                     y: 0,
                     opacity: 1,
-                    duration: 1,
-                    stagger: 0.2,
-                    ease: "power3.out",
+                    duration: 2,
+                    stagger: 0.3,
+                    ease: "expo.out",
                 });
             },
             once: true
@@ -219,6 +235,9 @@ export default function HomeContent() {
     return (
         <div ref={containerRef} className="relative z-10 w-full overflow-hidden pb-20">
 
+            {/* Sentinel Notification — only mounts when scrolled into view */}
+            {showSentinel && <SentinelToast />}
+
             {/* SECTION 0: The Mindset (Methodology) */}
             <section className="relative w-full py-24 lg:py-32 bg-[#050505] overflow-hidden">
                 {/* Background Ambience */}
@@ -230,12 +249,7 @@ export default function HomeContent() {
 
                         {/* Column 1: The Doctrine */}
                         <div className="methodology-section flex flex-col gap-6">
-                            {/* Label */}
-                            <div className="methodology-text">
-                                <span className="font-mono text-cyan-400 text-sm tracking-widest uppercase shadow-[0_0_10px_rgba(34,211,238,0.3)]">
-                                    // Operational_Strategy
-                                </span>
-                            </div>
+
 
                             {/* Headline */}
                             <h2
@@ -256,10 +270,10 @@ export default function HomeContent() {
                             <p
                                 className="methodology-text text-gray-400 text-base leading-relaxed max-w-lg"
                             >
-                                I specialize in Network Reliability. Once the infrastructure is stable (L1-L3).
+                                I specialize in Network Reliability and Security analysis.
                                 <br />
                                 <br />
-                                I design backend automation systems using n8n as an orchestration layer, integrating webhooks, APIs, databases, and conditional logic to eliminate manual processes and create self-operating pipelines.
+                                I design backend automation systems using low code tools like n8n to create autonomous workflows, integrating webhooks, APIs, databases, and conditional logic to eliminate manual processes.
                             </p>
 
                         </div>

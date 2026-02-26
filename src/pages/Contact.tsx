@@ -123,8 +123,8 @@ export default function Contact() {
                 What do you need?
                 <select name="topic" defaultValue="automation" disabled={status === 'submitting'}>
                   <option value="automation">Automation build</option>
-                  <option value="networking">Networking support</option>
-                  <option value="consulting">Consulting</option>
+                  <option value="Website build">Website build</option>
+                  <option value="consulting">IT Consulting</option>
                   <option value="other">Other</option>
                 </select>
               </label>
