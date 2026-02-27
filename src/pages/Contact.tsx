@@ -83,10 +83,7 @@ export default function Contact() {
             <p className="lead">{profile.location}</p>
             <p className="muted">Remote-friendly for async collaboration.</p>
           </Card>
-          <Card tilt={false}>
-            <h3 data-tilt-layer="title">CV</h3>
-            <p className="muted">Happy to share details. Ask via email or LinkedIn.</p>
-          </Card>
+
         </div>
       </Section>
 
