@@ -178,8 +178,8 @@ export function HexGridBackground() {
         };
 
         const handleResize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
             initGrid();
         };
 
@@ -189,27 +189,22 @@ export function HexGridBackground() {
 
         // Event Listeners
         window.addEventListener('resize', handleResize);
-        window.addEventListener('mousemove', (e) => {
-            // Need mouse pos relative to canvas if canvas is not fixed full screen
-            // If canvas is absolute in a relative container, e.clientX might differ if scrolled?
-            // User says "calculate distance from cursor".
-            // If the grid is "locked in place" (fixed), clientX/Y is fine.
-            // If it scrolls, we need relative pos.
-            // Let's assume it fills the viewport or we use getBoundingClientRect.
+        const resizeObserver = new ResizeObserver(() => handleResize());
+        resizeObserver.observe(canvas);
+
+        const handleMouseMove = (e: MouseEvent) => {
             const rect = canvas.getBoundingClientRect();
             mouseRef.current = {
                 x: e.clientX - rect.left,
                 y: e.clientY - rect.top
             };
-        });
+        };
+        window.addEventListener('mousemove', handleMouseMove);
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            // Remove mouse listener? It was window listener.
-            // Better to attach mousemove to window to catch fast movements, but coordinate calc needs care.
-            // Actually, if we attach to canvas, we miss when mouse leaves canvas?
-            // Component specific interactions usually attach to element.
-            // "Trigger: On mousemove"
+            window.removeEventListener('mousemove', handleMouseMove);
+            resizeObserver.disconnect();
             if (requestRef.current !== null) cancelAnimationFrame(requestRef.current);
         };
     }, []);

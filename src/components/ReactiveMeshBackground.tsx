@@ -70,8 +70,8 @@ export const ReactiveMeshBackground = () => {
 
         // --- Initialization ---
         const init = () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+            width = canvas.width = canvas.clientWidth;
+            height = canvas.height = canvas.clientHeight;
 
             cols = Math.ceil(width / CONFIG.SPACING) + 1;
             rows = Math.ceil(height / CONFIG.SPACING) + 1;
@@ -311,15 +311,15 @@ export const ReactiveMeshBackground = () => {
         gsap.ticker.add(render);
 
         window.addEventListener('resize', init);
+        const resizeObserver = new ResizeObserver(() => init());
+        resizeObserver.observe(canvas);
         window.addEventListener('mousemove', onMouseMove);
-        // Bind enter/leave to document or window? Usually specific element is better, 
-        // but component covers full screen?
-        // User requested "On mouse enter/leave". Assuming Window for full page background.
         document.addEventListener('mouseenter', onMouseEnter);
         document.addEventListener('mouseleave', onMouseLeave);
 
         return () => {
             window.removeEventListener('resize', init);
+            resizeObserver.disconnect();
             window.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseenter', onMouseEnter);
             document.removeEventListener('mouseleave', onMouseLeave);

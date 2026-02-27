@@ -35,12 +35,14 @@ export function CircuitBackground() {
 
         // Resize handler for both canvases
         const resize = () => {
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-            uiCanvas.width = window.innerWidth;
-            uiCanvas.height = window.innerHeight;
+            bgCanvas.width = bgCanvas.clientWidth;
+            bgCanvas.height = bgCanvas.clientHeight;
+            uiCanvas.width = uiCanvas.clientWidth;
+            uiCanvas.height = uiCanvas.clientHeight;
         };
         window.addEventListener('resize', resize);
+        const resizeObserver = new ResizeObserver(() => resize());
+        resizeObserver.observe(bgCanvas);
         resize();
 
         const handleMouseMove = (e: MouseEvent) => {
@@ -157,6 +159,7 @@ export function CircuitBackground() {
 
         return () => {
             window.removeEventListener('resize', resize);
+            resizeObserver.disconnect();
             window.removeEventListener('mousemove', handleMouseMove);
             gsap.ticker.remove(tick);
         };

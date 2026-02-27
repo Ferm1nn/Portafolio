@@ -116,25 +116,32 @@ export function NetworkBackground() {
 
         function resize() {
             if (!canvas) return;
-            width = window.innerWidth;
-            height = window.innerHeight;
+            // Use canvas.clientWidth/clientHeight instead of window.innerWidth/innerHeight.
+            // On real mobile browsers, window.innerHeight can include browser chrome (address bar),
+            // making the canvas taller than the visible viewport and causing vertical stretching.
+            // clientWidth/clientHeight reflect the actual CSS-rendered size of the element.
+            width = canvas.clientWidth;
+            height = canvas.clientHeight;
             canvas.width = width;
             canvas.height = height;
             initParticles();
         }
 
         // Start Canvas
-        // Note: Using clientX/Y in mousemove matches standard fixed behavior. 
-        // The previous implementation used e.x which is strictly non-standard TS but valid in browsers (alias to clientX).
-        // I normalized it to clientX for "good front-end develop" practice while keeping logic identical.
-
         resize();
         animateCanvas();
+
+        // ResizeObserver is more reliable than the 'resize' event on mobile,
+        // as it fires whenever the element's layout size changes (e.g., when
+        // the browser address bar appears/disappears on scroll).
+        const resizeObserver = new ResizeObserver(() => resize());
+        resizeObserver.observe(canvas);
         window.addEventListener('resize', resize);
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('resize', resize);
+            resizeObserver.disconnect();
             cancelAnimationFrame(animationFrameId);
         };
     }, []);

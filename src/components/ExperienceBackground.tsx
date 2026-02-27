@@ -20,8 +20,8 @@ export default function ExperienceBackground() {
         if (!ctx) return;
 
         let animationFrameId: number;
-        let width = window.innerWidth;
-        let height = window.innerHeight;
+        let width = canvas.clientWidth;
+        let height = canvas.clientHeight;
 
         // Configuration
         const COLUMN_SPACING = 50; // px
@@ -41,8 +41,8 @@ export default function ExperienceBackground() {
 
         // Resize Handler
         const handleResize = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
+            width = canvas.clientWidth;
+            height = canvas.clientHeight;
             canvas.width = width;
             canvas.height = height;
 
@@ -176,9 +176,12 @@ export default function ExperienceBackground() {
         render();
 
         window.addEventListener('resize', handleResize);
+        const resizeObserver = new ResizeObserver(() => handleResize());
+        resizeObserver.observe(canvas);
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
             cancelAnimationFrame(animationFrameId);
         };
     }, []);

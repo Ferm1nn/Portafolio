@@ -35,8 +35,8 @@ export const AuroraBackground = () => {
 
         // --- Initialization ---
         const init = () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+            width = canvas.width = canvas.clientWidth;
+            height = canvas.height = canvas.clientHeight;
 
             const cols = Math.ceil(width / SPACING_X) + 2;
             const rows = Math.ceil(height / SPACING_Y) + 2;
@@ -147,10 +147,13 @@ export const AuroraBackground = () => {
         init();
         gsap.ticker.add(render);
         window.addEventListener('resize', handleResize);
+        const resizeObserver = new ResizeObserver(() => handleResize());
+        resizeObserver.observe(canvas);
         window.addEventListener('mousemove', onMouseMove);
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
             window.removeEventListener('mousemove', onMouseMove);
             gsap.ticker.remove(render);
             if (mouseTimeout) clearTimeout(mouseTimeout);
