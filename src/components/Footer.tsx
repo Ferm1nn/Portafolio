@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail, Phone } from 'lucide-react';
+import { Github, Linkedin, Mail } from 'lucide-react';
 import { profile } from '../data/portfolioData';
 
 export function Footer() {
@@ -33,20 +33,6 @@ export function Footer() {
           {/* Separator (Desktop) */}
           <div className="hidden md:block h-3 w-px bg-white/10"></div>
 
-          {/* Phone */}
-          <a
-            href={`tel:${profile.phone.replace(/\s+/g, '')}`}
-            className="flex items-center gap-2 group"
-            aria-label="Phone"
-          >
-            <Phone size={16} className="text-gray-500 group-hover:text-cyan-400 transition-colors duration-300" />
-            <span className="text-xs md:text-sm text-gray-400 group-hover:text-white transition-colors duration-300 font-medium">
-              {profile.phone}
-            </span>
-          </a>
-
-          {/* Separator (Desktop) */}
-          <div className="hidden md:block h-3 w-px bg-white/10"></div>
 
           {/* GitHub */}
           <a
