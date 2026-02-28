@@ -1,19 +1,22 @@
 import { useRef } from 'react';
 import { HexGridBackground } from '../components/HexGridBackground';
+import { MobileBackground } from '../components/MobileBackground';
 import { experiences, profile } from '../data/portfolioData';
 import { Section } from '../components/Section';
 import { TimelineItem } from '../components/TimelineItem';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function Experience() {
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const isMobile = useIsMobile();
   useMotion(pageRef);
 
   return (
     <div ref={pageRef} className="relative z-0 min-h-screen">
-      <HexGridBackground />
+      {isMobile ? <MobileBackground variant="hex" /> : <HexGridBackground />}
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Experience</p>

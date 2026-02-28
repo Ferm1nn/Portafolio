@@ -2,18 +2,21 @@ import { useRef } from 'react';
 import { heroMetrics } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { TcpLayerStack } from '../components/TcpLayerStack';
 import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
+import { MobileBackground } from '../components/MobileBackground';
 import AmbientCyberLayer from '../components/AmbientCyberLayer';
 
 export default function Skills() {
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const isMobile = useIsMobile();
   useMotion(pageRef);
 
   return (
     <div ref={pageRef} style={{ position: 'relative' }}>
       <AmbientCyberLayer />
-      <ReactiveMeshBackground />
+      {isMobile ? <MobileBackground variant="mesh" /> : <ReactiveMeshBackground />}
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Skills</p>

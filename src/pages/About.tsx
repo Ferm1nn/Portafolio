@@ -4,16 +4,19 @@ import { profile, technicalSkills } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { useMotion } from '../hooks/useMotion';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { CircuitBackground } from '../components/CircuitBackground';
+import { MobileBackground } from '../components/MobileBackground';
 import { EducationSection } from '../sections/EducationSection';
 
 export default function About() {
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const isMobile = useIsMobile();
   useMotion(pageRef);
 
   return (
     <div ref={pageRef} style={{ position: 'relative' }}>
-      <CircuitBackground />
+      {isMobile ? <MobileBackground variant="circuit" /> : <CircuitBackground />}
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">About</p>

@@ -4,8 +4,10 @@ import { Section } from '../components/Section';
 import { profile } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
+import { MobileBackground } from '../components/MobileBackground';
 import AmbientCyberLayer from '../components/AmbientCyberLayer';
 import { useMotion } from '../hooks/useMotion';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -13,6 +15,7 @@ export default function Contact() {
   const pageRef = useRef<HTMLDivElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [status, setStatus] = useState<FormStatus>('idle');
+  const isMobile = useIsMobile();
   useMotion(pageRef);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -51,7 +54,7 @@ export default function Contact() {
   return (
     <div ref={pageRef}>
       <AmbientCyberLayer />
-      <ReactiveMeshBackground />
+      {isMobile ? <MobileBackground variant="mesh" /> : <ReactiveMeshBackground />}
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Contact</p>

@@ -247,24 +247,24 @@ const AutomationShowcase = () => {
             <div
                 ref={layoutRef}
                 className={`flex flex-col border border-slate-800 overflow-hidden transition-all duration-500
-                    ${isFullScreen ? 'fixed inset-0 z-[100] rounded-none border-0 bg-slate-950/95 backdrop-blur-xl' : 'relative rounded-lg h-[600px] bg-slate-950'}
+                    ${isFullScreen ? 'fixed inset-0 z-[100] rounded-none border-0 bg-slate-950/95 backdrop-blur-xl overflow-y-auto' : 'relative rounded-lg h-auto md:h-[600px] bg-slate-950'}
                 `}
             >
                 {/* Scanline Overlay */}
                 <div className="absolute inset-0 pointer-events-none z-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] opacity-20"></div>
 
                 {/* Controls Bar */}
-                <div ref={controlsRef} className="flex flex-col md:flex-row items-center justify-between bg-slate-950/90 p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-30 shrink-0">
-                    <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                        <div className="relative">
+                <div ref={controlsRef} className="flex flex-col items-stretch bg-slate-950/90 p-3 md:p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-30 shrink-0 gap-3 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center space-x-3 md:space-x-4">
+                        <div className="relative shrink-0">
                             <div className="absolute -inset-1 rounded-full bg-rose-500/20 animate-ping"></div>
-                            <div className="relative p-2 bg-slate-900 rounded-full border border-rose-500/50">
-                                <Cpu className="w-6 h-6 text-rose-500" />
+                            <div className="relative p-1.5 md:p-2 bg-slate-900 rounded-full border border-rose-500/50">
+                                <Cpu className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
                             </div>
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
-                            <div className="flex items-center space-x-2 font-mono text-xs font-bold tracking-wider">
+                        <div className="min-w-0">
+                            <h2 className="text-lg md:text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
+                            <div className="flex items-center space-x-2 font-mono text-[10px] md:text-xs font-bold tracking-wider truncate">
                                 {status === 'ATTACK' && (
                                     <span className="text-rose-500 animate-pulse flex items-center gap-2">
                                         <span className="w-2 h-2 rounded-full bg-rose-500"></span>
@@ -287,30 +287,43 @@ const AutomationShowcase = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-4 bg-slate-900 p-2 rounded border border-slate-800">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+                        <div className="grid grid-cols-[auto_1fr_auto] md:flex md:items-center gap-2 md:gap-4 bg-slate-900 p-2 rounded border border-slate-800 w-full md:w-auto">
+                            {/* INFO button */}
                             <button
                                 onClick={() => setShowInfo(!showInfo)}
                                 className={`flex items-center space-x-2 px-3 py-2 rounded border transition-all ${showInfo ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50'}`}
                             >
                                 <Info className="w-4 h-4" />
-                                <span className="font-mono text-sm font-bold">INFO</span>
+                                <span className="font-mono text-xs md:text-sm font-bold">INFO</span>
                             </button>
+
+                            {/* Scenario select */}
                             <select
                                 value={scenario}
                                 onChange={(e) => setScenario(e.target.value)}
                                 disabled={loading || status === 'ATTACK'}
-                                className="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase"
+                                className="bg-slate-950 border border-slate-700 text-slate-300 text-xs md:text-sm rounded px-2 md:px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase w-full min-w-0"
                             >
                                 <option>Brute Force</option>
                                 <option>SQL Injection</option>
                                 <option>DDoS Simulation</option>
                             </select>
 
+                            {/* Full Screen Toggle — placed inline on mobile, after select */}
+                            <button
+                                onClick={toggleFullScreen}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors md:hidden"
+                                title={isFullScreen ? "Minimize (Esc)" : "Maximize"}
+                            >
+                                {isFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                            </button>
+
+                            {/* INITIATE SIMULATION — full row on mobile */}
                             <button
                                 onClick={initiateSimulation}
                                 disabled={loading || status === 'ATTACK'}
-                                className={`group relative flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded font-mono text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
+                                className={`group relative col-span-full md:col-span-1 flex items-center justify-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 md:px-6 md:py-2 rounded font-mono text-xs md:text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
                             >
                                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                                 {loading ? (
@@ -327,10 +340,10 @@ const AutomationShowcase = () => {
                             </button>
                         </div>
 
-                        {/* Full Screen Toggle Button */}
+                        {/* Full Screen Toggle Button — desktop only */}
                         <button
                             onClick={toggleFullScreen}
-                            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+                            className="hidden md:block p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
                             title={isFullScreen ? "Minimize (Esc)" : "Maximize"}
                         >
                             {isFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -342,7 +355,7 @@ const AutomationShowcase = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1 flex-grow overflow-hidden relative">
 
                     {/* Left Panel: Red Team */}
-                    <div ref={leftPanelRef} className={`relative flex flex-col border-r border-rose-900/30 bg-red-950/10 transition-all duration-500`}>
+                    <div ref={leftPanelRef} className={`relative flex flex-col border-r border-rose-900/30 bg-red-950/10 transition-all duration-500 min-h-[200px] md:min-h-0`}>
                         <div className="flex items-center justify-between p-3 bg-red-950/30 border-b border-rose-900/30 shrink-0">
                             <div className="flex items-center space-x-2 text-rose-500">
                                 <Unlock className="w-4 h-4" />
@@ -392,7 +405,7 @@ const AutomationShowcase = () => {
                     </div>
 
                     {/* Right Panel: Blue Team */}
-                    <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10 transition-all duration-500">
+                    <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10 transition-all duration-500 min-h-[250px] md:min-h-0">
                         <div className="flex items-center justify-between p-3 bg-cyan-950/30 border-b border-cyan-900/30 shrink-0">
                             <div className="flex items-center space-x-2 text-cyan-500">
                                 <Shield className="w-4 h-4" />
@@ -481,7 +494,7 @@ const AutomationShowcase = () => {
     );
 
     return (
-        <div ref={containerRef} className="w-full max-w-7xl mx-auto my-12 invisible">
+        <div ref={containerRef} className="w-full max-w-7xl mx-auto my-4 md:my-12 px-2 md:px-0 invisible">
             {isFullScreen ? createPortal(mainContent, document.body) : mainContent}
         </div>
     );

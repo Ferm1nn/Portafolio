@@ -1,12 +1,16 @@
 import { Terminal, Code2 } from 'lucide-react';
 import ProjectPlaceholder from '../components/projects/ProjectPlaceholder';
 import { HexGridBackground } from '../components/HexGridBackground';
+import { MobileBackground } from '../components/MobileBackground';
 import AutomationShowcase from '../components/labs/AutomationShowcase';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const Projects = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen px-4 pt-24 pb-16 md:px-8">
-      <HexGridBackground />
+      {isMobile ? <MobileBackground variant="hex" /> : <HexGridBackground />}
       <div className="mx-auto max-w-6xl">
 
         {/* Page Header */}
