@@ -2,13 +2,8 @@ import { useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ExperienceBackground } from '../components/ExperienceBackground';
-
-import { Section } from '../components/Section';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
 import { useMotion } from '../hooks/useMotion';
 import { useMotionSettings } from '../motion/MotionProvider';
-import { profile } from '../data/portfolioData';
 import '../styles/NeuralTimeline.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -260,32 +255,6 @@ export default function Experience() {
           ))}
         </div>
       </div>
-
-      {/* ── CTA ── */}
-      <Section
-        id="experience-cta"
-        className="neural-cta"
-        eyebrow="Let us collaborate"
-        title="Available for automation builds and networking support"
-        description="Fast prototypes, reliable rollouts, and documented fixes."
-      >
-        <Card className="cta-panel" tilt={false}>
-          <div>
-            <h3>Let us discuss your stack</h3>
-            <p className="muted">
-              From webhook-driven automations to L1–L3 troubleshooting, responses stay grounded in
-              repeatable steps.
-            </p>
-          </div>
-          <div className="hero-actions">
-            <Button to="/contact">Contact</Button>
-          </div>
-        </Card>
-        <p className="muted text-center">
-          Prefer email? Reach out at{' '}
-          <a href={`mailto:${profile.email}`}>{profile.email}</a>.
-        </p>
-      </Section>
     </div>
   );
 }
