@@ -3,7 +3,6 @@ import { useMotion } from '../hooks/useMotion';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useMotionSettings } from '../motion/MotionProvider';
 import { CircuitBackground } from '../components/CircuitBackground';
-import { MobileBackground } from '../components/MobileBackground';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import '../styles/AnalystDossier.css';
@@ -109,7 +108,7 @@ export default function About() {
 
         // Type each character
         const chars = fullText.split('');
-        chars.forEach((char, charIdx) => {
+        chars.forEach((_, charIdx) => {
           tl.to(el, {
             duration: 0.025,
             onComplete: () => {
@@ -231,7 +230,7 @@ export default function About() {
 
             {/* Fields */}
             <div className="dossier-fields">
-              {dossierFields.map((field, idx) => (
+              {dossierFields.map((field) => (
                 <div className="dossier-field" key={field.label}>
                   <span className="dossier-field-label">{field.label}:</span>
                   <span className="dossier-field-value" data-text={field.value}>
