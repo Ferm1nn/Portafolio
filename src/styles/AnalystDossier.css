@@ -1,0 +1,500 @@
+/* ─────────────────────────────────────────────────────────
+   Analyst Dossier  –  About page
+   ───────────────────────────────────────────────────────── */
+
+/* ── Access Log Progress Bar ── */
+.access-log {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 36px;
+    height: 100vh;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.access-log-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(56, 189, 248, 0.4);
+    padding: 12px 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.access-log-track {
+    flex: 1;
+    width: 3px;
+    background: rgba(56, 189, 248, 0.08);
+    border-radius: 999px;
+    margin: 0 0 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.access-log-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #38bdf8, #22d3ee);
+    border-radius: 999px;
+    transform-origin: top center;
+    transform: scaleY(0);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* ── Dossier Container ── */
+.dossier-container {
+    position: relative;
+    max-width: var(--content-width, 1120px);
+    margin: 0 auto;
+    padding: 3rem var(--page-gutter, 1.25rem) 6rem;
+    padding-left: calc(var(--page-gutter, 1.25rem) + 36px);
+}
+
+/* ── Personnel Dossier Card ── */
+.dossier-card {
+    position: relative;
+    background: rgba(12, 20, 40, 0.8);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 18px;
+    padding: clamp(2rem, 3vw + 1rem, 3rem);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(56, 189, 248, 0.06);
+    overflow: hidden;
+    margin-bottom: 4rem;
+}
+
+/* Watermark */
+.dossier-card::before {
+    content: 'CLASSIFIED // AUTHORIZED';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(56, 189, 248, 0.035);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.dossier-card-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* Corner accents */
+.dossier-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: rgba(56, 189, 248, 0.25);
+    border-style: solid;
+    z-index: 1;
+}
+
+.dossier-corner--tl {
+    top: 10px;
+    left: 10px;
+    border-width: 2px 0 0 2px;
+}
+
+.dossier-corner--tr {
+    top: 10px;
+    right: 10px;
+    border-width: 2px 2px 0 0;
+}
+
+.dossier-corner--bl {
+    bottom: 10px;
+    left: 10px;
+    border-width: 0 0 2px 2px;
+}
+
+.dossier-corner--br {
+    bottom: 10px;
+    right: 10px;
+    border-width: 0 2px 2px 0;
+}
+
+/* Card Header */
+.dossier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+.dossier-header-title {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(56, 189, 248, 0.6);
+}
+
+.dossier-header-id {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.7rem;
+    color: rgba(56, 189, 248, 0.35);
+    letter-spacing: 0.08em;
+}
+
+/* Fields */
+.dossier-fields {
+    display: grid;
+    gap: 1.4rem;
+    margin-bottom: 2.5rem;
+}
+
+.dossier-field {
+    display: grid;
+    grid-template-columns: clamp(100px, 12vw, 140px) 1fr;
+    gap: 1rem;
+    align-items: baseline;
+}
+
+.dossier-field-label {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: clamp(0.72rem, 0.7vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(56, 189, 248, 0.55);
+}
+
+.dossier-field-value {
+    font-size: clamp(1rem, 1vw + 0.8rem, 1.15rem);
+    color: var(--text, #e6ecf5);
+    line-height: 1.5;
+    min-height: 1.5em;
+    overflow: hidden;
+}
+
+/* Blinking cursor for typewriter */
+.dossier-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: #38bdf8;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursorBlink 0.8s step-end infinite;
+}
+
+@keyframes cursorBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* ── Trait Badges ── */
+.dossier-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.dossier-trait {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: clamp(0.72rem, 0.7vw, 0.82rem);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    min-height: var(--touch-min, 44px);
+    border-radius: 8px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.dossier-trait-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22d3ee;
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+    animation: traitPulse 2s ease-in-out infinite;
+}
+
+@keyframes traitPulse {
+
+    0%,
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+}
+
+/* ── Section Divider ── */
+.dossier-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.dossier-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.2), transparent);
+}
+
+.dossier-divider-label {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: clamp(0.68rem, 0.7vw, 0.78rem);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(56, 189, 248, 0.5);
+    white-space: nowrap;
+}
+
+/* ── Intel Table ── */
+.intel-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 2rem;
+}
+
+.intel-table-head {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(56, 189, 248, 0.45);
+    text-align: left;
+}
+
+.intel-table-head th {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.12);
+}
+
+/* ── Intel Row ── */
+.intel-row {
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+    cursor: default;
+    transition: background 0.3s ease;
+}
+
+.intel-row td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.06);
+    vertical-align: middle;
+    position: relative;
+}
+
+.intel-row:hover {
+    background: rgba(56, 189, 248, 0.03);
+}
+
+/* Scanline sweep on hover */
+.intel-row::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(56, 189, 248, 0.06) 40%,
+            rgba(56, 189, 248, 0.1) 50%,
+            rgba(56, 189, 248, 0.06) 60%,
+            transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+    transition: left 0.6s ease;
+}
+
+.intel-row:hover::after {
+    left: 100%;
+}
+
+/* Row content */
+.intel-title {
+    font-size: clamp(0.95rem, 0.8vw + 0.8rem, 1.1rem);
+    color: var(--text, #e6ecf5);
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.intel-institution {
+    font-size: 0.85rem;
+    color: var(--text-muted, #a8b4c9);
+    margin-top: 0.2rem;
+}
+
+.intel-period {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: rgba(56, 189, 248, 0.6);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* Status Dot */
+.intel-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.intel-status--completed {
+    color: #4ade80;
+}
+
+.intel-status--in-progress {
+    color: #fbbf24;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-dot--completed {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+    animation: statusPulse 2.5s ease-in-out infinite;
+}
+
+.status-dot--in-progress {
+    background: #fbbf24;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.35);
+    }
+}
+
+/* ── Responsive (Mobile) ── */
+@media (max-width: 768px) {
+    .access-log {
+        display: none;
+    }
+
+    .dossier-container {
+        padding-left: var(--page-gutter, 1.25rem);
+    }
+
+    .dossier-field {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+    }
+
+    .dossier-traits {
+        flex-direction: column;
+    }
+
+    .intel-table,
+    .intel-table-head,
+    .intel-table tbody,
+    .intel-row,
+    .intel-row td {
+        display: block;
+        width: 100%;
+    }
+
+    .intel-table-head {
+        display: none;
+    }
+
+    .intel-row {
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.08);
+    }
+
+    .intel-row td {
+        padding: 0.3rem 0;
+        border-bottom: none;
+    }
+
+    .intel-row td::before {
+        content: attr(data-label);
+        display: block;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(56, 189, 248, 0.4);
+        margin-bottom: 0.2rem;
+    }
+
+    .dossier-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .intel-row td {
+        padding: 0.4rem 0;
+        border-bottom: none;
+        min-height: var(--touch-min, 44px);
+    }
+}
+
+@media (max-width: 480px) {
+    .dossier-card {
+        padding: 1.25rem;
+    }
+}

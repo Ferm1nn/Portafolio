@@ -3,11 +3,8 @@ import { useRef, useState } from 'react';
 import { Section } from '../components/Section';
 import { profile } from '../data/portfolioData';
 import { Card } from '../components/Card';
-import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
-import { MobileBackground } from '../components/MobileBackground';
-import AmbientCyberLayer from '../components/AmbientCyberLayer';
 import { useMotion } from '../hooks/useMotion';
-import { useIsMobile } from '../hooks/useIsMobile';
+import { ContactBackground } from '../components/ContactBackground';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -15,7 +12,6 @@ export default function Contact() {
   const pageRef = useRef<HTMLDivElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [status, setStatus] = useState<FormStatus>('idle');
-  const isMobile = useIsMobile();
   useMotion(pageRef);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -52,9 +48,8 @@ export default function Contact() {
   };
 
   return (
-    <div ref={pageRef}>
-      <AmbientCyberLayer />
-      {isMobile ? <MobileBackground variant="mesh" /> : <ReactiveMeshBackground />}
+    <div ref={pageRef} className="relative z-0">
+      <ContactBackground />
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Contact</p>
@@ -62,95 +57,95 @@ export default function Contact() {
           <p className="lead">Share the context, stack, and desired outcomes. Responses stay practical and rooted in hands-on delivery.</p>
         </div>
       </div>
+      <div className="relative z-10">
+        <Section id="contact-info" eyebrow="Direct lines" title="Contact details">
+          <div className="grid two">
+            <Card tilt={false}>
+              <h3 data-tilt-layer="title">Email</h3>
+              <a className="lead" href={`mailto:${profile.email}`}>
+                {profile.email}
+              </a>
+              <p className="muted">Preferred channel for automation briefs, support requests, or availability checks.</p>
+            </Card>
+            <Card tilt={false}>
+              <h3 data-tilt-layer="title">LinkedIn</h3>
+              <a className="lead" href={profile.linkedin} target="_blank" rel="noreferrer">
+                {profile.linkedin}
+              </a>
+              <p className="muted">Connect for updates or to sync on work-in-progress items.</p>
+            </Card>
+          </div>
+          <div className="grid two">
+            <Card tilt={false}>
+              <h3 data-tilt-layer="title">Location</h3>
+              <p className="lead">{profile.location}</p>
+              <p className="muted">Remote-friendly for async collaboration.</p>
+            </Card>
 
-      <Section id="contact-info" eyebrow="Direct lines" title="Contact details">
-        <div className="grid two">
+          </div>
+        </Section>
+
+        <Section
+          id="contact-form"
+          eyebrow="Form"
+          title="Send a quick note"
+          description="Use email or LinkedIn for guaranteed delivery."
+        >
           <Card tilt={false}>
-            <h3 data-tilt-layer="title">Email</h3>
-            <a className="lead" href={`mailto:${profile.email}`}>
-              {profile.email}
-            </a>
-            <p className="muted">Preferred channel for automation briefs, support requests, or availability checks.</p>
+            {status === 'success' ? (
+              <div className="p-8 text-center">
+                <h3 className="text-2xl font-bold mb-4">Message sent!</h3>
+                <p className="muted mb-6">Thanks for reaching out. I'll get back to you shortly.</p>
+                <button onClick={() => setStatus('idle')} className="btn primary">Send another</button>
+              </div>
+            ) : (
+              <form ref={formRef} className="contact-form" onSubmit={handleSubmit}>
+                <label>
+                  Name
+                  <input name="name" type="text" placeholder="Your name" required disabled={status === 'submitting'} />
+                </label>
+                <label>
+                  Email
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    disabled={status === 'submitting'}
+                  />
+                </label>
+                <label>
+                  What do you need?
+                  <select name="topic" defaultValue="automation" disabled={status === 'submitting'}>
+                    <option value="automation">Automation build</option>
+                    <option value="Website build">Website build</option>
+                    <option value="consulting">IT Consulting</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label>
+                  Message
+                  <textarea
+                    name="message"
+                    rows={4}
+                    placeholder="Context, tools, goals"
+                    required
+                    disabled={status === 'submitting'}
+                  />
+                </label>
+
+                {status === 'error' && (
+                  <p className="text-red-500 mb-4">Something went wrong. Please try again or email directly.</p>
+                )}
+
+                <button type="submit" className="btn primary" disabled={status === 'submitting'}>
+                  {status === 'submitting' ? 'Sending...' : 'Send Message'}
+                </button>
+              </form>
+            )}
           </Card>
-          <Card tilt={false}>
-            <h3 data-tilt-layer="title">LinkedIn</h3>
-            <a className="lead" href={profile.linkedin} target="_blank" rel="noreferrer">
-              {profile.linkedin}
-            </a>
-            <p className="muted">Connect for updates or to sync on work-in-progress items.</p>
-          </Card>
-        </div>
-        <div className="grid two">
-          <Card tilt={false}>
-            <h3 data-tilt-layer="title">Location</h3>
-            <p className="lead">{profile.location}</p>
-            <p className="muted">Remote-friendly for async collaboration.</p>
-          </Card>
-
-        </div>
-      </Section>
-
-      <Section
-        id="contact-form"
-        eyebrow="Form"
-        title="Send a quick note"
-        description="Use email or LinkedIn for guaranteed delivery."
-      >
-        <Card tilt={false}>
-          {status === 'success' ? (
-            <div className="p-8 text-center">
-              <h3 className="text-2xl font-bold mb-4">Message sent!</h3>
-              <p className="muted mb-6">Thanks for reaching out. I'll get back to you shortly.</p>
-              <button onClick={() => setStatus('idle')} className="btn primary">Send another</button>
-            </div>
-          ) : (
-            <form ref={formRef} className="contact-form" onSubmit={handleSubmit}>
-              <label>
-                Name
-                <input name="name" type="text" placeholder="Your name" required disabled={status === 'submitting'} />
-              </label>
-              <label>
-                Email
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  disabled={status === 'submitting'}
-                />
-              </label>
-              <label>
-                What do you need?
-                <select name="topic" defaultValue="automation" disabled={status === 'submitting'}>
-                  <option value="automation">Automation build</option>
-                  <option value="Website build">Website build</option>
-                  <option value="consulting">IT Consulting</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-              <label>
-                Message
-                <textarea
-                  name="message"
-                  rows={4}
-                  placeholder="Context, tools, goals"
-                  required
-                  disabled={status === 'submitting'}
-                />
-              </label>
-
-              {status === 'error' && (
-                <p className="text-red-500 mb-4">Something went wrong. Please try again or email directly.</p>
-              )}
-
-              <button type="submit" className="btn primary" disabled={status === 'submitting'}>
-                {status === 'submitting' ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
-          )}
-        </Card>
-      </Section>
+        </Section>
+      </div>
     </div>
   );
 }
-

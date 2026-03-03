@@ -1,0 +1,1580 @@
+diff --git a/.env.example b/.env.example
+new file mode 100644
+index 0000000..dd272f9
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1,15 @@
++# Environment Variables Configuration
++# Copy this file to .env and replace the values with your actual secrets.
++# NEVER commit your actual .env file to version control.
++
++# --- Backend Monitoring (net_agent.py) ---
++MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/?appName=YourApp
++
++# --- Vercel Serverless Functions ---
++# Contact Form Webhook (api/contact.ts)
++CONTACT_WEBHOOK_URL=https://your-n8n-instance.com/webhook/contact
++CONTACT_WEBHOOK_TOKEN=your-secure-bearer-token
++CONTACT_WEBHOOK_TIMEOUT_MS=7000
++
++# Automation Flow Webhook (api/automation.ts)
++N8N_SENTINEL_URL=https://your-n8n-instance.com/webhook/sentinel
+diff --git a/.gitignore b/.gitignore
+index beedfe1..2f5a5d4 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -15,6 +15,7 @@ dist-ssr
+ # Environment variables
+ .env
+ .env.*
++!.env.example
+ .env.local
+ .env.production
+ 
+diff --git a/net_agent.py b/net_agent.py
+new file mode 100644
+index 0000000..b724499
+--- /dev/null
++++ b/net_agent.py
+@@ -0,0 +1,121 @@
++import os
++import pymongo
++import psutil
++import socket
++import time
++from datetime import datetime
++import sys
++
++# --- CONFIGURATION ---
++MONGO_URI = os.environ.get("MONGO_URI")
++if not MONGO_URI:
++    print("❌ Missing MONGO_URI environment variable. Exiting.")
++    sys.exit(1)
++DB_NAME = "portfolio_db"
++COLLECTION_NAME = "system_health"
++CHECK_INTERVAL = 10  # Seconds
++ZOOM_TARGET = "8.8.8.8"
++ZOOM_PORT = 53
++
++def get_db_collection():
++    try:
++        client = pymongo.MongoClient(MONGO_URI)
++        # Test the connection immediately
++        client.admin.command('ping')
++        db = client[DB_NAME]
++        return db[COLLECTION_NAME]
++    except Exception as e:
++        print(f"❌ Database Connection Error: {e}")
++        return None
++
++def check_internet(host=ZOOM_TARGET, port=ZOOM_PORT, timeout=3):
++    """
++    Pings Google DNS (8.8.8.8) to check connectivity and latency.
++    Returns (status, latency_ms)
++    """
++    start_time = time.time()
++    try:
++        # We use a socket connection as a "ping" equivalent because it's cross-platform and doesn't require ICMP permissions
++        socket.create_connection((host, port), timeout=timeout)
++        latency = (time.time() - start_time) * 1000
++        return "ONLINE", int(latency)
++    except OSError:
++        return "OFFLINE", 0
++
++def get_system_stats():
++    """
++    Returns CPU and RAM usage percentages.
++    """
++    cpu = int(psutil.cpu_percent(interval=None))
++    ram = int(psutil.virtual_memory().percent)
++    return cpu, ram
++
++def main():
++    print("--------------------------------------------------")
++    print("   🕵️  NET AGENT: System Health Monitor Initialized")
++    print("--------------------------------------------------")
++    # Safe printing of host
++    try:
++        host_print = MONGO_URI.split('@')[-1]
++    except:
++        host_print = "Unknown Host"
++        
++    print(f"Target: {host_print}") 
++    print(f"Interval: {CHECK_INTERVAL}s")
++    print("--------------------------------------------------\n")
++
++    collection = get_db_collection()
++    
++    # --- THE FIX IS HERE: Compare explicitly with None ---
++    if collection is None:
++        print("❌ Could not connect to MongoDB. Exiting.")
++        return
++
++    # Warm up psutil
++    psutil.cpu_percent(interval=None)
++
++    while True:
++        try:
++            # 1. Network Check
++            status, latency = check_internet()
++
++            # 2. System Check
++            cpu, ram = get_system_stats()
++
++            # 3. Create Payload
++            payload = {
++                "timestamp": datetime.now().isoformat(),
++                "status": status,
++                "latency": latency,
++                "cpu": cpu,
++                "ram": ram,
++                "node": "Portfolio-Agent-Local"
++            }
++
++            # 4. Push to MongoDB
++            collection.insert_one(payload)
++
++            # 5. Log Output
++            log_icon = "🚀" if status == "ONLINE" else "⚠️"
++            print(f"{log_icon} [{status}] Latency: {latency}ms | CPU: {cpu}% | RAM: {ram}% | Data pushed to Atlas.")
++
++        except Exception as e:
++            print(f"❌ Error in loop: {e}")
++        
++        # 6. Sleep
++        time.sleep(CHECK_INTERVAL)
++
++if __name__ == "__main__":
++    # Check dependencies hint
++    try:
++        import pymongo
++        import psutil
++    except ImportError:
++        print("❌ Missing dependencies! Run: pip install pymongo psutil")
++        sys.exit(1)
++        
++    try:
++        main()
++    except KeyboardInterrupt:
++        print("\n🛑 Agent stopped by user.")
++        sys.exit(0)
+diff --git a/public/Fermin_Espinoza_CV.pdf b/public/Fermin_Espinoza_CV.pdf
+deleted file mode 100644
+index 6a71c79..0000000
+--- a/public/Fermin_Espinoza_CV.pdf
++++ /dev/null
+@@ -1,64 +0,0 @@
+-            FERMÍN ANTONIO ESPINOZA GARCÍA
+-
+-San José, Costa Rica • +506 8708 8364 • fezgar12@gmail.com • linkedin.com/in/fermin-
+-                                                espinoza/
+-
+-PROFILE
+-
+-Systems Engineering & Cybersecurity student with 2+ years of hands-on networking
+-troubleshooting and practical experience supporting connected systems (frontends, backends,
+-APIs, and automation platforms). Strong at structured first-level troubleshooting, clear
+-documentation, and professional customer-focused communication. Fluent in English (C1) and
+-Spanish (native).
+-
+-TECHNICAL SKILLS
+-
+-IT Support & Troubleshooting: (cabling, speed/duplex, IP/DNS/DHCP), connectivity validation,
+-incident documentation, escalation readiness.
+-Networking: TCP/IP, IPv4 subnetting, routing & switching fundamentals, STP, DHCP, DNS
+-(client-side), NAT/PAT, WLAN fundamentals, ACL concepts.
+-Automation / Systems: API integrations, authentication concepts, Supabase, n8n, basic Python
+-scripting for automation.
+-Languages: English (C1), Spanish (Native)
+-
+-EXPERIENCE
+-
+-AI Automation Developer (Freelance) 2025 – Present
+-
+-• Designed and deployed automation solutions integrating Supabase, n8n, and OpenAI APIs to
+-    connect systems reliably.
+-
+-• Troubleshot authentication, API access, permissions, and integration failures; delivered root-
+-    cause fixes and preventative improvements.
+-
+-• Created operational workflows for lead intake, onboarding, and email processing; improved
+-    reliability and reduced manual work.
+-
+-• Documented workflows, changes, and expected behavior to enable support, maintenance, and
+-    faster handoffs.
+-
+-Networking Labs, Cisco Networking Academy / Personal Labs Virtual & Physical — Costa
+-
+-Rica                                                                                              2022 – 2025
+-
+-• Set up and supported LAN & Wi‑Fi lab environments (SSID/security, DHCP/static IPs);
+-    applied STP to prevent loops.
+-
+-• Performed structured L1/L2/L3 troubleshooting (cabling, duplex/speed, IP/DNS/DHCP) and
+-    documented steps/results for repeatability.
+-
+-• Configured and validated ACLs, NAT/PAT, and DHCP; verified least‑privilege access and
+-    connectivity outcomes.
+-EDUCATION
+-
+-B.Sc. Systems Engineering (In progress), Universidad Fidélitas Costa Rica
+-High School Diploma -- 2024
+-
+-CERTIFICATIONS & COURSES
+-• Cisco CCNA 1 (2024) — Network architectures, IP addressing, Ethernet fundamentals
+-• Cisco CCNA 2 (2024) — Switching, routing, and wireless fundamentals
+-• Cisco CCNA 3 (2025) — Enterprise networking, security, and automation
+-• Cisco Networking Essentials (2023)
+-• Python Programming (2025) — Scripting, data structures, automation fundamentals
+-• Introduction to IoT (Cisco NetAcad) (2025)
+-
+diff --git a/src/components/AuroraBackground.tsx b/src/components/AuroraBackground.tsx
+index aeacbd7..9f740bc 100644
+--- a/src/components/AuroraBackground.tsx
++++ b/src/components/AuroraBackground.tsx
+@@ -35,8 +35,8 @@ export const AuroraBackground = () => {
+ 
+         // --- Initialization ---
+         const init = () => {
+-            width = canvas.width = window.innerWidth;
+-            height = canvas.height = window.innerHeight;
++            width = canvas.width = canvas.clientWidth;
++            height = canvas.height = canvas.clientHeight;
+ 
+             const cols = Math.ceil(width / SPACING_X) + 2;
+             const rows = Math.ceil(height / SPACING_Y) + 2;
+@@ -147,10 +147,13 @@ export const AuroraBackground = () => {
+         init();
+         gsap.ticker.add(render);
+         window.addEventListener('resize', handleResize);
++        const resizeObserver = new ResizeObserver(() => handleResize());
++        resizeObserver.observe(canvas);
+         window.addEventListener('mousemove', onMouseMove);
+ 
+         return () => {
+             window.removeEventListener('resize', handleResize);
++            resizeObserver.disconnect();
+             window.removeEventListener('mousemove', onMouseMove);
+             gsap.ticker.remove(render);
+             if (mouseTimeout) clearTimeout(mouseTimeout);
+diff --git a/src/components/CircuitBackground.tsx b/src/components/CircuitBackground.tsx
+index e93b1fd..4eeab42 100644
+--- a/src/components/CircuitBackground.tsx
++++ b/src/components/CircuitBackground.tsx
+@@ -35,12 +35,14 @@ export function CircuitBackground() {
+ 
+         // Resize handler for both canvases
+         const resize = () => {
+-            bgCanvas.width = window.innerWidth;
+-            bgCanvas.height = window.innerHeight;
+-            uiCanvas.width = window.innerWidth;
+-            uiCanvas.height = window.innerHeight;
++            bgCanvas.width = bgCanvas.clientWidth;
++            bgCanvas.height = bgCanvas.clientHeight;
++            uiCanvas.width = uiCanvas.clientWidth;
++            uiCanvas.height = uiCanvas.clientHeight;
+         };
+         window.addEventListener('resize', resize);
++        const resizeObserver = new ResizeObserver(() => resize());
++        resizeObserver.observe(bgCanvas);
+         resize();
+ 
+         const handleMouseMove = (e: MouseEvent) => {
+@@ -157,6 +159,7 @@ export function CircuitBackground() {
+ 
+         return () => {
+             window.removeEventListener('resize', resize);
++            resizeObserver.disconnect();
+             window.removeEventListener('mousemove', handleMouseMove);
+             gsap.ticker.remove(tick);
+         };
+diff --git a/src/components/ExperienceBackground.tsx b/src/components/ExperienceBackground.tsx
+index 0a2378f..9eeeff2 100644
+--- a/src/components/ExperienceBackground.tsx
++++ b/src/components/ExperienceBackground.tsx
+@@ -20,8 +20,8 @@ export default function ExperienceBackground() {
+         if (!ctx) return;
+ 
+         let animationFrameId: number;
+-        let width = window.innerWidth;
+-        let height = window.innerHeight;
++        let width = canvas.clientWidth;
++        let height = canvas.clientHeight;
+ 
+         // Configuration
+         const COLUMN_SPACING = 50; // px
+@@ -41,8 +41,8 @@ export default function ExperienceBackground() {
+ 
+         // Resize Handler
+         const handleResize = () => {
+-            width = window.innerWidth;
+-            height = window.innerHeight;
++            width = canvas.clientWidth;
++            height = canvas.clientHeight;
+             canvas.width = width;
+             canvas.height = height;
+ 
+@@ -176,9 +176,12 @@ export default function ExperienceBackground() {
+         render();
+ 
+         window.addEventListener('resize', handleResize);
++        const resizeObserver = new ResizeObserver(() => handleResize());
++        resizeObserver.observe(canvas);
+ 
+         return () => {
+             window.removeEventListener('resize', handleResize);
++            resizeObserver.disconnect();
+             cancelAnimationFrame(animationFrameId);
+         };
+     }, []);
+diff --git a/src/components/HexGridBackground.tsx b/src/components/HexGridBackground.tsx
+index 6cd534b..c6a475d 100644
+--- a/src/components/HexGridBackground.tsx
++++ b/src/components/HexGridBackground.tsx
+@@ -178,8 +178,8 @@ export function HexGridBackground() {
+         };
+ 
+         const handleResize = () => {
+-            canvas.width = window.innerWidth;
+-            canvas.height = window.innerHeight;
++            canvas.width = canvas.clientWidth;
++            canvas.height = canvas.clientHeight;
+             initGrid();
+         };
+ 
+@@ -189,27 +189,22 @@ export function HexGridBackground() {
+ 
+         // Event Listeners
+         window.addEventListener('resize', handleResize);
+-        window.addEventListener('mousemove', (e) => {
+-            // Need mouse pos relative to canvas if canvas is not fixed full screen
+-            // If canvas is absolute in a relative container, e.clientX might differ if scrolled?
+-            // User says "calculate distance from cursor".
+-            // If the grid is "locked in place" (fixed), clientX/Y is fine.
+-            // If it scrolls, we need relative pos.
+-            // Let's assume it fills the viewport or we use getBoundingClientRect.
++        const resizeObserver = new ResizeObserver(() => handleResize());
++        resizeObserver.observe(canvas);
++
++        const handleMouseMove = (e: MouseEvent) => {
+             const rect = canvas.getBoundingClientRect();
+             mouseRef.current = {
+                 x: e.clientX - rect.left,
+                 y: e.clientY - rect.top
+             };
+-        });
++        };
++        window.addEventListener('mousemove', handleMouseMove);
+ 
+         return () => {
+             window.removeEventListener('resize', handleResize);
+-            // Remove mouse listener? It was window listener.
+-            // Better to attach mousemove to window to catch fast movements, but coordinate calc needs care.
+-            // Actually, if we attach to canvas, we miss when mouse leaves canvas?
+-            // Component specific interactions usually attach to element.
+-            // "Trigger: On mousemove"
++            window.removeEventListener('mousemove', handleMouseMove);
++            resizeObserver.disconnect();
+             if (requestRef.current !== null) cancelAnimationFrame(requestRef.current);
+         };
+     }, []);
+diff --git a/src/components/MobileBackground.tsx b/src/components/MobileBackground.tsx
+new file mode 100644
+index 0000000..c9616a3
+--- /dev/null
++++ b/src/components/MobileBackground.tsx
+@@ -0,0 +1,504 @@
++import React, { useRef, useEffect, useState } from 'react';
++import gsap from 'gsap';
++import { ScrollTrigger } from 'gsap/ScrollTrigger';
++
++gsap.registerPlugin(ScrollTrigger);
++
++/**
++ * MobileBackground — CSS-only backgrounds for mobile viewports.
++ *
++ * Two modes:
++ *   1. Static variants (mesh, hex, circuit, aurora) — used on inner pages
++ *   2. Scroll-reactive "network" variant — used on Home page, ties background
++ *      colors and animation speed to scroll position via GSAP ScrollTrigger
++ *
++ * Scroll phases for "network" variant:
++ *   Phase 1 (Hero)       → Cyber blue   #06b6d4 / #0f3a68
++ *   Phase 2 (Methodology) → Matrix green #00ffcc / #0a3d2a
++ *   Phase 3 (CTA)        → Threat red   #ff3366 / #3d0a1a
++ *
++ * Uses 100dvh, position: fixed, CSS transforms/opacity for GPU compositing.
++ */
++
++type MobileBackgroundVariant = 'network' | 'mesh' | 'hex' | 'circuit' | 'aurora';
++
++interface MobileBackgroundProps {
++    variant: MobileBackgroundVariant;
++}
++
++/* ════════════════════════ Shared ════════════════════════ */
++
++const baseStyle: React.CSSProperties = {
++    position: 'fixed',
++    inset: 0,
++    width: '100vw',
++    height: '100dvh',
++    pointerEvents: 'none',
++    zIndex: -1,
++    overflow: 'hidden',
++};
++
++/* ════════════════════════ Static Keyframes ════════════════════════ */
++
++const staticKeyframes = `
++@keyframes mb-pulse {
++  0%, 100% { opacity: 0.4; transform: scale(1); }
++  50%      { opacity: 0.75; transform: scale(1.12); }
++}
++@keyframes mb-float {
++  0%   { transform: translate(0, 0) rotate(0deg); }
++  33%  { transform: translate(12px, -18px) rotate(1deg); }
++  66%  { transform: translate(-8px, 10px) rotate(-0.5deg); }
++  100% { transform: translate(0, 0) rotate(0deg); }
++}
++@keyframes mb-rise {
++  0%   { transform: translateY(0) scale(1); opacity: 0.3; }
++  50%  { transform: translateY(-15px) scale(1.2); opacity: 0.6; }
++  100% { transform: translateY(0) scale(1); opacity: 0.3; }
++}
++@keyframes mb-scan {
++  0%   { top: -10%; opacity: 0; }
++  10%  { opacity: 0.8; }
++  90%  { opacity: 0.8; }
++  100% { top: 110%; opacity: 0; }
++}
++@keyframes mb-drop {
++  0%   { top: -20%; opacity: 0; }
++  10%  { opacity: 1; }
++  80%  { opacity: 1; }
++  100% { top: 120%; opacity: 0; }
++}
++@keyframes mb-aurora {
++  0%   { background-position: 0% 50%; }
++  50%  { background-position: 100% 50%; }
++  100% { background-position: 0% 50%; }
++}
++@keyframes mb-breathe {
++  0%, 100% { opacity: 0.15; box-shadow: 0 0 4px rgba(6,182,212,0.2); }
++  50%      { opacity: 0.5; box-shadow: 0 0 12px rgba(6,182,212,0.5); }
++}
++`;
++
++/* ══════════════════════════════════════════════════════════════════
++   SCROLL-REACTIVE NETWORK VARIANT (Home page only)
++   ══════════════════════════════════════════════════════════════════ */
++
++interface ScrollPhaseColors {
++    primary: string;      // Node / glow color
++    primaryGlow: string;  // Box-shadow glow
++    glowBg: string;       // Radial gradient center
++    dotGrid: string;      // Dot pattern fill
++    lineSvg: string;      // SVG line stroke
++}
++
++const PHASES: ScrollPhaseColors[] = [
++    // Phase 0 — Cyber Blue (Hero)
++    {
++        primary: '#06b6d4',
++        primaryGlow: 'rgba(6,182,212,0.6)',
++        glowBg: 'rgba(6,182,212,0.14)',
++        dotGrid: 'rgba(6,182,212,0.2)',
++        lineSvg: 'rgba(6,182,212,0.08)',
++    },
++    // Phase 1 — Matrix Green (Methodology / System Architecture)
++    {
++        primary: '#00ffcc',
++        primaryGlow: 'rgba(0,255,204,0.6)',
++        glowBg: 'rgba(0,255,204,0.14)',
++        dotGrid: 'rgba(0,255,204,0.2)',
++        lineSvg: 'rgba(0,255,204,0.08)',
++    },
++    // Phase 2 — Threat Red (Sentinel / CTA)
++    {
++        primary: '#ff3366',
++        primaryGlow: 'rgba(255,51,102,0.6)',
++        glowBg: 'rgba(255,51,102,0.14)',
++        dotGrid: 'rgba(255,51,102,0.2)',
++        lineSvg: 'rgba(255,51,102,0.08)',
++    },
++];
++
++const ScrollReactiveNetwork: React.FC = () => {
++    const containerRef = useRef<HTMLDivElement>(null);
++    const glowRef = useRef<HTMLDivElement>(null);
++    const floatGlowRef = useRef<HTMLDivElement>(null);
++    const dotGridRef = useRef<HTMLDivElement>(null);
++    const nodesRef = useRef<(HTMLDivElement | null)[]>([]);
++    const linesRef = useRef<SVGSVGElement>(null);
++    const scanLineRef = useRef<HTMLDivElement>(null);
++
++    // Track current phase for animation speed changes
++    const [activePhase, setActivePhase] = useState(0);
++
++    useEffect(() => {
++        const ctx = gsap.context(() => {
++            // ─── Phase triggers ───
++            // We target sections inside HomeContent by their class/structure.
++            // Hero = #hero, Methodology = .methodology-section, CTA = last section
++
++            // Phase 1: Blue → Green (when methodology section enters)
++            ScrollTrigger.create({
++                trigger: '.methodology-section',
++                start: 'top 80%',
++                end: 'bottom 20%',
++                onEnter: () => animateToPhase(1),
++                onLeaveBack: () => animateToPhase(0),
++            });
++
++            // Phase 2: Green → Red (when service cards / CTA enters)
++            ScrollTrigger.create({
++                trigger: '.service-card',
++                start: 'top 60%',
++                end: 'bottom 20%',
++                onEnter: () => animateToPhase(2),
++                onLeaveBack: () => animateToPhase(1),
++            });
++        });
++
++        return () => ctx.revert();
++    }, []);
++
++    const animateToPhase = (phaseIndex: number) => {
++        const phase = PHASES[phaseIndex];
++        setActivePhase(phaseIndex);
++
++        // ─── Radial glow ───
++        if (glowRef.current) {
++            gsap.to(glowRef.current, {
++                background: `radial-gradient(ellipse at center, ${phase.glowBg} 0%, transparent 60%)`,
++                duration: 1.2,
++                ease: 'power2.inOut',
++            });
++        }
++
++        // ─── Floating accent glow ───
++        if (floatGlowRef.current) {
++            gsap.to(floatGlowRef.current, {
++                background: `radial-gradient(ellipse at center, ${phase.glowBg.replace('0.14', '0.1')} 0%, transparent 65%)`,
++                duration: 1.2,
++                ease: 'power2.inOut',
++            });
++        }
++
++        // ─── Dot grid ───
++        if (dotGridRef.current) {
++            gsap.to(dotGridRef.current, {
++                backgroundImage: `radial-gradient(circle, ${phase.dotGrid} 1px, transparent 1px)`,
++                duration: 1.2,
++                ease: 'power2.inOut',
++            });
++        }
++
++        // ─── Connection nodes ───
++        nodesRef.current.forEach((node, i) => {
++            if (!node) return;
++            gsap.to(node, {
++                background: phase.primary,
++                boxShadow: `0 0 12px ${phase.primaryGlow}, 0 0 24px ${phase.primaryGlow.replace('0.6', '0.3')}`,
++                duration: 0.8 + i * 0.1,
++                ease: 'power2.inOut',
++            });
++        });
++
++        // ─── SVG connection lines ───
++        if (linesRef.current) {
++            const lines = linesRef.current.querySelectorAll('line');
++            lines.forEach((line) => {
++                gsap.to(line, {
++                    attr: { stroke: phase.primary },
++                    duration: 1.0,
++                    ease: 'power2.inOut',
++                });
++            });
++        }
++
++        // ─── Scan line (shows on phase 1+, hidden on phase 0) ───
++        if (scanLineRef.current) {
++            if (phaseIndex > 0) {
++                gsap.to(scanLineRef.current, {
++                    opacity: 1,
++                    background: `linear-gradient(90deg, transparent 0%, ${phase.primary}99 30%, ${phase.primary} 50%, ${phase.primary}99 70%, transparent 100%)`,
++                    boxShadow: `0 0 20px ${phase.primaryGlow}, 0 0 60px ${phase.primaryGlow.replace('0.6', '0.15')}`,
++                    duration: 0.8,
++                    ease: 'power2.inOut',
++                });
++            } else {
++                gsap.to(scanLineRef.current, {
++                    opacity: 0,
++                    duration: 0.5,
++                });
++            }
++        }
++    };
++
++    // Node configuration
++    const nodes = [
++        { top: '15%', left: '20%', delay: '0s', size: 6 },
++        { top: '35%', left: '75%', delay: '2s', size: 5 },
++        { top: '60%', left: '40%', delay: '4s', size: 7 },
++        { top: '80%', left: '85%', delay: '1s', size: 4 },
++        { top: '45%', left: '10%', delay: '3s', size: 5 },
++        { top: '70%', left: '60%', delay: '5s', size: 6 },
++    ];
++
++    // Animation speed based on phase
++    const speedMultiplier = activePhase === 0 ? 1 : activePhase === 1 ? 0.7 : 1.3;
++
++    return (
++        <div ref={containerRef} style={{ ...baseStyle, background: '#020617' }}>
++            {/* Primary radial glow */}
++            <div
++                ref={glowRef}
++                style={{
++                    position: 'absolute', top: '20%', left: '50%',
++                    width: '130vw', height: '55vh',
++                    transform: 'translateX(-50%)',
++                    background: `radial-gradient(ellipse at center, ${PHASES[0].glowBg} 0%, transparent 60%)`,
++                    animation: `mb-pulse ${7 * speedMultiplier}s ease-in-out infinite`,
++                }}
++            />
++
++            {/* Floating accent glow */}
++            <div
++                ref={floatGlowRef}
++                style={{
++                    position: 'absolute', bottom: '5%', right: '-5%',
++                    width: '55vw', height: '35vh',
++                    background: `radial-gradient(ellipse at center, ${PHASES[0].glowBg.replace('0.14', '0.1')} 0%, transparent 65%)`,
++                    animation: `mb-float ${16 * speedMultiplier}s ease-in-out infinite`,
++                }}
++            />
++
++            {/* Dot particle field */}
++            <div
++                ref={dotGridRef}
++                style={{
++                    position: 'absolute', inset: 0,
++                    backgroundImage: `radial-gradient(circle, ${PHASES[0].dotGrid} 1px, transparent 1px)`,
++                    backgroundSize: '28px 28px',
++                    opacity: 0.5,
++                }}
++            />
++
++            {/* Floating connection nodes */}
++            {nodes.map((node, i) => (
++                <div
++                    key={i}
++                    ref={(el) => { nodesRef.current[i] = el; }}
++                    style={{
++                        position: 'absolute', top: node.top, left: node.left,
++                        width: node.size, height: node.size,
++                        borderRadius: '50%',
++                        background: PHASES[0].primary,
++                        boxShadow: `0 0 12px ${PHASES[0].primaryGlow}, 0 0 24px ${PHASES[0].primaryGlow.replace('0.6', '0.3')}`,
++                        animation: `mb-rise ${(5 + i) * speedMultiplier}s ease-in-out ${node.delay} infinite`,
++                    }}
++                />
++            ))}
++
++            {/* SVG connection lines */}
++            <svg
++                ref={linesRef}
++                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.12 }}
++            >
++                <line x1="20%" y1="15%" x2="75%" y2="35%" stroke={PHASES[0].primary} strokeWidth="0.5" />
++                <line x1="75%" y1="35%" x2="40%" y2="60%" stroke={PHASES[0].primary} strokeWidth="0.5" />
++                <line x1="40%" y1="60%" x2="10%" y2="45%" stroke={PHASES[0].primary} strokeWidth="0.5" />
++                <line x1="10%" y1="45%" x2="20%" y2="15%" stroke={PHASES[0].primary} strokeWidth="0.5" />
++                <line x1="40%" y1="60%" x2="85%" y2="80%" stroke={PHASES[0].primary} strokeWidth="0.5" />
++                <line x1="60%" y1="70%" x2="85%" y2="80%" stroke={PHASES[0].primary} strokeWidth="0.5" />
++            </svg>
++
++            {/* Scan line — appears in phase 1+, cycles top to bottom */}
++            <div
++                ref={scanLineRef}
++                style={{
++                    position: 'absolute', left: 0, width: '100%', height: '2px',
++                    background: `linear-gradient(90deg, transparent 0%, ${PHASES[0].primary}99 30%, ${PHASES[0].primary} 50%, ${PHASES[0].primary}99 70%, transparent 100%)`,
++                    boxShadow: `0 0 20px ${PHASES[0].primaryGlow}, 0 0 60px ${PHASES[0].primaryGlow.replace('0.6', '0.15')}`,
++                    animation: 'mb-scan 6s linear infinite',
++                    opacity: 0,
++                }}
++            />
++        </div>
++    );
++};
++
++/* ══════════════════════════════════════════════════════════════════
++   STATIC VARIANTS (inner pages)
++   ══════════════════════════════════════════════════════════════════ */
++
++const MeshVariant: React.FC = () => (
++    <div style={{ ...baseStyle, background: '#020617' }}>
++        <div style={{
++            position: 'absolute', inset: 0,
++            backgroundImage: `linear-gradient(rgba(6,182,212,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.04) 1px, transparent 1px)`,
++            backgroundSize: '40px 40px',
++        }} />
++        {[
++            { top: '20%', left: '25%', delay: '0s' }, { top: '20%', left: '65%', delay: '1.5s' },
++            { top: '50%', left: '45%', delay: '0.8s' }, { top: '50%', left: '85%', delay: '2.5s' },
++            { top: '80%', left: '15%', delay: '3s' }, { top: '80%', left: '55%', delay: '1.2s' },
++            { top: '35%', left: '5%', delay: '2s' }, { top: '65%', left: '75%', delay: '0.5s' },
++        ].map((node, i) => (
++            <div key={i} style={{
++                position: 'absolute', top: node.top, left: node.left,
++                width: 4, height: 4, borderRadius: '50%', background: '#06b6d4',
++                animation: `mb-breathe ${3 + (i % 3)}s ease-in-out ${node.delay} infinite`,
++            }} />
++        ))}
++        <div style={{
++            position: 'absolute', top: '30%', left: '50%',
++            width: '120vw', height: '50vh', transform: 'translateX(-50%)',
++            background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.08) 0%, transparent 55%)',
++            animation: 'mb-pulse 10s ease-in-out infinite',
++        }} />
++        <div style={{
++            position: 'absolute', top: '0', right: '-10%',
++            width: '50vw', height: '30vh',
++            background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.07) 0%, transparent 60%)',
++            animation: 'mb-float 18s ease-in-out infinite',
++        }} />
++    </div>
++);
++
++const HexVariant: React.FC = () => (
++    <div style={{ ...baseStyle, background: '#020617' }}>
++        <div style={{
++            position: 'absolute', inset: 0,
++            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='rgba(34,211,238,0.07)' stroke-width='1'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='rgba(34,211,238,0.04)' stroke-width='1'/%3E%3C/svg%3E")`,
++            backgroundSize: '56px 100px', opacity: 0.9,
++        }} />
++        <div style={{
++            position: 'absolute', left: 0, width: '100%', height: '2px',
++            background: 'linear-gradient(90deg, transparent 0%, rgba(34,211,238,0.6) 30%, rgba(34,211,238,0.8) 50%, rgba(34,211,238,0.6) 70%, transparent 100%)',
++            boxShadow: '0 0 20px rgba(34,211,238,0.4), 0 0 60px rgba(34,211,238,0.15)',
++            animation: 'mb-scan 8s linear infinite',
++        }} />
++        <div style={{
++            position: 'absolute', top: '10%', left: '50%',
++            width: '100vw', height: '35vh', transform: 'translateX(-50%)',
++            background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.1) 0%, transparent 55%)',
++            animation: 'mb-pulse 9s ease-in-out infinite',
++        }} />
++        <div style={{
++            position: 'absolute', bottom: '15%', left: '-5%',
++            width: '45vw', height: '25vh',
++            background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.06) 0%, transparent 60%)',
++            animation: 'mb-float 14s ease-in-out infinite',
++        }} />
++    </div>
++);
++
++const CircuitVariant: React.FC = () => (
++    <div style={{ ...baseStyle, background: '#020617' }}>
++        <div style={{
++            position: 'absolute', inset: 0,
++            backgroundImage: `
++        linear-gradient(0deg, transparent 49.5%, rgba(34,211,238,0.035) 49.5%, rgba(34,211,238,0.035) 50.5%, transparent 50.5%),
++        linear-gradient(90deg, transparent 49.5%, rgba(34,211,238,0.025) 49.5%, rgba(34,211,238,0.025) 50.5%, transparent 50.5%)
++      `,
++            backgroundSize: '55px 55px',
++        }} />
++        {[
++            { left: '15%', delay: '0s', dur: '6s', width: 2, color: 'rgba(34,211,238,0.5)', height: '80px' },
++            { left: '35%', delay: '2s', dur: '8s', width: 1.5, color: 'rgba(34,211,238,0.4)', height: '60px' },
++            { left: '55%', delay: '1s', dur: '7s', width: 2, color: 'rgba(34,211,238,0.6)', height: '100px' },
++            { left: '75%', delay: '3s', dur: '5s', width: 1.5, color: 'rgba(34,211,238,0.35)', height: '50px' },
++            { left: '90%', delay: '4s', dur: '9s', width: 1, color: 'rgba(34,211,238,0.3)', height: '70px' },
++            { left: '25%', delay: '5s', dur: '7.5s', width: 1.5, color: 'rgba(168,85,247,0.3)', height: '65px' },
++            { left: '65%', delay: '2.5s', dur: '6.5s', width: 1, color: 'rgba(168,85,247,0.25)', height: '55px' },
++        ].map((drop, i) => (
++            <div key={i} style={{
++                position: 'absolute', left: drop.left,
++                width: drop.width, height: drop.height,
++                background: `linear-gradient(to bottom, ${drop.color}, transparent)`,
++                borderRadius: '0 0 2px 2px',
++                animation: `mb-drop ${drop.dur} linear ${drop.delay} infinite`,
++            }} />
++        ))}
++        {[
++            { top: '20%', left: '15%' }, { top: '45%', left: '55%' },
++            { top: '70%', left: '35%' }, { top: '30%', left: '75%' }, { top: '85%', left: '90%' },
++        ].map((node, i) => (
++            <div key={`node-${i}`} style={{
++                position: 'absolute', top: node.top, left: node.left,
++                width: 6, height: 6, borderRadius: '1px',
++                border: '1px solid rgba(34,211,238,0.3)',
++                animation: `mb-breathe ${4 + i}s ease-in-out ${i * 0.7}s infinite`,
++            }} />
++        ))}
++        <div style={{
++            position: 'absolute', top: '40%', left: '50%',
++            width: '100vw', height: '40vh', transform: 'translateX(-50%)',
++            background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.06) 0%, transparent 50%)',
++            animation: 'mb-pulse 12s ease-in-out infinite',
++        }} />
++    </div>
++);
++
++const AuroraVariant: React.FC = () => (
++    <div style={{
++        ...baseStyle,
++        background: 'linear-gradient(160deg, #020617 0%, #0c1222 35%, #0a0f1f 65%, #020617 100%)',
++    }}>
++        <div style={{
++            position: 'absolute', inset: 0,
++            background: 'linear-gradient(270deg, rgba(6,182,212,0.1), rgba(168,85,247,0.08), rgba(6,182,212,0.06), rgba(168,85,247,0.1))',
++            backgroundSize: '400% 400%',
++            animation: 'mb-aurora 20s ease infinite',
++        }} />
++        <div style={{
++            position: 'absolute', inset: 0,
++            backgroundImage: 'radial-gradient(circle, rgba(6,182,212,0.12) 1px, transparent 1px)',
++            backgroundSize: '25px 25px', opacity: 0.5,
++            animation: 'mb-float 25s ease-in-out infinite',
++        }} />
++        <div style={{
++            position: 'absolute', inset: 0,
++            backgroundImage: 'radial-gradient(circle, rgba(168,85,247,0.1) 1px, transparent 1px)',
++            backgroundSize: '25px 25px', backgroundPosition: '12px 12px', opacity: 0.4,
++            animation: 'mb-float 30s ease-in-out 2s infinite reverse',
++        }} />
++        <div style={{
++            position: 'absolute', top: '35%', left: '50%',
++            width: '100vw', height: '45vh', transform: 'translateX(-50%)',
++            background: 'radial-gradient(ellipse at center, rgba(168,85,247,0.08) 0%, transparent 55%)',
++            animation: 'mb-pulse 11s ease-in-out infinite',
++        }} />
++    </div>
++);
++
++/* ════════════════════════ Variant Map ════════════════════════ */
++
++const STATIC_VARIANT_MAP: Record<string, React.FC> = {
++    mesh: MeshVariant,
++    hex: HexVariant,
++    circuit: CircuitVariant,
++    aurora: AuroraVariant,
++};
++
++/* ════════════════════════ Public Component ════════════════════════ */
++
++export function MobileBackground({ variant }: MobileBackgroundProps) {
++    // Network variant uses the scroll-reactive version
++    if (variant === 'network') {
++        return (
++            <>
++                <style>{staticKeyframes}</style>
++                <ScrollReactiveNetwork />
++            </>
++        );
++    }
++
++    // All other variants use static backgrounds
++    const Variant = STATIC_VARIANT_MAP[variant];
++    if (!Variant) return null;
++
++    return (
++        <>
++            <style>{staticKeyframes}</style>
++            <Variant />
++        </>
++    );
++}
+diff --git a/src/components/MobilePortfolio.tsx b/src/components/MobilePortfolio.tsx
+new file mode 100644
+index 0000000..9d86f0f
+--- /dev/null
++++ b/src/components/MobilePortfolio.tsx
+@@ -0,0 +1,288 @@
++import { useRef, useState } from 'react';
++import { Link } from 'react-router-dom';
++import gsap from 'gsap';
++import { ScrollTrigger } from 'gsap/ScrollTrigger';
++import { useGSAP } from '@gsap/react';
++import { Zap, Router, Database } from 'lucide-react';
++import { TECH_STACK, HIGHLIGHT_CARDS } from '../data/homeData';
++import SystemCheckOverlay from './SystemCheckOverlay';
++import { SentinelToast } from './SentinelToast';
++
++gsap.registerPlugin(ScrollTrigger);
++
++/**
++ * MobilePortfolio — Mobile-optimized Home page content.
++ *
++ * Renders all Home sections in a single-column mobile-native layout that
++ * scrolls cleanly over the fixed MobileBackground. Preserves the CSS class
++ * names (.methodology-section, .tilt-card, .service-card, etc.) so the
++ * scroll-reactive background color phases continue to trigger correctly.
++ */
++export default function MobilePortfolio() {
++    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
++    const [showSentinel, setShowSentinel] = useState(false);
++    const containerRef = useRef<HTMLDivElement>(null);
++    const marqueeRef = useRef<HTMLDivElement>(null);
++
++    useGSAP(() => {
++        // ─── Sentinel Toast trigger ───
++        ScrollTrigger.create({
++            trigger: containerRef.current,
++            start: 'top 60%',
++            onEnter: () => {
++                const hasSeen = sessionStorage.getItem('has_seen_project_spotlight');
++                if (!hasSeen) {
++                    setShowSentinel(true);
++                    sessionStorage.setItem('has_seen_project_spotlight', 'true');
++                }
++            },
++            once: true,
++        });
++
++        // ─── Methodology text reveal ───
++        const methodTexts = gsap.utils.toArray('.methodology-text');
++        gsap.set(methodTexts, { opacity: 0, y: 16 });
++        ScrollTrigger.create({
++            trigger: '.methodology-section',
++            start: 'top 85%',
++            onEnter: () => {
++                gsap.to(methodTexts, {
++                    opacity: 1, y: 0, duration: 1,
++                    stagger: 0.2, ease: 'expo.out',
++                });
++            },
++            once: true,
++        });
++
++        // ─── Tilt cards entrance ───
++        const tiltCards = gsap.utils.toArray('.tilt-card');
++        gsap.set(tiltCards, { opacity: 0, x: 40 });
++        ScrollTrigger.create({
++            trigger: '.tilt-cards-container',
++            start: 'top 85%',
++            onEnter: () => {
++                gsap.to(tiltCards, {
++                    opacity: 1, x: 0, duration: 1,
++                    stagger: 0.2, ease: 'expo.out',
++                });
++            },
++            once: true,
++        });
++
++        // ─── Tech stack marquee ───
++        if (marqueeRef.current) {
++            gsap.to(marqueeRef.current, {
++                xPercent: -50, ease: 'none',
++                duration: 18, repeat: -1,
++            });
++        }
++
++        // ─── Service cards entrance ───
++        const cardEls = gsap.utils.toArray('.service-card');
++        gsap.set(cardEls, { opacity: 0, y: 30 });
++        ScrollTrigger.create({
++            trigger: '.service-cards-container',
++            start: 'top 85%',
++            onEnter: () => {
++                gsap.to(cardEls, {
++                    y: 0, opacity: 1, duration: 1.2,
++                    stagger: 0.2, ease: 'expo.out',
++                });
++            },
++            once: true,
++        });
++
++        // ─── CTA pulse ───
++        const ctaBtn = document.querySelector('.mobile-cta-btn');
++        if (ctaBtn) {
++            gsap.to(ctaBtn, {
++                scale: 1.04,
++                boxShadow: '0 0 18px rgba(6,182,212,0.5)',
++                duration: 1.5, repeat: -1, yoyo: true,
++                ease: 'sine.inOut',
++            });
++        }
++    }, { scope: containerRef });
++
++    return (
++        <div ref={containerRef} className="relative z-10 w-full overflow-x-hidden">
++
++            {/* Toast */}
++            {showSentinel && <SentinelToast />}
++
++            {/* ══════════════ SECTION: HERO ══════════════ */}
++            <section
++                id="hero"
++                className="relative w-full flex items-center justify-center overflow-hidden bg-transparent"
++                style={{ minHeight: '100dvh', paddingTop: '80px' }}
++            >
++                <div className="text-center px-5 max-w-md mx-auto flex flex-col items-center gap-4">
++                    <p className="text-green-400 text-xs tracking-[0.2em] uppercase font-bold font-mono">
++                        Network & Cybersecurity Analyst
++                    </p>
++
++                    <h1
++                        className="text-4xl font-bold font-hud tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 leading-[1.15]"
++                        style={{ textShadow: '0 0 10px rgba(56,189,248,0.4)' }}
++                    >
++                        Fermin Espinoza
++                    </h1>
++
++                    <p className="text-slate-400 text-sm leading-relaxed font-light max-w-xs">
++                        Systems Engineering student specializing in secure networking, automation, and L1-L3 technical support.
++                    </p>
++
++                    <div className="mt-4">
++                        <Link
++                            to="/contact"
++                            className="inline-flex items-center justify-center bg-transparent border border-cyan-500 text-cyan-500 px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-cyan-500 hover:text-black rounded-sm font-hud tracking-wider"
++                        >
++                            CONTACT
++                        </Link>
++                    </div>
++                </div>
++            </section>
++
++            {/* ══════════════ SECTION: METHODOLOGY ══════════════ */}
++            <section className="relative w-full py-16 bg-[#050505]/80 overflow-hidden">
++                <div className="px-5 max-w-md mx-auto">
++
++                    {/* Text column */}
++                    <div className="methodology-section flex flex-col gap-4 mb-10">
++                        <h2 className="methodology-text text-3xl font-bold text-white leading-tight tracking-tight">
++                            Connect. Automate.{' '}
++                            <span className="text-white">Scale.</span>
++                        </h2>
++
++                        <p className="methodology-text text-base text-gray-300 font-light leading-relaxed border-l-2 border-white/20 pl-4">
++                            Building the bridges between physical infrastructure and digital workflows.
++                        </p>
++
++                        <p className="methodology-text text-sm text-gray-400 leading-relaxed">
++                            I specialize in Network Reliability and Security analysis. I design backend automation
++                            systems using low code tools like n8n to create autonomous workflows, integrating
++                            webhooks, APIs, databases, and conditional logic.
++                        </p>
++                    </div>
++
++                    {/* Tilt cards (stacked vertically) */}
++                    <div className="tilt-cards-container flex flex-col gap-3">
++                        {/* Infrastructure */}
++                        <div className="tilt-card relative w-full p-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 flex items-center gap-4">
++                            <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-blue-400">
++                                <Router size={22} strokeWidth={1.5} />
++                            </div>
++                            <div className="flex-1 min-w-0">
++                                <h3 className="text-sm font-medium text-white tracking-wide">Infrastructure & Troubleshooting</h3>
++                                <p className="text-xs text-gray-400 mt-0.5 font-light">L1-L3 Support, VLANs, & Packet Analysis.</p>
++                            </div>
++                        </div>
++
++                        {/* n8n */}
++                        <div className="tilt-card relative w-full p-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 flex items-center gap-4">
++                            <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-orange-400">
++                                <Zap size={22} strokeWidth={1.5} />
++                            </div>
++                            <div className="flex-1 min-w-0">
++                                <h3 className="text-sm font-medium text-white tracking-wide">n8n Automation Engine</h3>
++                                <p className="text-xs text-gray-400 mt-0.5 font-light">Complex Logic, Webhooks, & Error Handling.</p>
++                            </div>
++                            {/* Pulse border */}
++                            <div className="absolute inset-0 rounded-xl border border-orange-500/20 animate-pulse opacity-50 pointer-events-none" />
++                        </div>
++
++                        {/* API */}
++                        <div className="tilt-card relative w-full p-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 flex items-center gap-4">
++                            <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 text-green-400">
++                                <Database size={22} strokeWidth={1.5} />
++                            </div>
++                            <div className="flex-1 min-w-0">
++                                <h3 className="text-sm font-medium text-white tracking-wide">API & Data Bridging</h3>
++                                <p className="text-xs text-gray-400 mt-0.5 font-light">Rest APIs, JSON Transformation, & NoSQL.</p>
++                            </div>
++                        </div>
++                    </div>
++                </div>
++            </section>
++
++            {/* ══════════════ SECTION: TECH STACK MARQUEE ══════════════ */}
++            <section className="w-full py-6 bg-transparent border-t border-b border-white/5 mb-12">
++                <div className="overflow-hidden">
++                    <div ref={marqueeRef} className="flex gap-8 whitespace-nowrap px-4 items-center">
++                        {/* 3 copies for seamless loop */}
++                        {[...TECH_STACK, ...TECH_STACK, ...TECH_STACK].map((tech, index) => (
++                            <div
++                                key={`m-tech-${index}`}
++                                className="flex items-center gap-2 opacity-60"
++                            >
++                                <tech.icon className="text-2xl text-gray-500" />
++                                <span className="text-xs font-mono font-semibold tracking-wider text-slate-400">
++                                    {tech.name}
++                                </span>
++                            </div>
++                        ))}
++                    </div>
++                </div>
++            </section>
++
++            {/* ══════════════ SECTION: SERVICE PILLARS ══════════════ */}
++            <section className="px-5 max-w-md mx-auto mb-16">
++                <div className="service-cards-container flex flex-col gap-4">
++                    {HIGHLIGHT_CARDS.map((card, index) => (
++                        <div
++                            key={index}
++                            className={`service-card p-5 rounded-xl bg-[#0a0a0a]/80 backdrop-blur-md border ${card.border} relative overflow-hidden`}
++                        >
++                            {/* Icon */}
++                            <div className={`w-10 h-10 mb-3 rounded-lg bg-black/50 flex items-center justify-center border border-white/10 ${card.color}`}>
++                                <card.icon size={20} strokeWidth={1.5} />
++                            </div>
++
++                            <h3 className="text-lg font-bold text-white mb-1.5 font-mono tracking-tight">
++                                {card.title}
++                            </h3>
++                            <p className="text-slate-400 leading-relaxed text-xs border-l-2 border-white/10 pl-3">
++                                {card.desc}
++                            </p>
++
++                            {/* Decorative index */}
++                            <div className={`absolute top-3 right-3 text-[10px] font-mono opacity-20 ${card.color}`}>
++                                0{index + 1}
++                            </div>
++                        </div>
++                    ))}
++                </div>
++            </section>
++
++            {/* ══════════════ SECTION: CTA ══════════════ */}
++            <section className="text-center px-5 pb-16">
++                <div className="relative inline-block">
++                    {/* Glow behind */}
++                    <div className="absolute inset-0 bg-cyan-500/15 blur-3xl rounded-full scale-110 pointer-events-none" />
++
++                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500 mb-6 tracking-tight">
++                        Ready to see the live data?
++                    </h2>
++
++                    <button
++                        onClick={() => setIsOverlayOpen(true)}
++                        className="mobile-cta-btn group relative px-6 py-3 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-mono text-sm tracking-widest uppercase border border-cyan-500/50 hover:border-cyan-400 rounded transition-all duration-300 flex items-center gap-2 mx-auto"
++                    >
++                        <span className="relative z-10">Run System Check</span>
++                        <Zap className="w-4 h-4 group-hover:text-yellow-300 transition-colors animate-pulse" />
++
++                        {/* Tech corner brackets */}
++                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-cyan-500 -translate-x-0.5 -translate-y-0.5" />
++                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-cyan-500 translate-x-0.5 translate-y-0.5" />
++                    </button>
++
++                    <SystemCheckOverlay
++                        isOpen={isOverlayOpen}
++                        onClose={() => setIsOverlayOpen(false)}
++                    />
++                </div>
++            </section>
++
++        </div>
++    );
++}
+diff --git a/src/components/NetworkBackground.tsx b/src/components/NetworkBackground.tsx
+index ad23d3f..9b009f5 100644
+--- a/src/components/NetworkBackground.tsx
++++ b/src/components/NetworkBackground.tsx
+@@ -116,25 +116,32 @@ export function NetworkBackground() {
+ 
+         function resize() {
+             if (!canvas) return;
+-            width = window.innerWidth;
+-            height = window.innerHeight;
++            // Use canvas.clientWidth/clientHeight instead of window.innerWidth/innerHeight.
++            // On real mobile browsers, window.innerHeight can include browser chrome (address bar),
++            // making the canvas taller than the visible viewport and causing vertical stretching.
++            // clientWidth/clientHeight reflect the actual CSS-rendered size of the element.
++            width = canvas.clientWidth;
++            height = canvas.clientHeight;
+             canvas.width = width;
+             canvas.height = height;
+             initParticles();
+         }
+ 
+         // Start Canvas
+-        // Note: Using clientX/Y in mousemove matches standard fixed behavior. 
+-        // The previous implementation used e.x which is strictly non-standard TS but valid in browsers (alias to clientX).
+-        // I normalized it to clientX for "good front-end develop" practice while keeping logic identical.
+-
+         resize();
+         animateCanvas();
++
++        // ResizeObserver is more reliable than the 'resize' event on mobile,
++        // as it fires whenever the element's layout size changes (e.g., when
++        // the browser address bar appears/disappears on scroll).
++        const resizeObserver = new ResizeObserver(() => resize());
++        resizeObserver.observe(canvas);
+         window.addEventListener('resize', resize);
+ 
+         return () => {
+             window.removeEventListener('mousemove', handleMouseMove);
+             window.removeEventListener('resize', resize);
++            resizeObserver.disconnect();
+             cancelAnimationFrame(animationFrameId);
+         };
+     }, []);
+diff --git a/src/components/ReactiveMeshBackground.tsx b/src/components/ReactiveMeshBackground.tsx
+index d6b48b8..cc9e6ac 100644
+--- a/src/components/ReactiveMeshBackground.tsx
++++ b/src/components/ReactiveMeshBackground.tsx
+@@ -70,8 +70,8 @@ export const ReactiveMeshBackground = () => {
+ 
+         // --- Initialization ---
+         const init = () => {
+-            width = canvas.width = window.innerWidth;
+-            height = canvas.height = window.innerHeight;
++            width = canvas.width = canvas.clientWidth;
++            height = canvas.height = canvas.clientHeight;
+ 
+             cols = Math.ceil(width / CONFIG.SPACING) + 1;
+             rows = Math.ceil(height / CONFIG.SPACING) + 1;
+@@ -311,15 +311,15 @@ export const ReactiveMeshBackground = () => {
+         gsap.ticker.add(render);
+ 
+         window.addEventListener('resize', init);
++        const resizeObserver = new ResizeObserver(() => init());
++        resizeObserver.observe(canvas);
+         window.addEventListener('mousemove', onMouseMove);
+-        // Bind enter/leave to document or window? Usually specific element is better, 
+-        // but component covers full screen?
+-        // User requested "On mouse enter/leave". Assuming Window for full page background.
+         document.addEventListener('mouseenter', onMouseEnter);
+         document.addEventListener('mouseleave', onMouseLeave);
+ 
+         return () => {
+             window.removeEventListener('resize', init);
++            resizeObserver.disconnect();
+             window.removeEventListener('mousemove', onMouseMove);
+             document.removeEventListener('mouseenter', onMouseEnter);
+             document.removeEventListener('mouseleave', onMouseLeave);
+diff --git a/src/components/labs/AutomationShowcase.tsx b/src/components/labs/AutomationShowcase.tsx
+index 7fa2956..a81553d 100644
+--- a/src/components/labs/AutomationShowcase.tsx
++++ b/src/components/labs/AutomationShowcase.tsx
+@@ -247,24 +247,24 @@ const AutomationShowcase = () => {
+             <div
+                 ref={layoutRef}
+                 className={`flex flex-col border border-slate-800 overflow-hidden transition-all duration-500
+-                    ${isFullScreen ? 'fixed inset-0 z-[100] rounded-none border-0 bg-slate-950/95 backdrop-blur-xl' : 'relative rounded-lg h-[600px] bg-slate-950'}
++                    ${isFullScreen ? 'fixed inset-0 z-[100] rounded-none border-0 bg-slate-950/95 backdrop-blur-xl overflow-y-auto' : 'relative rounded-lg h-auto md:h-[600px] bg-slate-950'}
+                 `}
+             >
+                 {/* Scanline Overlay */}
+                 <div className="absolute inset-0 pointer-events-none z-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] opacity-20"></div>
+ 
+                 {/* Controls Bar */}
+-                <div ref={controlsRef} className="flex flex-col md:flex-row items-center justify-between bg-slate-950/90 p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-30 shrink-0">
+-                    <div className="flex items-center space-x-4 mb-4 md:mb-0">
+-                        <div className="relative">
++                <div ref={controlsRef} className="flex flex-col items-stretch bg-slate-950/90 p-3 md:p-4 border-b border-rose-500/20 backdrop-blur-md sticky top-0 z-30 shrink-0 gap-3 md:flex-row md:items-center md:justify-between">
++                    <div className="flex items-center space-x-3 md:space-x-4">
++                        <div className="relative shrink-0">
+                             <div className="absolute -inset-1 rounded-full bg-rose-500/20 animate-ping"></div>
+-                            <div className="relative p-2 bg-slate-900 rounded-full border border-rose-500/50">
+-                                <Cpu className="w-6 h-6 text-rose-500" />
++                            <div className="relative p-1.5 md:p-2 bg-slate-900 rounded-full border border-rose-500/50">
++                                <Cpu className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
+                             </div>
+                         </div>
+-                        <div>
+-                            <h2 className="text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
+-                            <div className="flex items-center space-x-2 font-mono text-xs font-bold tracking-wider">
++                        <div className="min-w-0">
++                            <h2 className="text-lg md:text-2xl font-mono font-bold text-white tracking-widest uppercase">Sentinel <span className="text-rose-500">Core</span></h2>
++                            <div className="flex items-center space-x-2 font-mono text-[10px] md:text-xs font-bold tracking-wider truncate">
+                                 {status === 'ATTACK' && (
+                                     <span className="text-rose-500 animate-pulse flex items-center gap-2">
+                                         <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+@@ -287,30 +287,43 @@ const AutomationShowcase = () => {
+                         </div>
+                     </div>
+ 
+-                    <div className="flex items-center space-x-4">
+-                        <div className="flex items-center space-x-4 bg-slate-900 p-2 rounded border border-slate-800">
++                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
++                        <div className="grid grid-cols-[auto_1fr_auto] md:flex md:items-center gap-2 md:gap-4 bg-slate-900 p-2 rounded border border-slate-800 w-full md:w-auto">
++                            {/* INFO button */}
+                             <button
+                                 onClick={() => setShowInfo(!showInfo)}
+                                 className={`flex items-center space-x-2 px-3 py-2 rounded border transition-all ${showInfo ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-700 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50'}`}
+                             >
+                                 <Info className="w-4 h-4" />
+-                                <span className="font-mono text-sm font-bold">INFO</span>
++                                <span className="font-mono text-xs md:text-sm font-bold">INFO</span>
+                             </button>
++
++                            {/* Scenario select */}
+                             <select
+                                 value={scenario}
+                                 onChange={(e) => setScenario(e.target.value)}
+                                 disabled={loading || status === 'ATTACK'}
+-                                className="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase"
++                                className="bg-slate-950 border border-slate-700 text-slate-300 text-xs md:text-sm rounded px-2 md:px-3 py-2 font-mono focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all uppercase w-full min-w-0"
+                             >
+                                 <option>Brute Force</option>
+                                 <option>SQL Injection</option>
+                                 <option>DDoS Simulation</option>
+                             </select>
+ 
++                            {/* Full Screen Toggle — placed inline on mobile, after select */}
++                            <button
++                                onClick={toggleFullScreen}
++                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors md:hidden"
++                                title={isFullScreen ? "Minimize (Esc)" : "Maximize"}
++                            >
++                                {isFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
++                            </button>
++
++                            {/* INITIATE SIMULATION — full row on mobile */}
+                             <button
+                                 onClick={initiateSimulation}
+                                 disabled={loading || status === 'ATTACK'}
+-                                className={`group relative flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded font-mono text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
++                                className={`group relative col-span-full md:col-span-1 flex items-center justify-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 md:px-6 md:py-2 rounded font-mono text-xs md:text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${!loading && 'hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]'}`}
+                             >
+                                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                 {loading ? (
+@@ -327,10 +340,10 @@ const AutomationShowcase = () => {
+                             </button>
+                         </div>
+ 
+-                        {/* Full Screen Toggle Button */}
++                        {/* Full Screen Toggle Button — desktop only */}
+                         <button
+                             onClick={toggleFullScreen}
+-                            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
++                            className="hidden md:block p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+                             title={isFullScreen ? "Minimize (Esc)" : "Maximize"}
+                         >
+                             {isFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+@@ -342,7 +355,7 @@ const AutomationShowcase = () => {
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1 flex-grow overflow-hidden relative">
+ 
+                     {/* Left Panel: Red Team */}
+-                    <div ref={leftPanelRef} className={`relative flex flex-col border-r border-rose-900/30 bg-red-950/10 transition-all duration-500`}>
++                    <div ref={leftPanelRef} className={`relative flex flex-col border-r border-rose-900/30 bg-red-950/10 transition-all duration-500 min-h-[200px] md:min-h-0`}>
+                         <div className="flex items-center justify-between p-3 bg-red-950/30 border-b border-rose-900/30 shrink-0">
+                             <div className="flex items-center space-x-2 text-rose-500">
+                                 <Unlock className="w-4 h-4" />
+@@ -392,7 +405,7 @@ const AutomationShowcase = () => {
+                     </div>
+ 
+                     {/* Right Panel: Blue Team */}
+-                    <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10 transition-all duration-500">
++                    <div ref={rightPanelRef} className="relative flex flex-col bg-cyan-950/10 transition-all duration-500 min-h-[250px] md:min-h-0">
+                         <div className="flex items-center justify-between p-3 bg-cyan-950/30 border-b border-cyan-900/30 shrink-0">
+                             <div className="flex items-center space-x-2 text-cyan-500">
+                                 <Shield className="w-4 h-4" />
+@@ -481,7 +494,7 @@ const AutomationShowcase = () => {
+     );
+ 
+     return (
+-        <div ref={containerRef} className="w-full max-w-7xl mx-auto my-12 invisible">
++        <div ref={containerRef} className="w-full max-w-7xl mx-auto my-4 md:my-12 px-2 md:px-0 invisible">
+             {isFullScreen ? createPortal(mainContent, document.body) : mainContent}
+         </div>
+     );
+diff --git a/src/hooks/useIsMobile.ts b/src/hooks/useIsMobile.ts
+new file mode 100644
+index 0000000..c80fe23
+--- /dev/null
++++ b/src/hooks/useIsMobile.ts
+@@ -0,0 +1,9 @@
++import { useMediaQuery } from './useMediaQuery';
++
++/**
++ * Returns true when the viewport is at or below the mobile breakpoint (768px).
++ * Used to conditionally render lightweight CSS backgrounds instead of canvas.
++ */
++export function useIsMobile(): boolean {
++    return useMediaQuery('(max-width: 768px)');
++}
+diff --git a/src/pages/About.tsx b/src/pages/About.tsx
+index 379b975..066437a 100644
+--- a/src/pages/About.tsx
++++ b/src/pages/About.tsx
+@@ -4,16 +4,19 @@ import { profile, technicalSkills } from '../data/portfolioData';
+ import { Card } from '../components/Card';
+ import { Badge } from '../components/Badge';
+ import { useMotion } from '../hooks/useMotion';
++import { useIsMobile } from '../hooks/useIsMobile';
+ import { CircuitBackground } from '../components/CircuitBackground';
++import { MobileBackground } from '../components/MobileBackground';
+ import { EducationSection } from '../sections/EducationSection';
+ 
+ export default function About() {
+   const pageRef = useRef<HTMLDivElement | null>(null);
++  const isMobile = useIsMobile();
+   useMotion(pageRef);
+ 
+   return (
+     <div ref={pageRef} style={{ position: 'relative' }}>
+-      <CircuitBackground />
++      {isMobile ? <MobileBackground variant="circuit" /> : <CircuitBackground />}
+       <div className="page-intro reveal">
+         <div className="page-intro-content">
+           <p className="eyebrow">About</p>
+diff --git a/src/pages/Contact.tsx b/src/pages/Contact.tsx
+index 700ccac..e710836 100644
+--- a/src/pages/Contact.tsx
++++ b/src/pages/Contact.tsx
+@@ -4,8 +4,10 @@ import { Section } from '../components/Section';
+ import { profile } from '../data/portfolioData';
+ import { Card } from '../components/Card';
+ import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
++import { MobileBackground } from '../components/MobileBackground';
+ import AmbientCyberLayer from '../components/AmbientCyberLayer';
+ import { useMotion } from '../hooks/useMotion';
++import { useIsMobile } from '../hooks/useIsMobile';
+ 
+ type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
+ 
+@@ -13,6 +15,7 @@ export default function Contact() {
+   const pageRef = useRef<HTMLDivElement | null>(null);
+   const formRef = useRef<HTMLFormElement | null>(null);
+   const [status, setStatus] = useState<FormStatus>('idle');
++  const isMobile = useIsMobile();
+   useMotion(pageRef);
+ 
+   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+@@ -51,7 +54,7 @@ export default function Contact() {
+   return (
+     <div ref={pageRef}>
+       <AmbientCyberLayer />
+-      <ReactiveMeshBackground />
++      {isMobile ? <MobileBackground variant="mesh" /> : <ReactiveMeshBackground />}
+       <div className="page-intro reveal">
+         <div className="page-intro-content">
+           <p className="eyebrow">Contact</p>
+@@ -83,10 +86,7 @@ export default function Contact() {
+             <p className="lead">{profile.location}</p>
+             <p className="muted">Remote-friendly for async collaboration.</p>
+           </Card>
+-          <Card tilt={false}>
+-            <h3 data-tilt-layer="title">CV</h3>
+-            <p className="muted">Happy to share details. Ask via email or LinkedIn.</p>
+-          </Card>
++
+         </div>
+       </Section>
+ 
+diff --git a/src/pages/Experience.tsx b/src/pages/Experience.tsx
+index 35f8c48..b5f7627 100644
+--- a/src/pages/Experience.tsx
++++ b/src/pages/Experience.tsx
+@@ -1,19 +1,22 @@
+ import { useRef } from 'react';
+ import { HexGridBackground } from '../components/HexGridBackground';
++import { MobileBackground } from '../components/MobileBackground';
+ import { experiences, profile } from '../data/portfolioData';
+ import { Section } from '../components/Section';
+ import { TimelineItem } from '../components/TimelineItem';
+ import { Button } from '../components/Button';
+ import { Card } from '../components/Card';
+ import { useMotion } from '../hooks/useMotion';
++import { useIsMobile } from '../hooks/useIsMobile';
+ 
+ export default function Experience() {
+   const pageRef = useRef<HTMLDivElement | null>(null);
++  const isMobile = useIsMobile();
+   useMotion(pageRef);
+ 
+   return (
+     <div ref={pageRef} className="relative z-0 min-h-screen">
+-      <HexGridBackground />
++      {isMobile ? <MobileBackground variant="hex" /> : <HexGridBackground />}
+       <div className="page-intro reveal">
+         <div className="page-intro-content">
+           <p className="eyebrow">Experience</p>
+diff --git a/src/pages/Home.tsx b/src/pages/Home.tsx
+index e6372f5..6a57ca1 100644
+--- a/src/pages/Home.tsx
++++ b/src/pages/Home.tsx
+@@ -1,13 +1,26 @@
+ import { useRef } from 'react';
+ import { useMotion } from '../hooks/useMotion';
++import { useIsMobile } from '../hooks/useIsMobile';
+ import { NetworkBackground } from '../components/NetworkBackground';
++import { MobileBackground } from '../components/MobileBackground';
+ import { HeroSection } from '../sections/HeroSection';
+ import HomeContent from '../components/HomeContent';
++import MobilePortfolio from '../components/MobilePortfolio';
+ 
+ export default function Home() {
+   const pageRef = useRef<HTMLDivElement | null>(null);
++  const isMobile = useIsMobile();
+   useMotion(pageRef);
+ 
++  if (isMobile) {
++    return (
++      <div ref={pageRef} className="relative z-0">
++        <MobileBackground variant="network" />
++        <MobilePortfolio />
++      </div>
++    );
++  }
++
+   return (
+     <div ref={pageRef} className="relative z-0">
+       <NetworkBackground />
+diff --git a/src/pages/Projects.tsx b/src/pages/Projects.tsx
+index 7412f7a..b897afd 100644
+--- a/src/pages/Projects.tsx
++++ b/src/pages/Projects.tsx
+@@ -1,12 +1,16 @@
+ import { Terminal, Code2 } from 'lucide-react';
+ import ProjectPlaceholder from '../components/projects/ProjectPlaceholder';
+ import { HexGridBackground } from '../components/HexGridBackground';
++import { MobileBackground } from '../components/MobileBackground';
+ import AutomationShowcase from '../components/labs/AutomationShowcase';
++import { useIsMobile } from '../hooks/useIsMobile';
+ 
+ const Projects = () => {
++  const isMobile = useIsMobile();
++
+   return (
+     <div className="min-h-screen px-4 pt-24 pb-16 md:px-8">
+-      <HexGridBackground />
++      {isMobile ? <MobileBackground variant="hex" /> : <HexGridBackground />}
+       <div className="mx-auto max-w-6xl">
+ 
+         {/* Page Header */}
+diff --git a/src/pages/Skills.tsx b/src/pages/Skills.tsx
+index cbfdece..7b8fba0 100644
+--- a/src/pages/Skills.tsx
++++ b/src/pages/Skills.tsx
+@@ -2,18 +2,21 @@ import { useRef } from 'react';
+ import { heroMetrics } from '../data/portfolioData';
+ import { Card } from '../components/Card';
+ import { useMotion } from '../hooks/useMotion';
++import { useIsMobile } from '../hooks/useIsMobile';
+ import { TcpLayerStack } from '../components/TcpLayerStack';
+ import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
++import { MobileBackground } from '../components/MobileBackground';
+ import AmbientCyberLayer from '../components/AmbientCyberLayer';
+ 
+ export default function Skills() {
+   const pageRef = useRef<HTMLDivElement | null>(null);
++  const isMobile = useIsMobile();
+   useMotion(pageRef);
+ 
+   return (
+     <div ref={pageRef} style={{ position: 'relative' }}>
+       <AmbientCyberLayer />
+-      <ReactiveMeshBackground />
++      {isMobile ? <MobileBackground variant="mesh" /> : <ReactiveMeshBackground />}
+       <div className="page-intro reveal">
+         <div className="page-intro-content">
+           <p className="eyebrow">Skills</p>

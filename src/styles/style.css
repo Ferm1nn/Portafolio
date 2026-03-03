@@ -31,6 +31,7 @@
   }
 }
 
+
 *,
 *::before,
 *::after {
@@ -1257,6 +1258,7 @@ h5 {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 0.8rem 0.95rem;
+  min-height: 44px;
   font-size: var(--font-size-body);
   font-family: var(--font-body);
   background: var(--color-surface-2);
@@ -1531,6 +1533,10 @@ a.pill.link:focus-visible {
 
   .section {
     margin: calc(var(--section-gap) * 0.9) 0;
+  }
+
+  .expand-panel {
+    padding: var(--space-4);
   }
 }
 

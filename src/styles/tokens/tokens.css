@@ -38,10 +38,11 @@
   --blur-lg: 20px;
 
   --content-width: 1160px;
-  --page-gutter: 1rem;
+  --page-gutter: clamp(1rem, 2vw, 1.5rem);
   --header-offset: 76px;
   --section-gap: clamp(2.6rem, 2vw + 2.2rem, 3.6rem);
   --section-gap-tight: clamp(1.8rem, 1.4vw + 1.4rem, 2.5rem);
+  --touch-min: 44px;
 
   --shadow-sm: 0 6px 14px var(--shadow-color);
   --shadow-md: 0 16px 40px var(--shadow-color);

@@ -135,7 +135,7 @@ export default function MobilePortfolio() {
                     <div className="mt-4">
                         <Link
                             to="/contact"
-                            className="inline-flex items-center justify-center bg-transparent border border-cyan-500 text-cyan-500 px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-cyan-500 hover:text-black rounded-sm font-hud tracking-wider"
+                            className="inline-flex items-center justify-center bg-transparent border border-cyan-500 text-cyan-500 px-6 py-2.5 min-h-[44px] text-sm font-medium transition-all duration-200 hover:bg-cyan-500 hover:text-black rounded-sm font-hud tracking-wider"
                         >
                             CONTACT
                         </Link>
@@ -266,7 +266,7 @@ export default function MobilePortfolio() {
 
                     <button
                         onClick={() => setIsOverlayOpen(true)}
-                        className="mobile-cta-btn group relative px-6 py-3 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-mono text-sm tracking-widest uppercase border border-cyan-500/50 hover:border-cyan-400 rounded transition-all duration-300 flex items-center gap-2 mx-auto"
+                        className="mobile-cta-btn group relative px-6 py-3 min-h-[44px] bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-mono text-sm tracking-widest uppercase border border-cyan-500/50 hover:border-cyan-400 rounded transition-all duration-300 flex items-center gap-2 mx-auto"
                     >
                         <span className="relative z-10">Run System Check</span>
                         <Zap className="w-4 h-4 group-hover:text-yellow-300 transition-colors animate-pulse" />

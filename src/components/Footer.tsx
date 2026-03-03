@@ -21,7 +21,7 @@ export function Footer() {
           {/* Email */}
           <a
             href={`mailto:${profile.email}`}
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 group min-h-[44px]"
             aria-label="Email"
           >
             <Mail size={16} className="text-gray-500 group-hover:text-cyan-400 transition-colors duration-300" />
@@ -39,7 +39,7 @@ export function Footer() {
             href={profile.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 group min-h-[44px]"
             aria-label="GitHub"
           >
             <Github size={16} className="text-gray-500 group-hover:text-white transition-colors duration-300" />
@@ -56,7 +56,7 @@ export function Footer() {
             href={profile.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 group min-h-[44px]"
             aria-label="LinkedIn"
           >
             <Linkedin size={16} className="text-gray-500 group-hover:text-blue-400 transition-colors duration-300" />

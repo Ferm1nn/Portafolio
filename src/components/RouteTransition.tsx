@@ -64,6 +64,7 @@ export function RouteTransition({ children }: RouteTransitionProps) {
           y: 0,
           duration: motionPresets.route.enterDuration,
           ease: motionPresets.route.ease,
+          clearProps: 'transform',
           onStart: () => {
             if (containerRef.current) {
               containerRef.current.style.willChange = 'opacity, transform';

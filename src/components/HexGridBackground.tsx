@@ -1,219 +1,158 @@
 import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 
-interface Hexagon {
-    x: number;
-    y: number;
-    opacity: number;
-    isPulsing: boolean;
-    pulsePhase: number; // 0 to Math.PI
-    pulseSpeed: number;
+interface Hex {
+    col: number;
+    row: number;
+    cx: number;
+    cy: number;
+    active: number;
+    exists: boolean;
 }
 
-export function HexGridBackground() {
+export function ProjectsBackground() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    // Store simulation state in refs to avoid re-renders
-    const hexsRef = useRef<Hexagon[]>([]);
-    const mouseRef = useRef({ x: -1000, y: -1000 });
-    const requestRef = useRef<number | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: true });
         if (!ctx) return;
 
-        // Configuration
-        const hexRadius = 25; // Adjust for density
-        const hexWidth = Math.sqrt(3) * hexRadius;
-        const hexHeight = 2 * hexRadius;
-        const xSpacing = hexWidth;
-        const ySpacing = hexHeight * 0.75;
-        // const strokeColor = '34, 211, 238'; // Cyan #22d3ee - Removed unused variable
-        const baseOpacity = 0.1;
-        const activeOpacity = 1;
-        const decayFactor = 0.95; // Custom decay for "slow mo" feel
-        const pulseProbability = 0.0005; // Chance per frame per hex to start pulsing
+        let width = 0, height = 0;
+        const mouse = { x: -1000, y: -1000 };
 
-        const initGrid = () => {
-            const width = canvas.width;
-            const height = canvas.height;
-            const cols = Math.ceil(width / xSpacing) + 2;
-            const rows = Math.ceil(height / ySpacing) + 2;
-            const newHexs: Hexagon[] = [];
+        // Hex grid math
+        const hexSize = 25;
+        const hexWidth = Math.sqrt(3) * hexSize;
+        const yOffset = hexSize * 1.5;
 
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    const xOffset = (row % 2) * (hexWidth / 2);
-                    const x = col * xSpacing + xOffset - hexWidth;
-                    const y = row * ySpacing - hexHeight;
+        let grid: Hex[] = [];
+        let time = 0;
 
-                    newHexs.push({
-                        x,
-                        y,
-                        opacity: baseOpacity,
-                        isPulsing: false,
-                        pulsePhase: 0,
-                        pulseSpeed: 0.02 + Math.random() * 0.03, // Random pulse speeds
-                    });
+        const resize = () => {
+            width = canvas.clientWidth;
+            height = canvas.clientHeight;
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            grid = [];
+            const cols = Math.ceil(width / hexWidth) + 1;
+            const rows = Math.ceil(height / yOffset) + 1;
+
+            for (let r = -1; r < rows; r++) {
+                for (let c = -1; c < cols; c++) {
+                    const cx = (c + (r % 2 === 0 ? 0 : 0.5)) * hexWidth;
+                    const cy = r * yOffset;
+                    // Introduce sparsity to make it non-uniform (70% exist)
+                    const exists = Math.random() > 0.3;
+                    grid.push({ col: c, row: r, cx, cy, active: 0, exists });
                 }
             }
-            hexsRef.current = newHexs;
         };
 
-        const drawHex = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+        window.addEventListener('resize', resize);
+        const ro = new ResizeObserver(resize);
+        ro.observe(canvas);
+        resize();
+
+        const onMouseMove = (e: MouseEvent) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        };
+        window.addEventListener('mousemove', onMouseMove);
+
+        const drawHex = (x: number, y: number, size: number) => {
             ctx.beginPath();
             for (let i = 0; i < 6; i++) {
-                const angle = (Math.PI / 3) * i + Math.PI / 6; // Rotate 30 degrees for flat top/bottom if needed, currently pointy top? 
-                // Standard geometric formula:
-                // x = r * cos(a)
-                // y = r * sin(a)
-                // For pointy top: angles are 30, 90, 150... (pi/6, pi/2, ...)
-                const px = x + radius * Math.cos(angle);
-                const py = y + radius * Math.sin(angle);
-                if (i === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+                const angle_rad = Math.PI / 180 * (60 * i - 30);
+                const hx = x + size * Math.cos(angle_rad);
+                const hy = y + size * Math.sin(angle_rad);
+                if (i === 0) ctx.moveTo(hx, hy);
+                else ctx.lineTo(hx, hy);
             }
             ctx.closePath();
-            ctx.stroke();
         };
 
-        const render = () => {
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const tick = () => {
+            ctx.clearRect(0, 0, width, height);
+            time += 0.016; // Simulate delta time
 
-            // Update and Draw
-            // const now = performance.now(); // Removed unused variable
+            // 1. Calculate subtle parallax depth offset relative to center
+            const pxX = (mouse.x - width / 2) * 0.03;
+            const pxY = (mouse.y - height / 2) * 0.03;
 
-            ctx.lineWidth = 0.5;
+            // 2. Draw localized "ping/inspection" effect around cursor
+            ctx.beginPath();
+            // Ping expanding and contracting subtly based on time
+            ctx.arc(mouse.x + pxX, mouse.y + pxY, 120 + Math.sin(time * 2) * 15, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
 
-            hexsRef.current.forEach((hex) => {
-                // 1. Mouse Interaction (Sonar)
-                const dx = hex.x - mouseRef.current.x;
-                const dy = hex.y - mouseRef.current.y;
+            // 3. Render Grid
+            grid.forEach(h => {
+                if (!h.exists) return;
+
+                // Decay active node firing state
+                if (h.active > 0) h.active -= 0.015;
+
+                // Apply parallax offset
+                const drawX = h.cx + pxX;
+                const drawY = h.cy + pxY;
+
+                const dx = mouse.x - drawX;
+                const dy = mouse.y - drawY;
                 const dist = Math.sqrt(dx * dx + dy * dy);
 
+                let opacity = 0.03; // Base very faint grid
+                let lineWidth = 1;
+                let strokeColor = `rgba(34, 211, 238, ${opacity})`;
+
+                // Mouse proximity lighting (inspection mode)
                 if (dist < 150) {
-                    // Immediate light up
-                    hex.opacity = activeOpacity;
-                    // Cancel pulse if interacted
-                    hex.isPulsing = false;
-                } else {
-                    // 2. Decay Logic
-                    if (hex.opacity > baseOpacity) {
-                        hex.opacity *= decayFactor;
-                        // Clamp to base if close enough
-                        if (hex.opacity < baseOpacity + 0.01) hex.opacity = baseOpacity;
-                    } else if (hex.opacity < baseOpacity && !hex.isPulsing) {
-                        hex.opacity = baseOpacity;
-                    }
+                    const intensity = 1 - (dist / 150);
+                    strokeColor = `rgba(34, 211, 238, ${0.03 + intensity * 0.4})`;
                 }
 
-                // 3. Automatic Pulse
-                if (!hex.isPulsing && hex.opacity <= baseOpacity + 0.01) {
-                    if (Math.random() < pulseProbability) {
-                        hex.isPulsing = true;
-                        hex.pulsePhase = 0;
-                    }
+                // If currently "fired" via automated system simulation
+                if (h.active > 0) {
+                    // Intense cyan glow
+                    strokeColor = `rgba(6, 182, 212, ${Math.max(0.1, h.active)})`;
+                    lineWidth = 1.5;
+
+                    // Intricate interior pattern for active nodes
+                    drawHex(drawX, drawY, hexSize * 0.5 * h.active);
+                    ctx.fillStyle = `rgba(34, 211, 238, ${h.active * 0.15})`;
+                    ctx.fill();
+                    ctx.strokeStyle = strokeColor;
+                    ctx.stroke();
                 }
 
-                if (hex.isPulsing) {
-                    hex.pulsePhase += hex.pulseSpeed;
-                    // Sine wave for pulse: base + (active - base) * sin(phase)
-                    // Actually, simplest is 0 to PI (bump up and down)
-                    if (hex.pulsePhase >= Math.PI) {
-                        hex.isPulsing = false;
-                        hex.opacity = baseOpacity;
-                    } else {
-                        const pulseIntensity = Math.sin(hex.pulsePhase);
-                        // Pulse usually shouldn't be as bright as mouse hover, maybe 0.6?
-                        // Or user said "blink on and off", we'll go to 0.6
-                        hex.opacity = baseOpacity + (0.6 - baseOpacity) * pulseIntensity;
-                    }
-                }
-
-                // Apply opacity
-                // User wants: stroke thin lines. Base color faint slate/blue (rgba(30, 41, 59, 0.1)).
-                // Bright Cyan #22d3ee when active.
-                // We can interpolate color or just use Opacity on the Cyan.
-                // If we only fade opacity of Cyan, it might look weird if base is slate.
-                // Let's draw base grid first? Or just render everything in Cyan with variable opacity?
-                // "Base Color: Very faint Slate/Blue... animate its opacity to 1 (Bright Cyan)".
-                // This suggests the color changes too.
-
-                // Strategy: 
-                // Always draw Cyan, but control Alpha.
-                // Base state alpha 0.1 corresponds to the faint look? 
-                // Slate/Blue (30,41,59) is dark. Cyan (34,211,238) is bright.
-                // I will interpolate manually or just use Cyan for everything but very low opacity?
-                // User explicitly asked for Slate/Blue base.
-                // So:
-                // if opacity <= baseOpacity -> use Slate/Blue (30,41,59) with alpha 0.1?
-                // if opacity > baseOpacity -> use Cyan with higher alpha?
-                // Implementation:
-                // Let's mix colors.
-
-                let r, g, b, a;
-                if (hex.opacity <= baseOpacity + 0.001 && !hex.isPulsing) {
-                    // Base state
-                    r = 30; g = 41; b = 59; a = 0.1;
-                } else {
-                    // Active state (interpolating is nicer)
-                    // t goes from 0 to 1 as opacity goes from base to active
-                    const t = Math.min((hex.opacity - baseOpacity) / (activeOpacity - baseOpacity), 1);
-                    // Lerp Color
-                    // Slate: 30, 41, 59
-                    // Cyan: 34, 211, 238
-                    r = 30 + (34 - 30) * t;
-                    g = 41 + (211 - 41) * t;
-                    b = 59 + (238 - 59) * t;
-                    a = hex.opacity;
-                }
-
-                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
-                drawHex(ctx, hex.x, hex.y, hexRadius);
+                // Draw outer hex
+                drawHex(drawX, drawY, hexSize - 1);
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
             });
-
-            requestRef.current = requestAnimationFrame(render);
         };
 
-        const handleResize = () => {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-            initGrid();
-        };
-
-        // Initial setup
-        handleResize();
-        requestRef.current = requestAnimationFrame(render);
-
-        // Event Listeners
-        window.addEventListener('resize', handleResize);
-        const resizeObserver = new ResizeObserver(() => handleResize());
-        resizeObserver.observe(canvas);
-
-        const handleMouseMove = (e: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
-            mouseRef.current = {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-            };
-        };
-        window.addEventListener('mousemove', handleMouseMove);
+        gsap.ticker.add(tick);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('mousemove', handleMouseMove);
-            resizeObserver.disconnect();
-            if (requestRef.current !== null) cancelAnimationFrame(requestRef.current);
+            gsap.ticker.remove(tick);
+            window.removeEventListener('resize', resize);
+            window.removeEventListener('mousemove', onMouseMove);
+            ro.disconnect();
         };
     }, []);
 
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 -z-10 pointer-events-none"
-        // z-10 to be behind everything. Fixed to viewport. Pointer-events-none allows clicks through.
+            className="fixed top-0 left-0 w-full h-full pointer-events-none"
+            style={{ zIndex: 0 }}
         />
     );
 }

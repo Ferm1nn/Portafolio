@@ -2,35 +2,30 @@ import { useRef } from 'react';
 import { heroMetrics } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
-import { useIsMobile } from '../hooks/useIsMobile';
 import { TcpLayerStack } from '../components/TcpLayerStack';
-import { ReactiveMeshBackground } from '../components/ReactiveMeshBackground';
-import { MobileBackground } from '../components/MobileBackground';
-import AmbientCyberLayer from '../components/AmbientCyberLayer';
+import { SkillsBackground } from '../components/SkillsBackground.tsx';
 
 export default function Skills() {
   const pageRef = useRef<HTMLDivElement | null>(null);
-  const isMobile = useIsMobile();
   useMotion(pageRef);
 
   return (
-    <div ref={pageRef} style={{ position: 'relative' }}>
-      <AmbientCyberLayer />
-      {isMobile ? <MobileBackground variant="mesh" /> : <ReactiveMeshBackground />}
+    <div ref={pageRef} className="relative z-0">
+      <SkillsBackground />
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Skills</p>
-          <h1 data-split="words">Technical Competencies: The TCP/IP Model</h1>
+          <h1 data-split="words">Technical Competencies</h1>
           <p className="lead">A comprehensive demonstration of my grounded skills, architected across the 5-layer TCP/IP stack.</p>
         </div>
       </div>
 
       {/* Full-width container for the Monolith Stack */}
-      <div style={{ width: '100%', padding: '0 5vw', marginBottom: '4rem', display: 'flex', justifyContent: 'center' }}>
+      <div className="relative z-10" style={{ width: '100%', padding: '0 5vw', marginBottom: '4rem', display: 'flex', justifyContent: 'center' }}>
         <TcpLayerStack />
       </div>
 
-      <div className="container" style={{ marginBottom: '4rem' }}>
+      <div className="container relative z-10" style={{ marginBottom: '4rem' }}>
         {/* Metrics row */}
         <div className="grid three" style={{ gap: '1rem' }}>
           {heroMetrics.map((metric) => (
@@ -47,4 +42,3 @@ export default function Skills() {
     </div>
   );
 }
-

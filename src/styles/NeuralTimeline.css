@@ -1,0 +1,317 @@
+/* ─────────────────────────────────────────────────────────
+   Neural Pulse Stream  –  Experience timeline
+   ───────────────────────────────────────────────────────── */
+
+/* ── Container ── */
+.neural-timeline {
+    position: relative;
+    /* Relaxed width slightly from 1500px to 1300px */
+    max-width: clamp(1120px, 90vw, 1300px);
+    margin: 0 auto;
+    padding: 3rem var(--page-gutter, 1.25rem) 6rem;
+}
+
+/* ── SVG Spine ── */
+.neural-spine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.neural-spine-line {
+    stroke: var(--primary, #38bdf8);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+}
+
+/* ── Sonar Node ── */
+.neural-node {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.neural-node-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--primary, #38bdf8);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.6),
+        0 0 24px rgba(56, 189, 248, 0.3);
+    position: relative;
+    z-index: 2;
+}
+
+.neural-node-ping {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid var(--primary, #38bdf8);
+    opacity: 0;
+    transform: scale(0.5);
+    pointer-events: none;
+}
+
+/* ── Connector Lines ── */
+.neural-connector {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(90deg,
+            rgba(56, 189, 248, 0.6),
+            rgba(56, 189, 248, 0.08));
+    z-index: 1;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.neural-entry--left .neural-connector {
+    right: 100%;
+    left: auto;
+    width: calc(4vw + 20px);
+    /* Responsive connector width */
+    margin-right: -1px;
+    background: linear-gradient(270deg,
+            rgba(56, 189, 248, 0.6),
+            rgba(56, 189, 248, 0.08));
+}
+
+.neural-entry--right .neural-connector {
+    left: 100%;
+    right: auto;
+    width: calc(4vw + 20px);
+    /* Responsive connector width */
+    margin-left: -1px;
+}
+
+/* ── Timeline Entries ── */
+.neural-entries {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 4vw, 5rem);
+    position: relative;
+    z-index: 1;
+}
+
+.neural-entry {
+    position: relative;
+    /* Making card extra wide, filling nearly 50% of the wide container */
+    width: calc(50% - max(40px, 4vw + 10px));
+    opacity: 0;
+    /* GSAP will animate in */
+}
+
+.neural-entry--left {
+    align-self: flex-start;
+    text-align: right;
+}
+
+.neural-entry--right {
+    align-self: flex-end;
+    text-align: left;
+}
+
+/* ── Card ── */
+.neural-card {
+    position: relative;
+    background: rgba(16, 26, 48, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: var(--radius-lg, 18px);
+    /* Slightly reduced padding and min-height to balance the proportions */
+    padding: clamp(1.5rem, 2.5vw + 1rem, 2.5rem);
+    min-height: 220px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(56, 189, 248, 0.08);
+    transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.neural-card:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(56, 189, 248, 0.12),
+        inset 0 1px 0 rgba(56, 189, 248, 0.12);
+}
+
+/* Scanline sweep */
+.neural-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(56, 189, 248, 0.06) 40%,
+            rgba(56, 189, 248, 0.12) 50%,
+            rgba(56, 189, 248, 0.06) 60%,
+            transparent 100%);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* ── Card Content ── */
+.neural-card-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: clamp(0.85rem, 0.8vw, 1rem);
+    /* Scaled down */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary, #38bdf8);
+    margin-bottom: 0.6rem;
+}
+
+.neural-card-date::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    /* Slightly larger dot */
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary, #38bdf8);
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+}
+
+.neural-card h3 {
+    font-size: clamp(1.25rem, 1.5vw + 1rem, 1.8rem);
+    /* Scaled down heading */
+    color: var(--text, #e6ecf5);
+    margin: 0 0 1rem;
+    line-height: 1.35;
+}
+
+.neural-card-description {
+    font-size: clamp(0.95rem, 0.8vw + 0.8rem, 1.15rem);
+    /* Scaled down description */
+    line-height: 1.65;
+    color: var(--text-muted, #a8b4c9);
+    margin: 0;
+}
+
+.neural-card-description li {
+    margin-bottom: 0.8rem;
+    /* More space between bullets */
+    list-style: none;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.neural-entry--left .neural-card-description li {
+    padding-left: 0;
+    padding-right: 1rem;
+}
+
+.neural-card-description li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--primary, #38bdf8);
+    font-weight: 700;
+}
+
+.neural-entry--left .neural-card-description li::before {
+    left: auto;
+    right: 0;
+}
+
+/* ── Tags ── */
+.neural-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 2rem;
+    /* Give more breathing room above tags */
+}
+
+.neural-entry--left .neural-tags {
+    justify-content: flex-end;
+}
+
+.neural-tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: clamp(0.75rem, 0.5vw + 0.6rem, 0.95rem);
+    /* Scaled down tags */
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0.85rem;
+    min-height: var(--touch-min, 44px);
+    /* Scaled down padding */
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: var(--chip-text, #cfe9ff);
+    opacity: 0;
+    /* GSAP will animate in */
+    white-space: nowrap;
+}
+
+/* ── CTA Section ── */
+.neural-cta {
+    margin-top: 6rem;
+}
+
+/* ── Responsive (Mobile) ── */
+@media (max-width: 768px) {
+    .neural-spine {
+        left: 20px;
+        transform: none;
+    }
+
+    .neural-node {
+        left: 20px;
+    }
+
+    .neural-entries {
+        gap: 3.5rem;
+    }
+
+    .neural-entry,
+    .neural-entry--left,
+    .neural-entry--right {
+        width: calc(100% - 48px);
+        align-self: flex-end;
+        text-align: left;
+        margin-left: auto;
+    }
+
+    .neural-card {
+        min-height: auto;
+    }
+
+    .neural-entry--left .neural-connector,
+    .neural-entry--right .neural-connector {
+        left: auto;
+        right: 100%;
+        width: 24px;
+        background: linear-gradient(270deg,
+                rgba(56, 189, 248, 0.6),
+                rgba(56, 189, 248, 0.08));
+    }
+
+    .neural-entry--left .neural-card-description li {
+        padding-left: 1rem;
+        padding-right: 0;
+    }
+
+    .neural-entry--left .neural-card-description li::before {
+        left: 0;
+        right: auto;
+    }
+
+    .neural-entry--left .neural-tags {
+        justify-content: flex-start;
+    }
+}
