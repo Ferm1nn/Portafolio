@@ -1,0 +1,157 @@
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+
+/**
+ * SkillsMobileBg — Mobile-adapted replica of SkillsBackground.
+ *
+ * Same falling data-packet animation + layer grid, tuned for mobile:
+ *   • 35 packets (vs 80 desktop)
+ *   • Slightly slower fall speed
+ *   • No mouse interaction (gravity pull, ripple)
+ *   • Fewer grid columns (6 vs 12)
+ *
+ * Scroll-safe: No ResizeObserver, no window resize listener.
+ * Canvas dimensions locked at mount using screen.availHeight.
+ * Only orientationchange triggers a re-layout.
+ */
+
+interface PacketData {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    length: number;
+    alpha: number;
+}
+
+export function SkillsMobileBg() {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        if (!ctx) return;
+
+        let width = 0, height = 0;
+        const packetCount = 35;
+        const packets: PacketData[] = [];
+
+        function scatterPackets() {
+            packets.length = 0;
+            for (let i = 0; i < packetCount; i++) {
+                packets.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: 0,
+                    vy: Math.random() * 1.0 + 0.3,
+                    length: Math.random() * 25 + 8,
+                    alpha: Math.random() * 0.35 + 0.08,
+                });
+            }
+        }
+
+        function setCanvasSize() {
+            width = window.innerWidth;
+            height = Math.max(window.innerHeight, screen.availHeight || window.innerHeight);
+
+            const dpr = window.devicePixelRatio;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        function handleOrientationChange() {
+            setCanvasSize();
+            scatterPackets();
+        }
+
+        // Initial setup
+        setCanvasSize();
+        scatterPackets();
+
+        const tick = () => {
+            ctx.clearRect(0, 0, width, height);
+
+            // 1. Draw layer grid (no mouse ripple on mobile)
+            const layers = 5;
+            const rowH = height / layers;
+            const cols = 6;
+            const colW = width / cols;
+
+            for (let r = 0; r <= layers; r++) {
+                const y = r * rowH;
+
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.04)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                for (let c = 0; c <= cols; c++) {
+                    const x = c * colW;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(34, 211, 238, 0.08)';
+                    ctx.fill();
+                }
+            }
+
+            // 2. Update and draw falling packets
+            for (const p of packets) {
+                p.vx *= 0.95;
+                if (p.vy < 0.3) p.vy += 0.03;
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.y > height + p.length) {
+                    p.y = -p.length;
+                    p.x = Math.random() * width;
+                    p.vx = 0;
+                    p.vy = Math.random() * 1.0 + 0.3;
+                }
+                if (p.x < 0) p.x += width;
+                if (p.x > width) p.x -= width;
+
+                const grad = ctx.createLinearGradient(
+                    p.x, p.y,
+                    p.x - p.vx * 8, p.y - p.length
+                );
+                grad.addColorStop(0, `rgba(34, 211, 238, ${p.alpha})`);
+                grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.vx * 8, p.y - p.length);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha + 0.2})`;
+                ctx.fill();
+            }
+        };
+
+        gsap.ticker.add(tick);
+
+        window.addEventListener('orientationchange', handleOrientationChange);
+
+        return () => {
+            gsap.ticker.remove(tick);
+            window.removeEventListener('orientationchange', handleOrientationChange);
+        };
+    }, []);
+
+    return (
+        <canvas
+            ref={canvasRef}
+            className="fixed top-0 left-0 pointer-events-none"
+            style={{ zIndex: 0, width: '100vw', height: '100vh' }}
+        />
+    );
+}

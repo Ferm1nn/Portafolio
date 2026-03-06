@@ -2,8 +2,9 @@ import { useRef } from 'react';
 import { heroMetrics } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
-import { TcpLayerStack } from '../components/TcpLayerStack';
+import { SkillsSection } from '../sections/SkillsSection';
 import { SkillsBackground } from '../components/SkillsBackground.tsx';
+import { SkillsMobileBg } from '../components/mobile-backgrounds';
 
 export default function Skills() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -11,7 +12,14 @@ export default function Skills() {
 
   return (
     <div ref={pageRef} className="relative z-0">
-      <SkillsBackground />
+      {/* Desktop background (≥768px) */}
+      <div className="hidden md:block">
+        <SkillsBackground />
+      </div>
+      {/* Mobile background (<768px) */}
+      <div className="md:hidden">
+        <SkillsMobileBg />
+      </div>
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Skills</p>
@@ -22,7 +30,7 @@ export default function Skills() {
 
       {/* Full-width container for the Monolith Stack */}
       <div className="relative z-10" style={{ width: '100%', padding: '0 5vw', marginBottom: '4rem', display: 'flex', justifyContent: 'center' }}>
-        <TcpLayerStack />
+        <SkillsSection />
       </div>
 
       <div className="container relative z-10" style={{ marginBottom: '4rem' }}>

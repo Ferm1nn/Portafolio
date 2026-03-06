@@ -5,6 +5,7 @@ import { profile } from '../data/portfolioData';
 import { Card } from '../components/Card';
 import { useMotion } from '../hooks/useMotion';
 import { ContactBackground } from '../components/ContactBackground';
+import { ContactMobileBg } from '../components/mobile-backgrounds';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -49,7 +50,14 @@ export default function Contact() {
 
   return (
     <div ref={pageRef} className="relative z-0">
-      <ContactBackground />
+      {/* Desktop background (≥768px) */}
+      <div className="hidden md:block">
+        <ContactBackground />
+      </div>
+      {/* Mobile background (<768px) */}
+      <div className="md:hidden">
+        <ContactMobileBg />
+      </div>
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">Contact</p>

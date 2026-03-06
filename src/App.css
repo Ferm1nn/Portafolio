@@ -1,5 +1,0 @@
-/* App shell — no constraints on #root so the portfolio can go full-bleed */
-#root {
-  width: 100%;
-  min-height: 100vh;
-}

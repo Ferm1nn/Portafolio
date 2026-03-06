@@ -265,23 +265,41 @@
 
 /* ── Responsive (Mobile) ── */
 @media (max-width: 768px) {
+
+    /* ── Container ── */
+    .neural-timeline {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* ── Spine flush to left edge ── */
     .neural-spine {
-        left: 20px;
+        left: 8px;
         transform: none;
     }
 
     .neural-node {
-        left: 20px;
+        left: 8px;
+    }
+
+    .neural-node-dot {
+        width: 10px;
+        height: 10px;
+    }
+
+    .neural-node-ping {
+        inset: -5px;
     }
 
     .neural-entries {
-        gap: 3.5rem;
+        gap: 2.5rem;
     }
 
+    /* ── Cards take ~95% width ── */
     .neural-entry,
     .neural-entry--left,
     .neural-entry--right {
-        width: calc(100% - 48px);
+        width: calc(100% - 28px);
         align-self: flex-end;
         text-align: left;
         margin-left: auto;
@@ -289,18 +307,41 @@
 
     .neural-card {
         min-height: auto;
+        padding: 1.25rem 1rem;
+        border-radius: 14px;
     }
 
+    .neural-card h3 {
+        font-size: 1.15rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .neural-card-date {
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .neural-card-description {
+        font-size: 0.9rem;
+        line-height: 1.55;
+    }
+
+    .neural-card-description li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* ── Short connector from spine to card ── */
     .neural-entry--left .neural-connector,
     .neural-entry--right .neural-connector {
         left: auto;
         right: 100%;
-        width: 24px;
+        width: 12px;
         background: linear-gradient(270deg,
                 rgba(56, 189, 248, 0.6),
                 rgba(56, 189, 248, 0.08));
     }
 
+    /* ── Fix left-entry text alignment ── */
     .neural-entry--left .neural-card-description li {
         padding-left: 1rem;
         padding-right: 0;
@@ -313,5 +354,17 @@
 
     .neural-entry--left .neural-tags {
         justify-content: flex-start;
+    }
+
+    /* ── Smaller tags for mobile ── */
+    .neural-tag {
+        font-size: 0.72rem;
+        padding: 0.35rem 0.65rem;
+        min-height: 32px;
+    }
+
+    .neural-tags {
+        margin-top: 1.25rem;
+        gap: 0.4rem;
     }
 }

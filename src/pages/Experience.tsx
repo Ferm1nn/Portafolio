@@ -2,6 +2,7 @@ import { useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ExperienceBackground } from '../components/ExperienceBackground';
+import { ExperienceMobileBg } from '../components/mobile-backgrounds';
 import { useMotion } from '../hooks/useMotion';
 import { useMotionSettings } from '../motion/MotionProvider';
 import '../styles/NeuralTimeline.css';
@@ -191,7 +192,14 @@ export default function Experience() {
 
   return (
     <div ref={pageRef} className="relative z-0 min-h-screen">
-      <ExperienceBackground />
+      {/* Desktop background (≥768px) */}
+      <div className="hidden md:block">
+        <ExperienceBackground />
+      </div>
+      {/* Mobile background (<768px) */}
+      <div className="md:hidden">
+        <ExperienceMobileBg />
+      </div>
       {/* ── Page Intro ── */}
       <div className="page-intro reveal">
         <div className="page-intro-content">

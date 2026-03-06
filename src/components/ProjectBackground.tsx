@@ -10,7 +10,7 @@ interface Hex {
     exists: boolean;
 }
 
-export function ProjectsBackground() {
+export function ProjectBackground() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {

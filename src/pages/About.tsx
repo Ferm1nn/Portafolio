@@ -2,7 +2,7 @@ import { useRef, useLayoutEffect } from 'react';
 import { useMotion } from '../hooks/useMotion';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useMotionSettings } from '../motion/MotionProvider';
-import { CircuitBackground } from '../components/CircuitBackground';
+import { AboutBackground } from '../components/AboutBackground';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import '../styles/AnalystDossier.css';
@@ -11,9 +11,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ── Data ── */
 const dossierFields = [
-  { label: 'Operator', value: 'Fermin Espinoza' },
+  { label: 'Name', value: 'Fermin Espinoza' },
   { label: 'Role', value: 'Systems Engineering Student / Junior Network & Cybersecurity Analyst' },
-  { label: 'Clearance', value: 'Bilingual — Spanish (Native) / English (C1)' },
+  { label: 'Proficiency', value: 'Bilingual — Spanish (Native) / English (C1)' },
   { label: 'Objective', value: 'SOC Analyst Role' },
 ];
 
@@ -184,15 +184,15 @@ export default function About() {
 
   return (
     <div ref={pageRef} style={{ position: 'relative' }}>
-      <CircuitBackground />
+      <AboutBackground />
 
       {/* Page Intro */}
       <div className="page-intro reveal">
         <div className="page-intro-content">
           <p className="eyebrow">About</p>
-          <h1 data-split="words">Analyst Dossier</h1>
+          <h1 data-split="words">About Me</h1>
           <p className="lead">
-            Personnel file and intelligence records for operator clearance verification.
+            Professional background and qualifications for employment verification.
           </p>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function About() {
             {/* Card Header */}
             <div className="dossier-header">
               <span className="dossier-header-title">
-                ◈ Personnel Dossier // Active
+                ◈ About the Candidate
               </span>
               <span className="dossier-header-id">
                 FILE-ID: FE-2025-0042

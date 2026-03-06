@@ -3,13 +3,21 @@ import ProjectPlaceholder from '../components/projects/ProjectPlaceholder';
 import NatureLoveCard from '../components/projects/NatureLoveCard';
 
 import AutomationShowcase from '../components/labs/AutomationShowcase';
-import { ProjectsBackground } from '../components/HexGridBackground';
+import { ProjectBackground } from '../components/ProjectBackground';
+import { ProjectsMobileBg } from '../components/mobile-backgrounds';
 
 const Projects = () => {
 
   return (
     <div className="relative z-0 min-h-screen px-4 pt-24 pb-16 md:px-8">
-      <ProjectsBackground />
+      {/* Desktop background (≥768px) */}
+      <div className="hidden md:block">
+        <ProjectBackground />
+      </div>
+      {/* Mobile background (<768px) */}
+      <div className="md:hidden">
+        <ProjectsMobileBg />
+      </div>
       <div className="mx-auto max-w-6xl relative z-10">
 
         {/* Page Header */}
