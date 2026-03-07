@@ -57,6 +57,7 @@ export function HomeMobileBg() {
         }
 
         function setCanvasSize() {
+            if (!canvas || !ctx) return;
             // Use window.innerWidth for width (stable on mobile)
             // Use screen.availHeight for height — this is the FULL screen
             // height and does NOT change when the address bar hides/shows,

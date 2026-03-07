@@ -42,6 +42,7 @@ export function ProjectsMobileBg() {
         let time = 0;
 
         function setCanvasSize() {
+            if (!canvas || !ctx) return;
             width = window.innerWidth;
             height = Math.max(window.innerHeight, screen.availHeight || window.innerHeight);
 
