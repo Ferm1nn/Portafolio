@@ -41,6 +41,9 @@ export function ProjectsMobileBg() {
         let grid: Hex[] = [];
         let time = 0;
 
+        let touch = { x: -1000, y: -1000 };
+        let isTouching = false;
+
         function setCanvasSize() {
             if (!canvas || !ctx) return;
             width = window.innerWidth;
@@ -93,16 +96,40 @@ export function ProjectsMobileBg() {
             ctx.clearRect(0, 0, width, height);
             time += 0.016;
 
+            // 1. Calculate subtle parallax depth offset relative to center (only while touching)
+            const pxX = isTouching ? (touch.x - width / 2) * 0.02 : 0;
+            const pxY = isTouching ? (touch.y - height / 2) * 0.02 : 0;
+
+            // 2. Localized ping effect around touch
+            if (isTouching) {
+                ctx.beginPath();
+                ctx.arc(touch.x + pxX, touch.y + pxY, 100 + Math.sin(time * 2) * 10, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.08)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
             grid.forEach((h) => {
                 if (!h.exists) return;
 
                 if (h.active > 0) h.active -= 0.003;
 
-                const drawX = h.cx;
-                const drawY = h.cy;
+                const drawX = h.cx + pxX;
+                const drawY = h.cy + pxY;
 
                 let strokeColor = 'rgba(34, 211, 238, 0.03)';
                 let lineWidth = 1;
+
+                if (isTouching) {
+                    const dx = touch.x - drawX;
+                    const dy = touch.y - drawY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        const intensity = 1 - (dist / 120);
+                        strokeColor = `rgba(34, 211, 238, ${0.03 + intensity * 0.4})`;
+                    }
+                }
 
                 // Automated ambient pulse
                 if (h.active <= 0 && Math.random() < 0.00005) {
@@ -127,12 +154,30 @@ export function ProjectsMobileBg() {
             });
         };
 
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                touch.x = e.touches[0].clientX;
+                touch.y = e.touches[0].clientY;
+                isTouching = true;
+            }
+        };
+
+        const handleTouchEnd = () => {
+            isTouching = false;
+        };
+
         gsap.ticker.add(tick);
         window.addEventListener('orientationchange', handleOrientationChange);
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchstart', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd);
 
         return () => {
             gsap.ticker.remove(tick);
             window.removeEventListener('orientationchange', handleOrientationChange);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchstart', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
         };
     }, []);
 

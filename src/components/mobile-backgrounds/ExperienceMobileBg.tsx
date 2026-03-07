@@ -39,6 +39,9 @@ export function ExperienceMobileBg() {
         if (!ctx) return;
 
         let width = 0, height = 0;
+        let touchX = -2000, touchY = -2000;
+        let prevTouchX = -2000;
+
         const lines: Line[] = [];
         const payloads: Payload[] = [];
         const numLinesPerSide = 3;
@@ -134,17 +137,17 @@ export function ExperienceMobileBg() {
             return { x, y };
         }
 
-        const spawnPayloadPair = () => {
+        const spawnPayloadPair = (baseIndex: number = -1, speedFactor: number = 1, startProgress: number = 0) => {
             if (payloads.length >= 10) return;
 
-            const leftIdx = Math.floor(Math.random() * numLinesPerSide);
+            const leftIdx = baseIndex >= 0 ? baseIndex : Math.floor(Math.random() * numLinesPerSide);
             const rightIdx = leftIdx + numLinesPerSide;
 
-            const speed = (0.001 + Math.random() * 0.001);
-            payloads.push({ lineId: leftIdx, progress: 0, speed });
+            const speed = (0.001 + Math.random() * 0.001) * speedFactor;
+            payloads.push({ lineId: leftIdx, progress: startProgress, speed });
 
             const delayOffset = -1 * (0.05 + Math.random() * 0.08);
-            payloads.push({ lineId: rightIdx, progress: delayOffset, speed });
+            payloads.push({ lineId: rightIdx, progress: startProgress + delayOffset, speed });
         };
 
         const tick = () => {
@@ -153,6 +156,35 @@ export function ExperienceMobileBg() {
             if (payloads.length < 6 && Math.random() < 0.01) {
                 spawnPayloadPair();
             }
+
+            const leftZoneBound = width * 0.4;
+            const rightZoneBound = width * 0.6;
+
+            // Smooth opacity transitions governed by symmetrical touch zones
+            lines.forEach(line => {
+                let target = 0.15; // Base 0.15 opacity
+
+                const inLeft = line.side === 'left' && touchX > 0 && touchX < leftZoneBound;
+                const inRight = line.side === 'right' && touchX > rightZoneBound;
+
+                if (inLeft || inRight) {
+                    let minDist = 9999;
+                    for (let prog = 0; prog <= 1; prog += 0.05) {
+                        const pt = getPointAtProgress(prog, line);
+                        const dist = Math.hypot(touchX - pt.x, touchY - pt.y);
+                        if (dist < minDist) minDist = dist;
+                    }
+
+                    const softRadius = 250;
+                    if (minDist < softRadius) {
+                        const intensity = 1 - (minDist / softRadius);
+                        target = 0.15 + (0.3 * intensity); // Glow up
+                    }
+                }
+
+                line.targetAlpha = target;
+                line.currentAlpha += (line.targetAlpha - line.currentAlpha) * 0.05;
+            });
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -227,12 +259,74 @@ export function ExperienceMobileBg() {
             ctx.fillRect(0, 0, width, height);
         };
 
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                const rect = canvas.getBoundingClientRect();
+                const currX = e.touches[0].clientX - rect.left;
+                const currY = e.touches[0].clientY - rect.top;
+
+                if (prevTouchX === -2000) prevTouchX = currX;
+                const movementX = currX - prevTouchX;
+
+                touchX = currX;
+                touchY = currY;
+
+                // Trigger manual webhooks if swiping quickly through a side
+                if (Math.abs(movementX) > 8) {
+                    const isLeftCrossover = touchX < width * 0.4;
+                    const isRightCrossover = touchX > width * 0.6;
+
+                    lines.filter(l => (l.side === 'left' && isLeftCrossover) || (l.side === 'right' && isRightCrossover)).forEach(line => {
+                        const numSegs = line.nodes.length - 1;
+                        const segment = Math.min(numSegs - 1, Math.floor((currY / height) * numSegs));
+                        if (segment < 0 || segment >= numSegs) return;
+
+                        const node0 = line.nodes[segment];
+                        const node1 = line.nodes[segment + 1];
+                        const t = Math.max(0, Math.min(1, (currY - node0.y) / (node1.y - node0.y)));
+
+                        const u = 1 - t;
+                        const tt = t * t;
+                        const uu = u * u;
+                        const uuu = uu * u;
+                        const ttt = tt * t;
+
+                        const cp1x = node0.x;
+                        const cp2x = node1.x;
+
+                        const lineX = uuu * (node0.x) + 3 * uu * t * (cp1x) + 3 * u * tt * (cp2x) + ttt * (node1.x);
+
+                        const crossedRight = prevTouchX <= lineX && currX >= lineX;
+                        const crossedLeft = prevTouchX >= lineX && currX <= lineX;
+
+                        if (crossedRight || crossedLeft) {
+                            spawnPayloadPair(line.id % numLinesPerSide, 2.5, currY / height);
+                        }
+                    });
+                }
+
+                prevTouchX = currX;
+            }
+        };
+
+        const handleTouchEnd = () => {
+            touchX = -2000;
+            touchY = -2000;
+            prevTouchX = -2000;
+        };
+
         gsap.ticker.add(tick);
         window.addEventListener('orientationchange', handleOrientationChange);
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchstart', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd);
 
         return () => {
             gsap.ticker.remove(tick);
             window.removeEventListener('orientationchange', handleOrientationChange);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchstart', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
         };
     }, []);
 

@@ -68,6 +68,32 @@ export function SkillsMobileBg() {
             scatterPackets();
         }
 
+        // Touch interaction state
+        const touch = { x: -1000, y: -1000 };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                const target = e.target as HTMLElement;
+                // Prevent background reaction when touching over the layer stack
+                if (target && target.closest('.tcp-stack')) {
+                    touch.x = -1000;
+                    touch.y = -1000;
+                } else {
+                    touch.x = e.touches[0].clientX;
+                    touch.y = e.touches[0].clientY;
+                }
+            }
+        };
+
+        const handleTouchEnd = () => {
+            touch.x = -1000;
+            touch.y = -1000;
+        };
+
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchstart', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd);
+
         // Initial setup
         setCanvasSize();
         scatterPackets();
@@ -75,7 +101,7 @@ export function SkillsMobileBg() {
         const tick = () => {
             ctx.clearRect(0, 0, width, height);
 
-            // 1. Draw layer grid (no mouse ripple on mobile)
+            // 1. Draw layer grid with touch ripple
             const layers = 5;
             const rowH = height / layers;
             const cols = 6;
@@ -93,17 +119,44 @@ export function SkillsMobileBg() {
 
                 for (let c = 0; c <= cols; c++) {
                     const x = c * colW;
+                    const dx = touch.x - x;
+                    const dy = touch.y - y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    let radius = 1.5;
+                    let alpha = 0.08;
+
+                    // Touch ripple effect on nodes
+                    if (dist < 150) {
+                        const intensity = 1 - (dist / 150);
+                        radius += intensity * 4;
+                        alpha += intensity * 0.5;
+                    }
+
                     ctx.beginPath();
-                    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(34, 211, 238, 0.08)';
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(34, 211, 238, ${alpha})`;
                     ctx.fill();
                 }
             }
 
             // 2. Update and draw falling packets
             for (const p of packets) {
-                p.vx *= 0.95;
-                if (p.vy < 0.3) p.vy += 0.03;
+                const dx = touch.x - p.x;
+                const dy = touch.y - p.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Gravitational pull towards touch
+                if (dist < 200) {
+                    const force = (200 - dist) / 200;
+                    p.vx += (dx / dist) * force * 0.15; // Pull X
+                    p.vy += (dy / dist) * force * 0.15; // Pull Y
+                } else {
+                    // Dampen X drift back to 0
+                    p.vx *= 0.95;
+                    // Restore vertical falling speed if slowed
+                    if (p.vy < 0.3) p.vy += 0.03;
+                }
 
                 p.x += p.vx;
                 p.y += p.vy;
@@ -145,6 +198,9 @@ export function SkillsMobileBg() {
         return () => {
             gsap.ticker.remove(tick);
             window.removeEventListener('orientationchange', handleOrientationChange);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchstart', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
         };
     }, []);
 

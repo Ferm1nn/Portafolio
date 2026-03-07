@@ -38,8 +38,11 @@ export function ContactMobileBg() {
         const packets: Packet[] = [];
         const numPackets = 30;
 
-        const pings: RadarPing[] = Array.from({ length: 3 }, () => ({ x: 0, y: 0, radius: 0, active: false }));
+        const pings: RadarPing[] = Array.from({ length: 6 }, () => ({ x: 0, y: 0, radius: 0, active: false }));
         let lastPingTime = 0;
+
+        let touch = { x: -1000, y: -1000 };
+        let isTouching = false;
 
         function setCanvasSize() {
             if (!canvas || !ctx) return;
@@ -83,7 +86,8 @@ export function ContactMobileBg() {
             ctx.clearRect(0, 0, width, height);
 
             const now = Date.now();
-            if (now - lastPingTime > (5000 + Math.random() * 2000)) {
+            // Base automated ping every ~6 seconds if not touching
+            if (!isTouching && now - lastPingTime > (5000 + Math.random() * 2000)) {
                 const p = pings.find(ping => !ping.active);
                 if (p) {
                     p.active = true;
@@ -130,6 +134,19 @@ export function ContactMobileBg() {
                 }
             });
 
+            // Localized touch rings if currently touching
+            if (isTouching) {
+                ctx.beginPath();
+                ctx.arc(touch.x, touch.y, 15, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.4)';
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(touch.x, touch.y, 25, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.1)';
+                ctx.stroke();
+            }
+
             // 2. Expand and draw Radar Pings
             pings.forEach(ping => {
                 if (!ping.active) return;
@@ -168,12 +185,42 @@ export function ContactMobileBg() {
             });
         };
 
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                touch.x = e.touches[0].clientX;
+                touch.y = e.touches[0].clientY;
+                isTouching = true;
+
+                const now = Date.now();
+                if (now - lastPingTime > 400) {
+                    const p = pings.find(ping => !ping.active);
+                    if (p) {
+                        p.active = true;
+                        p.x = touch.x;
+                        p.y = touch.y;
+                        p.radius = 0;
+                        lastPingTime = now;
+                    }
+                }
+            }
+        };
+
+        const handleTouchEnd = () => {
+            isTouching = false;
+        };
+
         gsap.ticker.add(tick);
         window.addEventListener('orientationchange', handleOrientationChange);
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchstart', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd);
 
         return () => {
             gsap.ticker.remove(tick);
             window.removeEventListener('orientationchange', handleOrientationChange);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchstart', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
         };
     }, []);
 

@@ -77,6 +77,26 @@ export function HomeMobileBg() {
             }
         }
 
+        // Touch interaction state
+        let touch = { x: null as number | null, y: null as number | null };
+        const touchDistance = 150;
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (e.touches.length > 0) {
+                touch.x = e.touches[0].clientX;
+                touch.y = e.touches[0].clientY;
+            }
+        };
+
+        const handleTouchEnd = () => {
+            touch.x = null;
+            touch.y = null;
+        };
+
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchstart', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd);
+
         // Initial setup
         setCanvasSize();
         initParticles();
@@ -92,6 +112,22 @@ export function HomeMobileBg() {
 
                 if (p.x < 0 || p.x > width) p.vx *= -1;
                 if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                // Touch interaction repulsion
+                if (touch.x != null && touch.y != null) {
+                    let dx = touch.x - p.x;
+                    let dy = touch.y - p.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < touchDistance) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (touchDistance - distance) / touchDistance;
+                        const directionX = forceDirectionX * force * 0.5;
+                        const directionY = forceDirectionY * force * 0.5;
+                        p.x -= directionX;
+                        p.y -= directionY;
+                    }
+                }
 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -127,6 +163,9 @@ export function HomeMobileBg() {
 
         return () => {
             window.removeEventListener('orientationchange', handleOrientationChange);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchstart', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
             cancelAnimationFrame(animationFrameId);
         };
     }, []);
