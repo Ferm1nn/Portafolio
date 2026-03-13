@@ -17,7 +17,7 @@ export function Footer() {
           <div className="flex items-center gap-4 font-mono text-xs text-gray-500 mt-2 md:mt-0">
             <Link to="/privacy" className="hover:text-cyan-400 transition-colors duration-300">Privacy Policy</Link>
             <div className="h-3 w-px bg-white/10"></div>
-            <Link to="/terms" className="hover:text-cyan-400 transition-colors duration-300">Terms of Service</Link>
+            <Link to="/terms-and-conditions" className="hover:text-cyan-400 transition-colors duration-300">Terms of Service</Link>
           </div>
         </div>
 
