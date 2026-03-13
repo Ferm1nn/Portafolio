@@ -1,4 +1,5 @@
 import { Github, Linkedin, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { profile } from '../data/portfolioData';
 
 export function Footer() {
@@ -8,11 +9,16 @@ export function Footer() {
     <footer className="w-full h-auto md:h-20 bg-[#050505]/80 backdrop-blur-md border-t border-white/10 z-40 relative">
       <div className="mx-auto flex flex-col md:flex-row h-full w-full max-w-7xl items-center justify-between px-6 py-6 md:py-0 gap-4 md:gap-0">
 
-        {/* LEFT: Identity (Copyright) */}
-        <div className="flex items-center order-2 md:order-1">
+        {/* LEFT: Identity (Copyright) & Legal */}
+        <div className="flex flex-col md:flex-row items-center order-2 md:order-1 gap-2 md:gap-4">
           <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">
             &copy; {currentYear} {profile.name} <span className="hidden sm:inline">// ALL RIGHTS RESERVED.</span>
           </span>
+          <div className="flex items-center gap-4 font-mono text-xs text-gray-500 mt-2 md:mt-0">
+            <Link to="/privacy" className="hover:text-cyan-400 transition-colors duration-300">Privacy Policy</Link>
+            <div className="h-3 w-px bg-white/10"></div>
+            <Link to="/terms" className="hover:text-cyan-400 transition-colors duration-300">Terms of Service</Link>
+          </div>
         </div>
 
         {/* RIGHT: Business Card Contact Details */}

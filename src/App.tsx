@@ -10,6 +10,8 @@ const Experience = lazy(() => import('./pages/Experience'));
 const Projects = lazy(() => import('./pages/Projects'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -46,6 +48,8 @@ function App() {
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
               </Routes>
             </Suspense>
           )}
