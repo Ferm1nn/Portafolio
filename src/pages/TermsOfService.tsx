@@ -91,29 +91,45 @@ export default function TermsOfService() {
               <h2>2. Intellectual Property</h2>
               <p>The Service and its original content, features, and functionality are and will remain the exclusive property of Fermin and its licensors. The Service is protected by copyright, trademark, and other laws of both the Country and foreign countries.</p>
 
-              <h2>3. Links to Other Web Sites</h2>
+              <h2>3. Meta and Third-Party API Integrations</h2>
+              <p>
+                To provide our automation services, we integrate with third-party platforms, specifically Meta Platforms, Inc. (including Facebook and WhatsApp). By utilizing our custom automations:
+              </p>
+              <ul>
+                <li>
+                  <strong>Authorization:</strong> You authorize us to set up, manage, and transmit data through Meta's APIs on your behalf.
+                </li>
+                <li>
+                  <strong>Compliance:</strong> You agree to strictly comply with Meta's Business Terms of Service, WhatsApp Business API Policies, and all applicable laws regarding automated messaging and user consent.
+                </li>
+                <li>
+                  <strong>Liability:</strong> You acknowledge that we are not responsible for changes in Meta's API rules, service downtimes on Meta's end, or account suspensions resulting from your failure to adhere to Meta's messaging policies.
+                </li>
+              </ul>
+
+              <h2>4. Links to Other Web Sites</h2>
               <p>Our Service may contain links to third-party web sites or services that are not owned or controlled by Fermin.</p>
               <p>Fermin has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third party web sites or services. You further acknowledge and agree that Fermin shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on any such content, goods or services available on or through any such web sites or services.</p>
 
-              <h2>4. Termination</h2>
+              <h2>5. Termination</h2>
               <p>We may terminate or suspend Your access immediately, without prior notice or liability, for any reason whatsoever, including without limitation if You breach the Terms.</p>
               <p>Upon termination, Your right to use the Service will immediately cease.</p>
 
-              <h2>5. Limitation of Liability</h2>
+              <h2>6. Limitation of Liability</h2>
               <p>In no event shall Fermin, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from (i) Your access to or use of or inability to access or use the Service; (ii) any conduct or content of any third party on the Service; (iii) any content obtained from the Service; and (iv) unauthorized access, use or alteration of Your transmissions or content, whether based on warranty, contract, tort (including negligence) or any other legal theory, whether or not We have been informed of the possibility of such damage.</p>
 
-              <h2>6. Disclaimer</h2>
+              <h2>7. Disclaimer</h2>
               <p>Your use of the Service is at Your sole risk. The Service is provided on an "AS IS" and "AS AVAILABLE" basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.</p>
 
-              <h2>7. Governing Law</h2>
+              <h2>8. Governing Law</h2>
               <p>These Terms shall be governed and construed in accordance with the laws of Costa Rica, without regard to its conflict of law provisions.</p>
               <p>Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights. If any provision of these Terms is held to be invalid or unenforceable by a court, the remaining provisions of these Terms will remain in effect.</p>
 
-              <h2>8. Changes</h2>
+              <h2>9. Changes</h2>
               <p>We reserve the right, at Our sole discretion, to modify or replace these Terms at any time. If a revision is material We will try to provide at least 30 days notice prior to any new terms taking effect. What constitutes a material change will be determined at Our sole discretion.</p>
               <p>By continuing to access or use Our Service after those revisions become effective, You agree to be bound by the revised terms. If You do not agree to the new terms, please stop using the Service.</p>
 
-              <h2>9. Contact Us</h2>
+              <h2>10. Contact Us</h2>
               <p>If you have any questions about these Terms, please contact us:</p>
               <ul>
               <li><p>By email: fezgar12@gmail.com</p></li>
@@ -131,29 +147,45 @@ export default function TermsOfService() {
               <h2>2. Propiedad Intelectual</h2>
               <p>El Servicio y su contenido original, características y funcionalidad son y seguirán siendo propiedad exclusiva de Fermin y sus licenciantes. El Servicio está protegido por derechos de autor, marcas comerciales y otras leyes tanto del País como de países extranjeros.</p>
 
-              <h2>3. Enlaces a Otros Sitios Web</h2>
+              <h2>3. Integraciones de Meta y APIs de Terceros</h2>
+              <p>
+                Para proporcionar nuestros servicios de automatización, nos integramos con plataformas de terceros, específicamente Meta Platforms, Inc. (incluyendo Facebook y WhatsApp). Al utilizar nuestras automatizaciones personalizadas:
+              </p>
+              <ul>
+                <li>
+                  <strong>Autorización:</strong> Usted nos autoriza a configurar, administrar y transmitir datos a través de las APIs de Meta en su nombre.
+                </li>
+                <li>
+                  <strong>Cumplimiento:</strong> Usted acepta cumplir estrictamente con los Términos de Servicio para Empresas de Meta, las Políticas de la API de WhatsApp Business y todas las leyes aplicables relativas a la mensajería automatizada y el consentimiento del usuario.
+                </li>
+                <li>
+                  <strong>Responsabilidad:</strong> Usted reconoce que no somos responsables por cambios en las reglas de las APIs de Meta, tiempo de inactividad del servicio por parte de Meta o suspensiones de cuenta resultantes de su falta de cumplimiento de las políticas de mensajería de Meta.
+                </li>
+              </ul>
+
+              <h2>4. Enlaces a Otros Sitios Web</h2>
               <p>Nuestro Servicio puede contener enlaces a sitios web o servicios de terceros que no son propiedad ni están controlados por Fermin.</p>
               <p>Fermin no tiene control sobre, y no asume ninguna responsabilidad por, el contenido, las políticas de privacidad o las prácticas de sitios web o servicios de terceros. Usted reconoce y acepta además que Fermin no será responsable, directa o indirectamente, de ningún daño o pérdida causada o supuestamente causada por o en conexión con el uso o la confianza en dicho contenido, bienes o servicios disponibles en o a través de dichos sitios web o servicios.</p>
 
-              <h2>4. Terminación</h2>
+              <h2>5. Terminación</h2>
               <p>Podemos terminar o suspender Su acceso de inmediato, sin previo aviso ni responsabilidad, por cualquier motivo, incluido, entre otros, si Usted incumple los Términos.</p>
               <p>Al momento de la terminación, Su derecho a utilizar el Servicio cesará inmediatamente.</p>
 
-              <h2>5. Limitación de Responsabilidad</h2>
+              <h2>6. Limitación de Responsabilidad</h2>
               <p>En ningún caso Fermin, ni sus directores, empleados, socios, agentes, proveedores o afiliados, serán responsables de ningún daño indirecto, incidental, especial, consecuente o punitivo, incluyendo sin limitación, la pérdida de ganancias, datos, uso, fondo de comercio u otras pérdidas intangibles, que resulten de (i) Su acceso a o uso de, o incapacidad para acceder o usar el Servicio; (ii) cualquier conducta o contenido de cualquier tercero en el Servicio; (iii) cualquier contenido obtenido del Servicio; y (iv) el acceso, uso o alteración no autorizados de Sus transmisiones o contenido, ya sea con base en garantía, contrato, agravio (incluyendo negligencia) o cualquier otra teoría legal, independientemente de si Hemos sido informados o no de la posibilidad de dicho daño.</p>
 
-              <h2>6. Descargo de Responsabilidad</h2>
+              <h2>7. Descargo de Responsabilidad</h2>
               <p>Su uso del Servicio es bajo Su propio riesgo. El Servicio se proporciona "TAL CUAL" y "SEGÚN ESTÉ DISPONIBLE". El Servicio se proporciona sin garantías de ningún tipo, ya sean expresas o implícitas, incluyendo, entre otras, garantías implícitas de comerciabilidad, idoneidad para un propósito particular, no infracción o curso de rendimiento.</p>
 
-              <h2>7. Ley Aplicable</h2>
+              <h2>8. Ley Aplicable</h2>
               <p>Estos Términos se regirán e interpretarán de acuerdo con las leyes de Costa Rica, sin tener en cuenta las disposiciones sobre conflictos de leyes.</p>
               <p>Nuestra falta de hacer cumplir cualquier derecho o disposición de estos Términos no se considerará una renuncia a esos derechos. Si alguna disposición de estos Términos es considerada inválida o inaplicable por un tribunal, las disposiciones restantes de estos Términos permanecerán vigentes.</p>
 
-              <h2>8. Cambios</h2>
+              <h2>9. Cambios</h2>
               <p>Nos reservamos el derecho, a Nuestra entera discreción, de modificar o reemplazar estos Términos en cualquier momento. Si una revisión es importante, intentaremos proporcionar un aviso de al menos 30 días antes de que los nuevos términos entren en vigencia. Lo que constituye un cambio importante se determinará a Nuestra entera discreción.</p>
               <p>Al continuar accediendo o utilizando Nuestro Servicio después de que esas revisiones se vuelvan efectivas, Usted acepta estar sujeto a los términos revisados. Si no acepta los nuevos términos, por favor deje de usar el Servicio.</p>
 
-              <h2>9. Contáctenos</h2>
+              <h2>10. Contáctenos</h2>
               <p>Si tiene alguna pregunta sobre estos Términos, por favor contáctenos:</p>
               <ul>
               <li><p>Por correo electrónico: fezgar12@gmail.com</p></li>

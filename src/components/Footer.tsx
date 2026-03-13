@@ -15,7 +15,7 @@ export function Footer() {
             &copy; {currentYear} {profile.name} <span className="hidden sm:inline">// ALL RIGHTS RESERVED.</span>
           </span>
           <div className="flex items-center gap-4 font-mono text-xs text-gray-500 mt-2 md:mt-0">
-            <Link to="/privacy" className="hover:text-cyan-400 transition-colors duration-300">Privacy Policy</Link>
+            <Link to="/privacy-policy" className="hover:text-cyan-400 transition-colors duration-300">Privacy Policy</Link>
             <div className="h-3 w-px bg-white/10"></div>
             <Link to="/terms-and-conditions" className="hover:text-cyan-400 transition-colors duration-300">Terms of Service</Link>
           </div>
